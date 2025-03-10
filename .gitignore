@@ -9,6 +9,10 @@
 *ncrunch* 
 *.orig
 
+
+#ignored -locally only
+.env
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
