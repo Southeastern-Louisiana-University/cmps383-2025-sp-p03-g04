@@ -45,12 +45,14 @@ namespace Selu383.SP25.P03.Api.Data
             builder.Entity<ReservationSeat>()
                 .HasOne(rs => rs.Reservation)
                 .WithMany(r => r.ReservationSeats)
-                .HasForeignKey(rs => rs.ReservationId);
-        
+                .HasForeignKey(rs => rs.ReservationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<ReservationSeat>()
                 .HasOne(rs => rs.Seat)
                 .WithMany(s => s.ReservationSeats)
-                .HasForeignKey(rs => rs.SeatId);
+                .HasForeignKey(rs => rs.SeatId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
