@@ -1,4 +1,5 @@
-
+using System.IO;
+using Selu383.SP25.P03.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP25.P03.Api.Data;
@@ -65,6 +66,24 @@ namespace Selu383.SP25.P03.Api
 
                 options.SlidingExpiration = true;
             });
+
+            if (File.Exists(".env"))
+            {
+                foreach (var line in File.ReadAllLines(".env"))
+                {
+                    if (!string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
+                    {
+                        var parts = line.Split('=', 2, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 2)
+                        {
+                            Environment.SetEnvironmentVariable(parts[0].Trim(), parts[1].Trim());
+                        }
+                    }
+                }
+            }
+
+            builder.Services.AddHttpClient<TmdbService>();
+            builder.Services.AddScoped<TmdbService>();
 
             var app = builder.Build();
 
