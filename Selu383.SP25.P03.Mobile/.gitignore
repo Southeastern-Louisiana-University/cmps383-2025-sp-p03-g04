@@ -9,6 +9,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+#ngrok local only
+.env
+
 # Native
 *.orig.*
 *.jks
