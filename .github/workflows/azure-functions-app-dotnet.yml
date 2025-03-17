@@ -1,35 +1,35 @@
-name: Build and Deploy to Azure Web App
+name: Deploy DotNet project to Azure Web App
 
 on:
   push:
     branches: ["master"]
 
 env:
-  AZURE_WEBAPP_NAME: 'selu383-sp25-p03-g04'   # your Azure Web App name
-  AZURE_WEBAPP_PACKAGE_PATH: './publish'      # path to the output directory
-  DOTNET_VERSION: '9.0.x'                     # .NET version
+  AZURE_WEBAPP_NAME: 'selu383-sp25-p03-g04'   # set this to your web app name on Azure
+  AZURE_WEBAPP_PACKAGE_PATH: './output'       # set this to the path for deployment output
+  DOTNET_VERSION: '9.0.x'                     # set this to the dotnet version to use
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    environment: dev
     steps:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v4
-      
+
     - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 'Build and publish API project'
+    - name: 'Build API Project'
+      shell: pwsh
       run: |
-        dotnet restore Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj
-        dotnet build Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj --configuration Release
-        dotnet publish Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-        
+        dotnet build Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj --configuration Release --output ./output
+
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
