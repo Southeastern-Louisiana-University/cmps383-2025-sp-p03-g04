@@ -1,74 +1,131 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { Stack } from 'expo-router';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedView } from '../../components/ThemedView';
+import { ThemedText } from '../../components/ThemedText';
+import { MovieCarousel, Movie } from '../../components/MovieCarousel';
+import { TodaysShowsList, Showtime } from '../../components/TodaysShowsList';
+import { TheaterSelector, Theater } from '../../components/TheaterSelector';
+import * as moviesAPI from '../../services/movies';
+import * as theatersAPI from '../../services/theaters';
+import * as showtimesAPI from '../../services/showtimes';
 
 export default function HomeScreen() {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [theaters, setTheaters] = useState<Theater[]>([]);
+  const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
+  const [showtimes, setShowtimes] = useState<Showtime[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Filter showtimes based on selected theater
+  useEffect(() => {
+    if (selectedTheater) {
+      // Filter showtimes to show only those for the selected theater
+      const filteredShowtimes = showtimes.filter(
+        showtime => showtime.theaterId === selectedTheater.id
+      );
+      setShowtimes(filteredShowtimes);
+    } else {
+      // Load all showtimes if no theater is selected
+      showtimesAPI.getShowtimes().then(data => setShowtimes(data));
+    }
+  }, [selectedTheater]);
+
+  const loadData = async () => {
+    try {
+      // Fetch movies
+      const moviesData = await moviesAPI.getMovies();
+      setMovies(moviesData);
+
+      // Fetch theaters
+      const theatersData = await theatersAPI.getTheaters();
+      setTheaters(theatersData);
+      
+      // Set default selected theater if available
+      if (theatersData.length > 0 && !selectedTheater) {
+        setSelectedTheater(theatersData[0]);
+      }
+
+      // Fetch showtimes
+      const showtimesData = await showtimesAPI.getShowtimes();
+      setShowtimes(showtimesData);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      // Handle error state here
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const handleSelectMovie = (movieId: number) => {
+    // Handle movie selection (e.g., navigate to movie details)
+    console.log('Selected movie ID:', movieId);
+  };
+
+  const handleSelectShowtime = (showtimeId: number) => {
+    // Handle showtime selection (e.g., navigate to seat selection)
+    console.log('Selected showtime ID:', showtimeId);
+  };
+
+  const handleSelectTheater = (theater: Theater) => {
+    setSelectedTheater(theater);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+    <>
+      <Stack.Screen options={{ title: "Lion's Den Cinema" }} />
+      <ThemedView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        >
+          <ThemedText style={styles.welcomeText}>
+            Welcome to Lion's Den Cinema
+          </ThemedText>
+
+          <TheaterSelector 
+            theaters={theaters}
+            selectedTheater={selectedTheater}
+            onSelectTheater={handleSelectTheater}
+          />
+
+          <MovieCarousel 
+            movies={movies}
+            onSelectMovie={handleSelectMovie}
+          />
+
+          <TodaysShowsList 
+            showtimes={showtimes}
+            onSelectShowtime={handleSelectShowtime}
+          />
+        </ScrollView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scrollContent: {
+    paddingVertical: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });
