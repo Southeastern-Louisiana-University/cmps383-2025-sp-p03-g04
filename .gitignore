@@ -8,6 +8,7 @@
 *.sln.docstates
 *ncrunch* 
 *.orig
+.expo
 
 
 #ignored -locally only
