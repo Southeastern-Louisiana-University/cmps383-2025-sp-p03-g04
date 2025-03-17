@@ -21,20 +21,15 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 'Resolve Project Dependencies Using Dotnet'
+    - name: 'Build and publish API project'
       run: |
-        dotnet restore
-        dotnet build --configuration Release
+        dotnet restore Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj
+        dotnet build Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj --configuration Release
         dotnet publish Selu383.SP25.P03.Api/Selu383.SP25.P03.Api.csproj -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-        
-    - name: 'Login via Azure CLI'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
         
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
       with:
-
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
