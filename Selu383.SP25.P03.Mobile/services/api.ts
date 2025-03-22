@@ -146,3 +146,11 @@ export const getUserReservations = (userId: number): Promise<Reservation[]> => {
     headers: createHeaders(true)
   });
 };
+
+export const fetchTmdbMovieDetails = (tmdbId: number): Promise<any> => {
+  return fetchApi<any>(`/tmdb/details/${tmdbId}`);
+};
+
+export const fetchTmdbMovieVideos = (tmdbId: number): Promise<any> => {
+  return fetchApi<any>(`/tmdb/videos/${tmdbId}`);
+};

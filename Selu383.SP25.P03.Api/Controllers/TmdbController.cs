@@ -43,6 +43,21 @@ namespace Selu383.SP25.P03.Api.Controllers
             return Ok(results);
         }
 
+        [HttpGet("videos/{tmdbId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<object>> GetMovieVideos(int tmdbId)
+        {
+            try
+            {
+                var videos = await _tmdbService.GetMovieVideosAsync(tmdbId);
+                return Ok(videos);
+            }
+            catch (Exception ex)
+            {
+        return BadRequest($"Failed to get videos: {ex.Message}");
+            }
+        }
+
         [HttpPost("import/{tmdbId}")]
         [Authorize(Roles = UserRoleNames.Admin)]
         public async Task<ActionResult<MovieDto>> ImportMovie(int tmdbId)

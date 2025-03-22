@@ -1,3 +1,4 @@
+// app/(tabs)/_layout.tsx - Update to include theater dropdown in header
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,10 +9,10 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#B4D335', // Lion's Den green
+        tabBarActiveTintColor: '#65a30d', // Updated green color
         tabBarInactiveTintColor: '#9BA1A6',
         tabBarStyle: {
-          backgroundColor: '#1E2429', // Dark background for tabs
+          backgroundColor: '#1E2429',
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -22,7 +23,7 @@ export default function TabLayout() {
           fontSize: 12,
         },
         headerStyle: {
-          backgroundColor: '#B4D335', // Lion's Den green header
+          backgroundColor: '#65a30d', // Updated green color
         },
         headerTitleStyle: {
           fontWeight: 'bold',
@@ -33,15 +34,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Theater",
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
-          headerShown: false,
         }}
       />
       
+      {/* Keep other tab screens */}
       <Tabs.Screen
         name="movies"
         options={{
