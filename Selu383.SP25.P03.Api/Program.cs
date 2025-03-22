@@ -99,6 +99,7 @@ namespace Selu383.SP25.P03.Api
                 await SeedUsers.Initialize(scope.ServiceProvider);
                 SeedMovies.Initialize(scope.ServiceProvider);
                 SeedShowtimes.Initialize(scope.ServiceProvider);
+                SeedConcessions.Initialize(scope.ServiceProvider);
             }
 
             // Configure the HTTP request pipeline.

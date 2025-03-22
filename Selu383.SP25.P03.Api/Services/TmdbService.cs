@@ -78,14 +78,14 @@ namespace Selu383.SP25.P03.Api.Services
         }
 
         // Add the GetMovieVideosAsync method inside the class
-        public async Task<object> GetMovieVideosAsync(int tmdbId)
-        {
-            var response = await _httpClient.GetAsync($"movie/{tmdbId}/videos?api_key={_apiKey}");
-            response.EnsureSuccessStatusCode();
+public async Task<MovieVideosResponse> GetMovieVideosAsync(int tmdbId)
+{
+    var response = await _httpClient.GetAsync($"movie/{tmdbId}/videos?api_key={_apiKey}");
+    response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<object>(content, _jsonOptions);
-        }
+    var result = await response.Content.ReadFromJsonAsync<MovieVideosResponse>(_jsonOptions);
+    return result ?? new MovieVideosResponse(); // Return empty response if null
+}
     }
 
     public class TmdbMovieSearchResponse
@@ -110,4 +110,17 @@ namespace Selu383.SP25.P03.Api.Services
         public bool Adult { get; set; }
         public int Runtime { get; set; }
     }
+
+    public class MovieVideosResponse
+{
+    public List<MovieVideo> Results { get; set; } = new List<MovieVideo>();
+}
+
+public class MovieVideo
+{
+    public string Key { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Site { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+}
 }
