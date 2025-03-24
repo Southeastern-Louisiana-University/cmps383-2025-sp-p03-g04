@@ -2,17 +2,17 @@ import { Movie } from '@/components/MovieCarousel';
 import { Showtime } from '@/components/TodaysShowsList';
 import { Theater } from '@/components/TheaterSelector';
 
-// Base URL for your API
-const API_BASE_URL = 'https://yourdeployedapi.azurewebsites.net/api';
+// Base URL API
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://selu383-sp25-p03-g04.azurewebsites.net/api';
 
-// Type for authentication response
+// authentication response
 interface AuthResponse {
   id: number;
   userName: string;
   roles: string[];
 }
 
-// Type for login request
+// login request
 interface LoginRequest {
   userName: string;
   password: string;
@@ -145,4 +145,12 @@ export const getUserReservations = (userId: number): Promise<Reservation[]> => {
   return fetchApi<Reservation[]>(`/reservations/user/${userId}`, {
     headers: createHeaders(true)
   });
+};
+
+export const fetchTmdbMovieDetails = (tmdbId: number): Promise<any> => {
+  return fetchApi<any>(`/tmdb/details/${tmdbId}`);
+};
+
+export const fetchTmdbMovieVideos = (tmdbId: number): Promise<any> => {
+  return fetchApi<any>(`/tmdb/videos/${tmdbId}`);
 };

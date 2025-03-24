@@ -9,6 +9,10 @@ export interface Movie {
   title: string;
   posterUrl: string;
   runtime: number;
+  description?: string; 
+  rating?: string;      
+  releaseDate?: Date;   
+  tmdbId?: number;      
 }
 
 interface MovieCarouselProps {

@@ -5,6 +5,7 @@ using Selu383.SP25.P03.Api.Features.Users;
 using Selu383.SP25.P03.Api.Features.Theaters;
 using Selu383.SP25.P03.Api.Features.Movies;
 using Selu383.SP25.P03.Api.Features.Reservations;
+using Selu383.SP25.P03.Api.Features.Concessions;
 
 namespace Selu383.SP25.P03.Api.Data
 {
@@ -21,6 +22,11 @@ namespace Selu383.SP25.P03.Api.Data
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<ReservationSeat> ReservationSeats { get; set; }
+
+        public DbSet<FoodCategory> FoodCategories { get; set; }
+        public DbSet<FoodItem> FoodItems { get; set; }
+        public DbSet<FoodOrder> FoodOrders { get; set; }
+        public DbSet<FoodOrderItem> FoodOrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -53,6 +59,36 @@ namespace Selu383.SP25.P03.Api.Data
                 .WithMany(s => s.ReservationSeats)
                 .HasForeignKey(rs => rs.SeatId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<FoodOrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<FoodOrderItem>()
+                .HasOne(oi => oi.FoodItem)
+                .WithMany(fi => fi.OrderItems)
+                .HasForeignKey(oi => oi.FoodItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FoodItem>()
+                .HasOne(fi => fi.Category)
+                .WithMany(c => c.Items)
+                .HasForeignKey(fi => fi.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<FoodOrder>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<FoodOrder>()
+                .HasOne(o => o.Reservation)
+                .WithMany()
+                .HasForeignKey(o => o.ReservationId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

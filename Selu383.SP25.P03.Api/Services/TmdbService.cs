@@ -45,22 +45,23 @@ namespace Selu383.SP25.P03.Api.Services
             response.EnsureSuccessStatusCode();
     
             var result = await response.Content.ReadFromJsonAsync<TmdbMovieDetails>(_jsonOptions);
-        if (result == null)
-        {
-            throw new InvalidOperationException($"Failed to deserialize movie details for TMDB ID: {tmdbId}");
-        }
+            if (result == null)
+            {
+                throw new InvalidOperationException($"Failed to deserialize movie details for TMDB ID: {tmdbId}");
+            }
             return result;
         }
 
         // Method to get now playing movies
         public async Task<TmdbMovieSearchResponse> GetNowPlayingMoviesAsync()
-{
-    var response = await _httpClient.GetAsync($"movie/now_playing?api_key={_apiKey}");
-    response.EnsureSuccessStatusCode();
-    
-    var result = await response.Content.ReadFromJsonAsync<TmdbMovieSearchResponse>(_jsonOptions);
-    return result ?? new TmdbMovieSearchResponse(); // Return empty response if null
-}
+        {
+            var response = await _httpClient.GetAsync($"movie/now_playing?api_key={_apiKey}");
+            response.EnsureSuccessStatusCode();
+            
+            var result = await response.Content.ReadFromJsonAsync<TmdbMovieSearchResponse>(_jsonOptions);
+            return result ?? new TmdbMovieSearchResponse(); // Return empty response if null
+        }
+
         // Map from TMDB movie to our Movie model
         public Movie MapToMovie(TmdbMovieDetails tmdbMovie)
         {
@@ -75,6 +76,16 @@ namespace Selu383.SP25.P03.Api.Services
                 TmdbId = tmdbMovie.Id
             };
         }
+
+        // Add the GetMovieVideosAsync method inside the class
+public async Task<MovieVideosResponse> GetMovieVideosAsync(int tmdbId)
+{
+    var response = await _httpClient.GetAsync($"movie/{tmdbId}/videos?api_key={_apiKey}");
+    response.EnsureSuccessStatusCode();
+
+    var result = await response.Content.ReadFromJsonAsync<MovieVideosResponse>(_jsonOptions);
+    return result ?? new MovieVideosResponse(); // Return empty response if null
+}
     }
 
     public class TmdbMovieSearchResponse
@@ -99,4 +110,17 @@ namespace Selu383.SP25.P03.Api.Services
         public bool Adult { get; set; }
         public int Runtime { get; set; }
     }
+
+    public class MovieVideosResponse
+{
+    public List<MovieVideo> Results { get; set; } = new List<MovieVideo>();
+}
+
+public class MovieVideo
+{
+    public string Key { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Site { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+}
 }

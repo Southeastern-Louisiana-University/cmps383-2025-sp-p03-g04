@@ -24,20 +24,13 @@ namespace Selu383.SP25.P03.Api.Controllers
             reservations = dataContext.Set<Reservation>();
         }
 
-        // Class to accept reservation creation request
-        public class CreateReservationRequest
-        {
-            public int ShowtimeId { get; set; }
-            public List<int> SeatIds { get; set; } = new List<int>();
-        }
-
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservationRequest request)
         {
-            if (request == null)
+            if (request == null || request.Tickets.Count == 0)
             {
-                return BadRequest("Reservation data is required");
+                return BadRequest("Reservation data is required and must include at least one ticket");
             }
             
             // Verify showtime exists
@@ -51,19 +44,22 @@ namespace Selu383.SP25.P03.Api.Controllers
                 return NotFound("Showtime not found");
             }
 
+            // Get all seat IDs from the tickets
+            var seatIds = request.Tickets.Select(t => t.SeatId).ToList();
+
             // Verify seats exist and belong to the right screen
             var seats = await dataContext.Seats
-                .Where(s => request.SeatIds.Contains(s.Id) && s.ScreenId == showtime.ScreenId)
+                .Where(s => seatIds.Contains(s.Id) && s.ScreenId == showtime.ScreenId)
                 .ToListAsync();
 
-            if (seats.Count != request.SeatIds.Count)
+            if (seats.Count != seatIds.Count)
             {
                 return BadRequest("One or more seats are invalid");
             }
 
             // Verify seats are available
             var reservedSeatIds = await dataContext.ReservationSeats
-                .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == request.ShowtimeId)
+                .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == request.ShowtimeId && rs.Reservation.IsPaid)
                 .Select(rs => rs.SeatId)
                 .ToListAsync();
 
@@ -74,14 +70,37 @@ namespace Selu383.SP25.P03.Api.Controllers
             }
 
             // Get current user
-            var user = await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == (User.Identity != null ? User.Identity.Name : null));
-            if (user == null)
+            // Get current user
+var userName = User.Identity?.Name;
+var user = userName != null 
+    ? await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userName)
+    : null;
+
+if (user == null)
+{
+    return BadRequest("User not found");
+}
+
+            // For each ticket, set the price based on ticket type
+            // In a real application, you'd have a more sophisticated pricing strategy
+            foreach (var ticket in request.Tickets)
             {
-                return BadRequest("User not found");
+                switch (ticket.TicketType.ToLower())
+                {
+                    case "child":
+                        ticket.Price = showtime.TicketPrice * 0.75m; // 25% discount for children
+                        break;
+                    case "senior":
+                        ticket.Price = showtime.TicketPrice * 0.8m; // 20% discount for seniors
+                        break;
+                    default: // "adult" or any other type
+                        ticket.Price = showtime.TicketPrice;
+                        break;
+                }
             }
 
             // Calculate total amount
-            decimal totalAmount = showtime.TicketPrice * request.SeatIds.Count;
+            decimal totalAmount = request.Tickets.Sum(t => t.Price);
 
             // Create reservation
             var reservation = new Reservation
@@ -90,25 +109,45 @@ namespace Selu383.SP25.P03.Api.Controllers
                 UserId = user.Id,
                 ReservationTime = DateTime.UtcNow,
                 TotalAmount = totalAmount,
-                IsPaid = false
+                IsPaid = request.ProcessPayment // Set to true if payment is being processed immediately
             };
 
             reservations.Add(reservation);
             await dataContext.SaveChangesAsync();
 
             // Add seat reservations
-            foreach (var seatId in request.SeatIds)
+            foreach (var ticket in request.Tickets)
             {
+                var seat = seats.First(s => s.Id == ticket.SeatId);
+                
                 dataContext.ReservationSeats.Add(new ReservationSeat
                 {
                     ReservationId = reservation.Id,
-                    SeatId = seatId
+                    SeatId = ticket.SeatId,
+                    TicketType = ticket.TicketType,
+                    Price = ticket.Price
                 });
             }
 
             await dataContext.SaveChangesAsync();
 
             // Map to DTO for response
+            var ticketDtos = new List<TicketDto>();
+            foreach (var reservationSeat in dataContext.ReservationSeats
+                .Where(rs => rs.ReservationId == reservation.Id)
+                .Include(rs => rs.Seat))
+            {
+                ticketDtos.Add(new TicketDto
+                {
+                    Id = reservationSeat.Id,
+                    SeatId = reservationSeat.SeatId,
+                    Row = reservationSeat.Seat?.Row ?? string.Empty,
+                    Number = reservationSeat.Seat?.Number ?? 0,
+                    TicketType = reservationSeat.TicketType,
+                    Price = reservationSeat.Price
+                });
+            }
+
             var reservationDto = new ReservationDto
             {
                 Id = reservation.Id,
@@ -121,12 +160,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                 MovieTitle = showtime.Movie?.Title ?? string.Empty,
                 TheaterName = showtime.Screen?.Theater?.Name ?? string.Empty,
                 ScreenName = showtime.Screen?.Name ?? string.Empty,
-                Seats = seats.Select(s => new SeatInfoDto
-                {
-                    Id = s.Id,
-                    Row = s.Row,
-                    Number = s.Number
-                }).ToList()
+                Tickets = ticketDtos
             };
 
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
@@ -160,6 +194,17 @@ namespace Selu383.SP25.P03.Api.Controllers
                 return Forbid();
             }
 
+            var ticketDtos = reservation.ReservationSeats
+                .Select(rs => new TicketDto
+                {
+                    Id = rs.Id,
+                    SeatId = rs.SeatId,
+                    Row = rs.Seat?.Row ?? string.Empty,
+                    Number = rs.Seat?.Number ?? 0,
+                    TicketType = rs.TicketType,
+                    Price = rs.Price
+                }).ToList();
+
             return new ReservationDto
             {
                 Id = reservation.Id,
@@ -172,13 +217,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                 MovieTitle = reservation.Showtime?.Movie?.Title ?? string.Empty,
                 TheaterName = reservation.Showtime?.Screen?.Theater?.Name ?? string.Empty,
                 ScreenName = reservation.Showtime?.Screen?.Name ?? string.Empty,
-                Seats = reservation.ReservationSeats
-                    .Select(rs => new SeatInfoDto
-                    {
-                        Id = rs.Seat?.Id ?? 0,
-                        Row = rs.Seat?.Row ?? string.Empty,
-                        Number = rs.Seat?.Number ?? 0
-                    }).ToList()
+                Tickets = ticketDtos
             };
         }
 
@@ -198,13 +237,14 @@ namespace Selu383.SP25.P03.Api.Controllers
                 return Forbid();
             }
 
-            var userReservations = await reservations
-                .Include(r => r.Showtime)
-
-                .Include(r => r.ReservationSeats)
-                .ThenInclude(rs => rs.Seat)
-                .Where(r => r.UserId == userId)
-                .ToListAsync();
+var userReservations = await reservations
+    .Include(r => r.Showtime)
+    .Include("Showtime.Movie")
+    .Include("Showtime.Screen.Theater")
+    .Include(r => r.ReservationSeats)
+    .ThenInclude(rs => rs.Seat)
+    .Where(r => r.UserId == userId)
+    .ToListAsync();
 
             var reservationDtos = userReservations.Select(r => new ReservationDto
             {
@@ -218,13 +258,15 @@ namespace Selu383.SP25.P03.Api.Controllers
                 MovieTitle = r.Showtime?.Movie?.Title ?? string.Empty,
                 TheaterName = r.Showtime?.Screen?.Theater?.Name ?? string.Empty,
                 ScreenName = r.Showtime?.Screen?.Name ?? string.Empty,
-                Seats = r.ReservationSeats
-                    .Select(rs => new SeatInfoDto
-                    {
-                        Id = rs.Seat?.Id ?? 0,
-                        Row = rs.Seat?.Row ?? string.Empty,
-                        Number = rs.Seat?.Number ?? 0
-                    }).ToList()
+                Tickets = r.ReservationSeats.Select(rs => new TicketDto
+                {
+                    Id = rs.Id,
+                    SeatId = rs.SeatId,
+                    Row = rs.Seat?.Row ?? string.Empty,
+                    Number = rs.Seat?.Number ?? 0,
+                    TicketType = rs.TicketType,
+                    Price = rs.Price
+                }).ToList()
             }).ToList();
 
             return reservationDtos;
@@ -262,6 +304,17 @@ namespace Selu383.SP25.P03.Api.Controllers
             reservation.IsPaid = true;
             await dataContext.SaveChangesAsync();
 
+            var ticketDtos = reservation.ReservationSeats
+                .Select(rs => new TicketDto
+                {
+                    Id = rs.Id,
+                    SeatId = rs.SeatId,
+                    Row = rs.Seat?.Row ?? string.Empty,
+                    Number = rs.Seat?.Number ?? 0,
+                    TicketType = rs.TicketType,
+                    Price = rs.Price
+                }).ToList();
+
             return new ReservationDto
             {
                 Id = reservation.Id,
@@ -274,13 +327,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                 MovieTitle = reservation.Showtime?.Movie?.Title ?? string.Empty,
                 TheaterName = reservation.Showtime?.Screen?.Theater?.Name ?? string.Empty,
                 ScreenName = reservation.Showtime?.Screen?.Name ?? string.Empty,
-                Seats = reservation.ReservationSeats
-                    .Select(rs => new SeatInfoDto
-                    {
-                        Id = rs.Seat?.Id ?? 0,
-                        Row = rs.Seat?.Row ?? string.Empty,
-                        Number = rs.Seat?.Number ?? 0
-                    }).ToList()
+                Tickets = ticketDtos
             };
         }
 
