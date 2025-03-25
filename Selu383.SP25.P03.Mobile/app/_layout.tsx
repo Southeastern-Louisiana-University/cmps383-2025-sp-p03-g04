@@ -1,23 +1,21 @@
+import React from 'react';
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { AuthProvider } from '../components/AuthProvider';
 
-export default function Layout() {
-  const colorScheme = useColorScheme();
-  
+export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#B4D335',
-        },
-        headerTintColor: '#242424',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        contentStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#121212' : '#FFFFFF',
-        },
-      }}
-    />
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#B4D335',
+          },
+          headerTintColor: '#242424',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+    </AuthProvider>
   );
 }
