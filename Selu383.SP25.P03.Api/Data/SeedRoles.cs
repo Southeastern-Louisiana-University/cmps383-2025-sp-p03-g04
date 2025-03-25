@@ -16,8 +16,12 @@ namespace Selu383.SP25.P03.Api.Data
                     return;   // DB has been seeded
                 }
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
-                await roleManager.CreateAsync(new Role { Name = UserRoleNames.Admin });
-                await roleManager.CreateAsync(new Role { Name = UserRoleNames.User });
+                
+                // Add all roles
+                await roleManager.CreateAsync(new Role { Name = UserRoleNames.Admin });  // Manager role
+                await roleManager.CreateAsync(new Role { Name = UserRoleNames.Staff });  // Staff role
+                await roleManager.CreateAsync(new Role { Name = UserRoleNames.User });   // Customer role
+                
                 context.SaveChanges();
             }
         }

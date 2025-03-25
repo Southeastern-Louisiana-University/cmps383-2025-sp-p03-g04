@@ -1,40 +1,139 @@
-import * as api from './api';
+import { BASE_URL } from '@/constants/BaseUrl';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Interface for login request
-export interface LoginRequest {
-  userName: string;
-  password: string;
-}
-
-// Interface for user information
 export interface User {
   id: number;
   userName: string;
   roles: string[];
 }
 
-/**
- * Attempts to log in a user with the provided credentials
- * @param userName The username
- * @param password The password
- * @returns A promise that resolves to the user information
- */
-export async function login(userName: string, password: string): Promise<User> {
-  return api.login({ userName, password });
+export interface LoginRequest {
+  userName: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  roles: string[];
 }
 
 /**
- * Gets the current user's information
- * @returns A promise that resolves to the user information
+ * Attempt to log in with the provided credentials
  */
-export async function getCurrentUser(): Promise<User> {
-  return api.getCurrentUser();
-}
+export const login = async (userName: string, password: string): Promise<User> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/authentication/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userName,
+        password,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Login failed: ${response.status}`);
+    }
+
+    const userData = await response.json();
+    await AsyncStorage.setItem('userId', userData.id.toString());
+    await AsyncStorage.setItem('username', userData.userName);
+    await AsyncStorage.setItem('userRole', userData.roles[0]);
+    return userData;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+};
 
 /**
- * Logs out the current user
- * @returns A promise that resolves when logout is complete
+ * Register a new user
  */
-export async function logout(): Promise<void> {
-  return api.logout();
-}
+export const register = async (data: RegisterRequest): Promise<User> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
+      },
+      body: JSON.stringify({
+        Username: data.username,
+        Password: data.password,
+        Roles: data.roles,
+        // Note: Current API doesn't accept email, so we're not including it
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Registration failed: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get the currently logged in user's information
+ */
+export const getCurrentUser = async (): Promise<User> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/authentication/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get current user: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get current user error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Log out the current user
+ */
+export const logout = async (): Promise<void> => {
+  try {
+    // Call the logout endpoint
+    const response = await fetch(`${BASE_URL}/api/authentication/logout`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Logout failed: ${response.status}`);
+    }
+
+    // Clear local storage regardless of API response
+    await AsyncStorage.removeItem('authToken');
+    await AsyncStorage.removeItem('userId');
+    await AsyncStorage.removeItem('username');
+    await AsyncStorage.removeItem('userRole');
+  } catch (error) {
+    console.error('Logout error:', error);
+    
+    // Still clear local storage even if the API call fails
+    await AsyncStorage.removeItem('authToken');
+    await AsyncStorage.removeItem('userId');
+    await AsyncStorage.removeItem('username');
+    await AsyncStorage.removeItem('userRole');
+    
+    throw error;
+  }
+};
