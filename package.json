@@ -1,0 +1,20 @@
+{
+  "name": "package.json",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g04.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g04/issues"
+  },
+  "homepage": "https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g04#readme",
+  "description": ""
+}
