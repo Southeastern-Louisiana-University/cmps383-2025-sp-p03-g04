@@ -10,7 +10,6 @@
 *.orig
 .expo
 
-package-lock.*
 
 #ignored -locally only
 .env
