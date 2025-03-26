@@ -31,25 +31,42 @@ namespace Selu383.SP25.P03.Api.Controllers
         [Authorize]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto dto)
         {
-            if (!dto.Roles.Any() || !dto.Roles.All(x => roles.Any(y => x == y.Name)))
-            {
-                return BadRequest();
-            }
+    if (dto.Roles == null || !dto.Roles.Any())
+    {
+        return BadRequest("User roles cannot be empty");
+    }
 
-            var result = await userManager.CreateAsync(new User { UserName = dto.Username }, dto.Password);
-            if (result.Succeeded)
-            {
-                await userManager.AddToRolesAsync(await userManager.FindByNameAsync(dto.Username), dto.Roles);
+        if (!dto.Roles.All(roleName => roles.Any(dbRole => roleName == dbRole.Name)))
+    {
+        return BadRequest("One or more roles are invalid");
+    }
 
-                var user = await userManager.FindByNameAsync(dto.Username);
-                return new UserDto
-                {
-                    Id = user.Id,
-                    UserName = dto.Username,
-                    Roles = dto.Roles
-                };
-            }
-            return BadRequest();
+    var result = await userManager.CreateAsync(new User { UserName = dto.Username }, dto.Password);
+    
+    if (result.Succeeded)
+    {
+        // Find the user by username
+        var user = await userManager.FindByNameAsync(dto.Username);
+        
+        // Additional null check to ensure user was created
+        if (user == null)
+        {
+            return BadRequest("User could not be created");
         }
+        
+        // Add roles to the user
+        await userManager.AddToRolesAsync(user, dto.Roles);
+
+        // Return the user DTO
+        return new UserDto
+        {
+            Id = user.Id,
+            UserName = dto.Username,
+            Roles = dto.Roles
+        };
+    }
+    
+    return BadRequest(result.Errors);
+}
     }
 }
