@@ -47,6 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('Error loading user:', error);
+        // Clear any partial data in case of error
+        await AsyncStorage.multiRemove(['userId', 'username', 'userRole']);
       } finally {
         setIsLoading(false);
       }
@@ -87,13 +89,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign out function
   const signOut = async () => {
     try {
-      await authService.logout();
-      await AsyncStorage.removeItem('userId');
-      await AsyncStorage.removeItem('username');
-      await AsyncStorage.removeItem('userRole');
+      // First clear local storage, this way even if the API call fails, we're still logged out locally
+      await AsyncStorage.multiRemove(['userId', 'username', 'userRole']);
       setUser(null);
+      
+      // Then attempt the API call, but don't wait for it to complete before updating the UI
+      authService.logout().catch(error => {
+        console.error('API logout error (ignored):', error);
+        // We already cleared local storage above, so we can ignore this error
+      });
     } catch (error) {
       console.error('Sign out error:', error);
+      // Make sure we're logged out locally even if there's an error
+      setUser(null);
       throw error;
     }
   };
