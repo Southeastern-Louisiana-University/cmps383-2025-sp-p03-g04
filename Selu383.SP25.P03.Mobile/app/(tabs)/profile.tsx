@@ -14,14 +14,14 @@ export default function ProfileScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(colorScheme === 'dark');
   const [notifications, setNotifications] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleDarkModeToggle = () => {
     setDarkMode(!darkMode);
     AsyncStorage.setItem('userColorScheme', !darkMode ? 'dark' : 'light');
-    
   };
   
   // Handle logout
@@ -39,11 +39,16 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
+              setIsProcessing(true);
               await signOut();
-              router.replace('../role-selection');
+              
+              // Force navigation to role selection
+              router.push('/role-selection');
             } catch (error) {
               console.error('Logout error:', error);
               Alert.alert('Error', 'Failed to log out. Please try again.');
+            } finally {
+              setIsProcessing(false);
             }
           }
         }
@@ -85,7 +90,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../payment-methods')}
+              onPress={() => router.push('./payment-methods')}
             >
               <Ionicons name="card-outline" size={22} color="#B4D335" />
               <ThemedText style={styles.settingButtonText}>Payment Methods</ThemedText>
@@ -94,7 +99,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../purchase-history')}
+              onPress={() => router.push('./purchase-history')}
             >
               <Ionicons name="receipt-outline" size={22} color="#B4D335" />
               <ThemedText style={styles.settingButtonText}>Purchase History</ThemedText>
@@ -108,7 +113,7 @@ export default function ProfileScreen() {
           <>
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../staff/settings/shifts')}
+              onPress={() => router.push('./staff/settings/shifts')}
             >
               <Ionicons name="time-outline" size={22} color="#0A7EA4" />
               <ThemedText style={styles.settingButtonText}>My Shifts</ThemedText>
@@ -117,7 +122,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../staff/settings/tasks')}
+              onPress={() => router.push('./staff/settings/tasks')}
             >
               <Ionicons name="list-outline" size={22} color="#0A7EA4" />
               <ThemedText style={styles.settingButtonText}>Task History</ThemedText>
@@ -126,7 +131,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../staff/settings/performance')}
+              onPress={() => router.push('./staff/settings/performance')}
             >
               <Ionicons name="stats-chart-outline" size={22} color="#0A7EA4" />
               <ThemedText style={styles.settingButtonText}>Performance</ThemedText>
@@ -140,7 +145,7 @@ export default function ProfileScreen() {
           <>
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../admin/settings/theaters')}
+              onPress={() => router.push('./admin/settings/theaters')}
             >
               <Ionicons name="business-outline" size={22} color="#C87000" />
               <ThemedText style={styles.settingButtonText}>Theater Management</ThemedText>
@@ -149,7 +154,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../admin/settings/users')}
+              onPress={() => router.push('./admin/settings/users')}
             >
               <Ionicons name="people-outline" size={22} color="#C87000" />
               <ThemedText style={styles.settingButtonText}>User Management</ThemedText>
@@ -158,7 +163,7 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingButton}
-              onPress={() => router.push('../admin/settings/api')}
+              onPress={() => router.push('./admin/settings/api')}
             >
               <Ionicons name="code-slash-outline" size={22} color="#C87000" />
               <ThemedText style={styles.settingButtonText}>API Settings</ThemedText>
@@ -205,7 +210,7 @@ export default function ProfileScreen() {
           
           <TouchableOpacity 
             style={styles.settingButton}
-            onPress={() => router.push('../edit-profile')}
+            onPress={() => router.push('./edit-profile')}
           >
             <Ionicons name="person-outline" size={22} color={getHeaderColor()} />
             <ThemedText style={styles.settingButtonText}>Edit Profile</ThemedText>
@@ -214,7 +219,7 @@ export default function ProfileScreen() {
           
           <TouchableOpacity 
             style={styles.settingButton}
-            onPress={() => router.push('../change-password')}
+            onPress={() => router.push('./change-password')}
           >
             <Ionicons name="lock-closed-outline" size={22} color={getHeaderColor()} />
             <ThemedText style={styles.settingButtonText}>Change Password</ThemedText>
@@ -231,11 +236,11 @@ export default function ProfileScreen() {
               <ThemedText style={styles.settingLabel}>Dark Mode</ThemedText>
             </View>
             <Switch
-  value={darkMode}
-  onValueChange={handleDarkModeToggle}
-  trackColor={{ false: '#3e3e3e', true: getHeaderColor() }}
-  thumbColor={'#f4f3f4'}
-/>
+              value={darkMode}
+              onValueChange={handleDarkModeToggle}
+              trackColor={{ false: '#3e3e3e', true: getHeaderColor() }}
+              thumbColor={'#f4f3f4'}
+            />
           </View>
           
           {getRoleSettings()}
@@ -246,7 +251,7 @@ export default function ProfileScreen() {
           
           <TouchableOpacity 
             style={styles.settingButton}
-            onPress={() => router.push('../help-support')}
+            onPress={() => router.push('./help-support')}
           >
             <Ionicons name="help-circle-outline" size={22} color={getHeaderColor()} />
             <ThemedText style={styles.settingButtonText}>Help & Support</ThemedText>
@@ -255,7 +260,7 @@ export default function ProfileScreen() {
           
           <TouchableOpacity 
             style={styles.settingButton}
-            onPress={() => router.push('../terms-conditions')}
+            onPress={() => router.push('./terms-conditions')}
           >
             <Ionicons name="document-text-outline" size={22} color={getHeaderColor()} />
             <ThemedText style={styles.settingButtonText}>Terms & Conditions</ThemedText>
@@ -264,7 +269,7 @@ export default function ProfileScreen() {
           
           <TouchableOpacity 
             style={styles.settingButton}
-            onPress={() => router.push('../privacy-policy')}
+            onPress={() => router.push('./privacy-policy')}
           >
             <Ionicons name="shield-outline" size={22} color={getHeaderColor()} />
             <ThemedText style={styles.settingButtonText}>Privacy Policy</ThemedText>
@@ -273,11 +278,14 @@ export default function ProfileScreen() {
         </View>
         
         <TouchableOpacity 
-          style={styles.logoutButton}
+          style={[styles.logoutButton, isProcessing && styles.disabledButton]}
           onPress={handleLogout}
+          disabled={isProcessing}
         >
           <Ionicons name="log-out-outline" size={22} color="white" />
-          <ThemedText style={styles.logoutButtonText}>Log Out</ThemedText>
+          <ThemedText style={styles.logoutButtonText}>
+            {isProcessing ? 'Logging out...' : 'Log Out'}
+          </ThemedText>
         </TouchableOpacity>
         
         <ThemedText style={styles.versionText}>Version 1.0.0</ThemedText>
@@ -378,6 +386,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     marginBottom: 20,
+  },
+  disabledButton: {
+    backgroundColor: '#9BA1A6',
+    opacity: 0.7,
   },
   logoutButtonText: {
     color: 'white',

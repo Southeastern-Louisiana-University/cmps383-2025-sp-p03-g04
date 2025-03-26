@@ -29,6 +29,7 @@ export const login = async (userName: string, password: string): Promise<User> =
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify({
         userName,
         password,
@@ -39,11 +40,7 @@ export const login = async (userName: string, password: string): Promise<User> =
       throw new Error(`Login failed: ${response.status}`);
     }
 
-    const userData = await response.json();
-    await AsyncStorage.setItem('userId', userData.id.toString());
-    await AsyncStorage.setItem('username', userData.userName);
-    await AsyncStorage.setItem('userRole', userData.roles[0]);
-    return userData;
+    return await response.json();
   } catch (error) {
     console.error('Login error:', error);
     throw error;
@@ -59,8 +56,8 @@ export const register = async (data: RegisterRequest): Promise<User> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
       },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify({
         Username: data.username,
         Password: data.password,
@@ -87,9 +84,7 @@ export const getCurrentUser = async (): Promise<User> => {
   try {
     const response = await fetch(`${BASE_URL}/api/authentication/me`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
-      },
+      credentials: 'include', // Important for cookies
     });
 
     if (!response.ok) {
@@ -111,29 +106,14 @@ export const logout = async (): Promise<void> => {
     // Call the logout endpoint
     const response = await fetch(`${BASE_URL}/api/authentication/logout`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${await AsyncStorage.getItem('authToken')}`,
-      },
+      credentials: 'include', // Important for cookies
     });
 
     if (!response.ok) {
-      throw new Error(`Logout failed: ${response.status}`);
+      console.warn(`Logout API call failed with status: ${response.status}`);
     }
-
-    // Clear local storage regardless of API response
-    await AsyncStorage.removeItem('authToken');
-    await AsyncStorage.removeItem('userId');
-    await AsyncStorage.removeItem('username');
-    await AsyncStorage.removeItem('userRole');
   } catch (error) {
     console.error('Logout error:', error);
-    
-    // Still clear local storage even if the API call fails
-    await AsyncStorage.removeItem('authToken');
-    await AsyncStorage.removeItem('userId');
-    await AsyncStorage.removeItem('username');
-    await AsyncStorage.removeItem('userRole');
-    
     throw error;
   }
 };
