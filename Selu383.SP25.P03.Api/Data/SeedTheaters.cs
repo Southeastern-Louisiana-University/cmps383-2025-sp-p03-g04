@@ -16,22 +16,30 @@ namespace Selu383.SP25.P03.Api.Data
                 }
                 
                 // Create theaters
-                var amcPalace = new Theater
+                var LionDen1 = new Theater
                 {
-                    Name = "AMC Palace 10",
-                    Address = "123 Main St, Springfield",
+                    Name = "Lion's Den Cinema 1",
+                    Address = "254 East Fairview St, New York City",
                     SeatCount = 150
                 };
                 
-                var regalCinema = new Theater
+                var LionDen2 = new Theater
                 {
-                    Name = "Regal Cinema",
-                    Address = "456 Elm St, Shelbyville",
+                    Name = "Lion's Den Cinema 2",
+                    Address = "1228 Saint Anthony St, New Orleans",
                     SeatCount = 200
                 };
+
+                var LionDen3 = new Theater
+                {
+                    Name = "Lion's Den Cinema 3",
+                    Address = "8386 Broad St, Los Angeles",
+                    SeatCount = 175
+                };
                 
-                context.Theaters.Add(amcPalace);
-                context.Theaters.Add(regalCinema);
+                context.Theaters.Add(LionDen1);
+                context.Theaters.Add(LionDen2);
+                context.Theaters.Add(LionDen3);
                 context.SaveChanges();
                 
                 // Create screens for each theater
@@ -39,34 +47,50 @@ namespace Selu383.SP25.P03.Api.Data
                 {
                     Name = "Screen 1",
                     Capacity = 100,
-                    TheaterId = amcPalace.Id
+                    TheaterId = LionDen1.Id
                 };
                 
                 var screen2 = new Screen
                 {
                     Name = "Screen 2",
                     Capacity = 80,
-                    TheaterId = amcPalace.Id
+                    TheaterId = LionDen1.Id
                 };
                 
                 var screen3 = new Screen
                 {
                     Name = "Screen 1",
                     Capacity = 120,
-                    TheaterId = regalCinema.Id
+                    TheaterId = LionDen2.Id
                 };
                 
                 var screen4 = new Screen
                 {
                     Name = "Screen 2",
                     Capacity = 80,
-                    TheaterId = regalCinema.Id
+                    TheaterId = LionDen2.Id
+                };
+
+                var screen5 = new Screen
+                {
+                    Name = "Screen 1",
+                    Capacity = 100,
+                    TheaterId = LionDen3.Id
+                };
+
+                var screen6 = new Screen
+                {
+                    Name = "Screen 2",
+                    Capacity = 120,
+                    TheaterId = LionDen3.Id
                 };
                 
                 context.Screens.Add(screen1);
                 context.Screens.Add(screen2);
                 context.Screens.Add(screen3);
                 context.Screens.Add(screen4);
+                context.Screens.Add(screen5);
+                context.Screens.Add(screen6);
                 context.SaveChanges();
                 
                 // Create seats for each screen
@@ -74,6 +98,8 @@ namespace Selu383.SP25.P03.Api.Data
                 CreateSeats(context, screen2.Id, 8, 10);  // 8 rows, 10 seats per row
                 CreateSeats(context, screen3.Id, 10, 12); // 10 rows, 12 seats per row
                 CreateSeats(context, screen4.Id, 8, 10);  // 8 rows, 10 seats per row
+                CreateSeats(context, screen5.Id, 10, 10); // 10 rows, 10 seats per row
+                CreateSeats(context, screen6.Id, 10, 12); // 10 rows, 12 seats per row
                 
                 context.SaveChanges();
             }
