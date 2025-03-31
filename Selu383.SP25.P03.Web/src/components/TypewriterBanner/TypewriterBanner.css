@@ -1,0 +1,64 @@
+.typewriter-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+  }
+  
+  .movie-icon {
+    color: #65A30D;
+  }
+  
+  .typewriter-container {
+    display: flex;
+    align-items: center;
+    height: 1.5rem;
+  }
+  
+  .typewriter-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #f8f9fa;
+  }
+  
+  .cursor {
+    display: inline-block;
+    margin-left: 2px;
+    width: 3px;
+    height: 1.25rem;
+    background-color: #65A30D;
+    animation: blink 1s step-end infinite;
+  }
+  
+  @keyframes blink {
+    from, to {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .typewriter-text {
+      font-size: 1.125rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .typewriter-text {
+      font-size: 1rem;
+    }
+    
+    .logo-container {
+      font-size: 1.5rem;
+    }
+  }
