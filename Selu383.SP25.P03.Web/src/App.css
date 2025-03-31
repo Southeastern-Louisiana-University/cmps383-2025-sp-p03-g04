@@ -1,42 +1,211 @@
-#root {
-  max-width: 1280px;
+:root {
+  --main-color: #65A30D;
+  --text-color: #fff;
+  --bg-color: #000;
+  --nav-bg: rgba(0, 0, 0, 0.85);
+  --card-bg: #111;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 5%;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  text-decoration: none;
+  gap: 0.5rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.logo-icon {
+  color: var(--main-color);
+  font-size: 1.5rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  margin: 0 2rem;
+}
+
+.nav-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--main-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--main-color);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn {
+  background-color: var(--main-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.btn:hover {
+  background-color: #538629;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn.theater-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: 1px solid var(--main-color);
+}
+
+.btn.theater-mode:hover {
+  background-color: rgba(101, 163, 13, 0.2);
+}
+
+main {
+  flex: 1;
+}
+
+/* Not found page */
+.not-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 60px);
+  font-size: 2rem;
+  text-align: center;
+  padding: 0 2rem;
+  margin-top: 60px;
+}
+
+/* Dark mode */
+body.dark-mode {
+  --bg-color: #000;
+  --text-color: #fff;
+  --card-bg: #111;
+  --nav-bg: rgba(0, 0, 0, 0.85);
+}
+
+/* Media queries */
+@media (max-width: 992px) {
+  .navbar-container {
+    padding: 0.8rem 3%;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .nav-links {
+    gap: 1.5rem;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-wrap: wrap;
+  }
+  
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin: 0.5rem 0;
+    gap: 1.2rem;
+  }
+  
+  main {
+    margin-top: 100px;
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+@media (max-width: 576px) {
+  .navbar-container {
+    padding: 0.5rem 2%;
+  }
+  
+  .nav-buttons {
+    margin-left: auto;
+  }
+  
+  .nav-links {
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    padding: 0.3rem 0;
+  }
+  
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
 }
