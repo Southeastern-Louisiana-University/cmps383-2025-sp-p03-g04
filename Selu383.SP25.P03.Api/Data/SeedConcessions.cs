@@ -75,42 +75,42 @@ namespace Selu383.SP25.P03.Api.Data
                         Description = "Wonton wrapped Grande Mozzarella cheese, marinara sauce", 
                         Price = 11.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1548340748-6d498c3f1c46?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1362421857/photo/crispy-mozzarella-sticks-wrapped-in-wonton-wrappers.webp?a=1&b=1&s=612x612&w=0&k=20&c=3QehhnsB9JnWroOTVdKUhJgIH2D2JXQ_bCOp4p0egks="
                     },
                     new FoodItem { 
                         Name = "Southwest Wonton Rolls", 
                         Description = "Chicken, roasted corn, peppers, black beans, cheddar and jack cheese, fire roasted salsa, side of chipotle ranch", 
                         Price = 9.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1553787497-6a6c68c10505?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/175937858/photo/fried-rolls.webp?a=1&b=1&s=612x612&w=0&k=20&c=4nY1XQn2h07ELoEJAGl6UfWJngHAjkir5XsKwq0jzdY="
                     },
                     new FoodItem { 
                         Name = "Fried Pickles", 
                         Description = "Lightly breaded dill pickle chips served with chipotle ranch dressing", 
                         Price = 9.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1594608671998-381ab2944fbd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1172&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/469869101/photo/southern-fried-pickles.webp?a=1&b=1&s=612x612&w=0&k=20&c=JdaXDbOjVv4PoyXzD5CwaN0anap8wUYzp1QP25DWnO4="
                     },
                     new FoodItem { 
                         Name = "Chewy Pretzel Bites", 
                         Description = "Served with cheddar cheese sauce", 
                         Price = 10.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1593958812614-2db6a598c71c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1253331799/photo/soft-pretzel-bites-on-a-baking-tray.webp?a=1&b=1&s=612x612&w=0&k=20&c=vsimA7Yt2euX7D-BNQJOps8ZAfWlI5UF7QaUWf1w4FE="
                     },
                     new FoodItem { 
                         Name = "Tavern Platter", 
                         Description = "Four chicken tenders, three wonton mozzarella sticks, seasoned fries with cheddar cheese sauce and applewood-smoked bacon", 
                         Price = 23.49m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1492716588/photo/food-photos-various-entrees-appetizers-deserts-etc.jpg?s=612x612&w=0&k=20&c=7VbQjto_VN1hJmTuUyXpKm0AvUI8MTol4Rkl6WqWI-c="
                     },
                     new FoodItem { 
                         Name = "Game Day Platter", 
                         Description = "Three mini cheeseburgers, half-pound of chicken wings, seasoned fries with cheddar cheese sauce and applewood-smoked bacon", 
                         Price = 22.79m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1579208030886-b937da0925dc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1498243668/photo/tasty-cheeseburger-with-lettuce-cheddar-cheese-tomato-and-pickles-burger-bun-with-sesame.webp?a=1&b=1&s=612x612&w=0&k=20&c=ZphkSrWnciLD-hcWMA1WAXdKIFCNnH9EHasGDRX6P4U="
                     },
                     new FoodItem { 
                         Name = "Nachos Grande", 
@@ -131,28 +131,28 @@ namespace Selu383.SP25.P03.Api.Data
                         Description = "Tortilla chips, cheddar cheese, fire-roasted salsa, guacamole", 
                         Price = 8.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1546069901-5ec6a79120b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/957887642/photo/spicy-homemade-cheesey-queso-dip.webp?a=1&b=1&s=612x612&w=0&k=20&c=ClR-XEyxJgRxlWJCiL7dj9MGvr_Yj80MN0s7eCFA4uE="
                     },
                     new FoodItem { 
                         Name = "Sweet Potato Waffle Fries", 
                         Description = "Served with Ketchup and Honey Mustard", 
                         Price = 8.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1519676867240-f03562e64548?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1135821873/photo/homemade-sweet-potatoe-waffle-fries.webp?a=1&b=1&s=612x612&w=0&k=20&c=sGiB6VGTh3xh6R_ClGzNWpvB2D4Acb_F3RUPTpUZPvk="
                     },
                     new FoodItem { 
                         Name = "Onion Rings", 
                         Description = "Served with chipotle ranch and ketchup", 
                         Price = 9.99m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1588511886774-ddd428377a80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=686&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/483773093/photo/onion-rings.webp?a=1&b=1&s=612x612&w=0&k=20&c=4Nf75-AVBBR0CDRkC_CEG7BFhZNs9VeTyIixjUjUy4o="
                     },
                     new FoodItem { 
                         Name = "Loaded Fries", 
                         Description = "Cheddar cheese sauce, applewood-smoked bacon, green onions", 
                         Price = 10.49m, 
                         CategoryId = startersCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/1125081388/photo/loaded-chili-cheese-french-fries.webp?a=1&b=1&s=612x612&w=0&k=20&c=7s4Zk2WlgvSaM1f5qL-DAE6XKO6rQ1fHF_WcECB35Ig="
                     },
                     new FoodItem { 
                         Name = "French Fries", 
@@ -184,7 +184,7 @@ namespace Selu383.SP25.P03.Api.Data
                         Description = "Grilled chicken, romaine lettuce, parmesan cheese, croutons, caesar dressing", 
                         Price = 15.39m, 
                         CategoryId = saladsCategory.Id,
-                        ImageUrl = "https://images.unsplash.com/photo-1599021419847-d8a7a6aba5b5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1178&q=80"
+                        ImageUrl = "https://media.istockphoto.com/id/991861846/photo/homemade-cesar-salad-with-chicken-lettuce-and-parmesan.webp?a=1&b=1&s=612x612&w=0&k=20&c=lGzBXd30zY4RMPpD9JGG8XL8ii_2e2g2xzJqC71uzoY="
                     },
                     new FoodItem { 
                         Name = "Southwest BBQ Crispy Chicken Salad", 
@@ -237,42 +237,42 @@ context.FoodItems.AddRange(
         Description = "Crispy chicken breast tossed with Nashville Hot spice rub and butter, pepper jack, lettuce, pickles, red onion and chipotle ranch dressing on a brioche bun. Served with French fries", 
         Price = 15.99m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1587593810167-a84920ea0781?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1249008469/photo/spicy-nashville-hot-chicken-sandwich-with-coleslaw-and-pickles.webp?a=1&b=1&s=612x612&w=0&k=20&c=wI9Uo1Ex5PVVwPkdgnryEu0nMjfzPPwKtMV3dkTlCns="
     },
     new FoodItem { 
         Name = "Buffalo Chicken Wrap", 
         Description = "Crispy chicken tenders, Buffalo sauce, lettuce, tomato, red onion and choice of ranch or blue cheese dressing on a flour tortilla. Served with French fries.", 
         Price = 15.49m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1627662168806-DF415659d1Aa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1317922284/photo/buffalo-chicken-blue-cheese-wrap.webp?a=1&b=1&s=612x612&w=0&k=20&c=SQsI6lFybQHDCo4BD0n8ywTixEhwr_ww4mXnE__PE-0="
     },
     new FoodItem { 
         Name = "Chicken B.A.L.T Sandwich", 
         Description = "Grilled chicken breast, guacamole, applewood smoked bacon, sliced tomatoes, pickled red onions, mayo and lettuce. Served with French fries.", 
         Price = 16.99m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1603046891744-76e6300f6eaf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/457918787/photo/kebab-with-french-fries.webp?a=1&b=1&s=612x612&w=0&k=20&c=Y8IE_gcQ4okqdv8sbWDAcw-d0PAWpSNMuD3f05TpFus="
     },
     new FoodItem { 
         Name = "Hot Honey Chicken Sandwich", 
         Description = "Fried chicken breast tossed in hot honey sauce, fried pickles and fried onion straws. Served with French fries.", 
         Price = 15.99m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1606755962773-d324e0a13086?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/2172843221/photo/fried-chicken-sandwich.webp?a=1&b=1&s=612x612&w=0&k=20&c=Evr675ZipvZqdhMDNWXab7mOy5G1TyPONF1wzXfz2_8="
     },
     new FoodItem { 
         Name = "Smash Burger Wrap", 
         Description = "Two smash burger patties, cheddar cheese, romaine lettuce, diced tomato, red onion, dill pickles, Tavern sauce, flour tortilla. Served with French fries.", 
         Price = 15.99m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1553909489-cd47e0907980?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1025&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1499246538/photo/preparing-the-viral-big-m-smash-burger-taco.webp?a=1&b=1&s=612x612&w=0&k=20&c=_CLS8A-hGJM2k14X6iWlD0LuFBUVelv3CpgvZDnWKOs="
     },
     new FoodItem { 
         Name = "Cherry Chicken Pecan Wrap", 
         Description = "Mixed greens, chicken, feta cheese, toasted pecans, red onion, dried cherries, white balsamic. Served with French fries.", 
         Price = 15.49m, 
         CategoryId = sandwichesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1553909489-cd47e0907980?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1025&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1356818887/photo/roast-chicken-blt-lettuce-wrap-sandwich.webp?a=1&b=1&s=612x612&w=0&k=20&c=rULhAzptIRXjueq_K82zRAX0A7UNdp0LYyIWWwd54VU="
     }
 );
 
@@ -318,14 +318,14 @@ context.FoodItems.AddRange(
         Description = "One Impossible burger plant-based patty with American cheese, lettuce, tomato, red onion, pickles and Tavern sauce served with French Fries", 
         Price = 15.99m, 
         CategoryId = burgersCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1582196016295-f8c8bd4b3a99?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1775171327/photo/cheeseburger.webp?a=1&b=1&s=612x612&w=0&k=20&c=2_YQRO6pr9CIXV2XkJUm3J3hHMmQuUuxlqaylz91LSM="
     },
     new FoodItem { 
         Name = "Smash Melt", 
         Description = "Two smash burger patties, American, cheddar, and pepper jack cheese, applewood-smoked bacon, onion, tomato, Tavern sauce, Texas toast. Served with French Fries", 
         Price = 16.49m, 
         CategoryId = burgersCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1599&q=80"
+        ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlHy6WQnH9dKF2UhC3IoFwrFD7bM5ZWwopYPoDmZKV&s"
     }
 );
 
@@ -336,7 +336,7 @@ context.FoodItems.AddRange(
         Description = "Three flour tortilla tacos, lettuce, pico de gallo, cheddar and jack cheese, sour cream, served with fire-roasted salsa, guacamole and tortilla chips", 
         Price = 16.49m, 
         CategoryId = entreesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=780&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1853294101/photo/the-viral-smash-ground-chicken-cheese-burger-taco.webp?a=1&b=1&s=612x612&w=0&k=20&c=dbyv2yH3NqY4OmeBl4Bb_qf04oq1_DiphpFo2vo5JrM="
     },
     new FoodItem { 
         Name = "Fried Chicken Bacon Ranch Burrito", 
@@ -361,14 +361,14 @@ context.FoodItems.AddRange(
         Description = "Coated with cinnamon sugar and served with salted caramel and chocolate sauce", 
         Price = 8.99m, 
         CategoryId = dessertsCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1624471339371-1e812757614c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/468988439/photo/close-up-of-many-churros-with-sugar.webp?a=1&b=1&s=612x612&w=0&k=20&c=7mV40iyDua0tkFhBvb1Mnsv2I6agEEz5lqrJoQXsXpg="
     },
     new FoodItem { 
         Name = "Funnel Cake Sticks", 
         Description = "Served with salted caramel and chocolate sauce", 
         Price = 10.99m, 
         CategoryId = dessertsCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1604773124275-7b0d435e5a8a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/811665838/photo/funnel-cake.webp?a=1&b=1&s=612x612&w=0&k=20&c=2d-1KXg-oBGxc422gulFwVCn7Aa37gK2_G1frkFjWMk="
     },
     new FoodItem { 
         Name = "Funnel Cake Stick Sundae", 
@@ -393,7 +393,7 @@ context.FoodItems.AddRange(
         Description = "Classic milkshake", 
         Price = 7.49m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1577805947697-89e18249e211?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=746&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/172192393/photo/milkshake-trio.webp?a=1&b=1&s=612x612&w=0&k=20&c=mh6GSqNWnPdVmo78R3TIX92Dj2Seus2e9scTG98ovEw="
     },
     new FoodItem { 
         Name = "Large Soda", 
@@ -414,42 +414,42 @@ context.FoodItems.AddRange(
         Description = "Large unsweet iced tea", 
         Price = 7.25m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1556679343-c1306ee3f376?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/1633413449/photo/coffee-with-orange-juice.jpg?s=612x612&w=0&k=20&c=6wNiX10YJdZ6fFxvV-wXXannfz4LmE_kehmEpS5xbUs="
     },
     new FoodItem { 
         Name = "Regular Unsweet Iced Tea", 
         Description = "Regular unsweet iced tea", 
         Price = 6.25m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1556679343-c1306ee3f376?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/904627686/photo/fresh-brewed-iced-tea-in-a-clear-cup-on-a-white-background.webp?a=1&b=1&s=612x612&w=0&k=20&c=odAF0Zxt0oRTwrJRRZ1Nu5htGkd3F-i39UuoVJBI6W0="
     },
     new FoodItem { 
         Name = "Large Sweet Tea", 
         Description = "Large sweet iced tea", 
         Price = 7.25m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1556679343-c1306ee3f376?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/471350903/photo/boston-iced-tea.webp?a=1&b=1&s=612x612&w=0&k=20&c=m4c8VjZ7g6ESwQH8avdIrB-nRs8Wqyh7sxlX9PB5y58="
     },
     new FoodItem { 
         Name = "Regular Sweet Tea", 
         Description = "Regular sweet iced tea", 
         Price = 6.25m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1556679343-c1306ee3f376?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+        ImageUrl = "https://media.istockphoto.com/id/471350903/photo/boston-iced-tea.webp?a=1&b=1&s=612x612&w=0&k=20&c=m4c8VjZ7g6ESwQH8avdIrB-nRs8Wqyh7sxlX9PB5y58="
     },
     new FoodItem { 
         Name = "ICEE Large", 
         Description = "Large ICEE frozen beverage", 
         Price = 8.05m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1581636625048-328f23359788?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80"
+        ImageUrl = "https://www.icee.com/wp-content/uploads/2019/12/blue-raspberry-icee@2x.png"
     },
     new FoodItem { 
         Name = "ICEE Junior", 
         Description = "Junior size ICEE frozen beverage", 
         Price = 7.55m, 
         CategoryId = beveragesCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1541591425581-5f79c8ce41b6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        ImageUrl = "https://cdnimg.webstaurantstore.com/images/products/large/736018/2519317.jpg"
     }
 );
 
@@ -460,63 +460,63 @@ context.FoodItems.AddRange(
         Description = "Chocolate candy", 
         Price = 5.49m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1581798459219-306262b0f79d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://m.media-amazon.com/images/I/710Yn-aHzhL.jpg"
     },
     new FoodItem { 
         Name = "Cookie Dough Bites", 
         Description = "Chocolate covered cookie dough bites", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://i5.walmartimages.com/asr/f3adc482-ba6f-407e-a495-bc8508c5af32.41093c5fa639e3de49d64a2879e588f8.jpeg"
     },
     new FoodItem { 
         Name = "Dots", 
         Description = "Fruity gumdrops", 
         Price = 5.49m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1600359756098-8bc52195bbf4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=688&q=80"
+        ImageUrl = "https://tootsie.com/app/uploads/2024/08/DOTS.Original.ProductDetailLargeImage.png"
     },
     new FoodItem { 
         Name = "Lifesaver Gummi", 
         Description = "Fruit-flavored gummy rings", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1599629954294-14df9ec8127c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=735&q=80"
+        ImageUrl = "https://allcitycandy.com/cdn/shop/products/lifesaversgummiesbagside_2048x.jpg?v=1666968543"
     },
     new FoodItem { 
         Name = "M&M Peanut", 
         Description = "Chocolate covered peanuts", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1629364995224-79567664190c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
+        ImageUrl = "https://snackboxusa.com/cdn/shop/products/M_MPeanut.jpg?v=1606378598&width=1080"
     },
     new FoodItem { 
         Name = "M&M Plain", 
         Description = "Milk chocolate candies", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1581798459330-2127561a2159?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://allcitycandy.com/cdn/shop/products/m_mmilkchocolatebagfront1.jpg?v=1651519269"
     },
     new FoodItem { 
         Name = "Milk Duds", 
         Description = "Chocolate-covered caramels", 
         Price = 5.49m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://m.media-amazon.com/images/I/716jBOMrWlL.jpg"
     },
     new FoodItem { 
         Name = "Reeses Pieces", 
         Description = "Peanut butter candy", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1575224526242-ff76827246e4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+        ImageUrl = "https://m.media-amazon.com/images/I/714Z9vJPIUL.jpg"
     },
     new FoodItem { 
         Name = "Skittles", 
         Description = "Fruit-flavored candy", 
         Price = 6.00m, 
         CategoryId = candyCategory.Id,
-        ImageUrl = "https://images.unsplash.com/photo-1600359756098-8bc52195bbf4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=688&q=80"
+        ImageUrl = "https://i5.walmartimages.com/seo/Skittles-Original-Chewy-Candy-Share-Size-4-oz-Bag_7950ce9d-b691-4472-82a0-86863a324809.76a441b806255c51f8b937b3967a9781.jpeg"
     }
 );
 
