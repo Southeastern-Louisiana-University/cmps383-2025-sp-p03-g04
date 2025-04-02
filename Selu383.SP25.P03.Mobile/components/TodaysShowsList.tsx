@@ -1,9 +1,8 @@
-import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View } from 'react-native';
-import { ThemedView } from './ThemedView';
-import { ThemedText } from './ThemedText';
+import React from "react";
+import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
+import { ThemedView } from "./ThemedView";
+import { ThemedText } from "./ThemedText";
 
-// Define the types for showtimes and movies
 export interface Showtime {
   id: number;
   startTime: string;
@@ -21,11 +20,14 @@ interface TodaysShowsListProps {
   onSelectShowtime?: (showtimeId: number) => void;
 }
 
-export function TodaysShowsList({ showtimes, onSelectShowtime }: TodaysShowsListProps) {
+export function TodaysShowsList({
+  showtimes,
+  onSelectShowtime,
+}: TodaysShowsListProps) {
   // Group showtimes by movie
   const groupedByMovie: Record<number, Showtime[]> = {};
-  
-  showtimes.forEach(showtime => {
+
+  showtimes.forEach((showtime) => {
     if (!groupedByMovie[showtime.movieId]) {
       groupedByMovie[showtime.movieId] = [];
     }
@@ -35,10 +37,10 @@ export function TodaysShowsList({ showtimes, onSelectShowtime }: TodaysShowsList
   const renderShowtimeItem = ({ item }: { item: Showtime }) => {
     // Format the date
     const dateTimeString = new Date(item.startTime).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    
+
     return (
       <TouchableOpacity
         style={styles.showtimeButton}
@@ -52,14 +54,18 @@ export function TodaysShowsList({ showtimes, onSelectShowtime }: TodaysShowsList
   const renderMovieShowtimes = () => {
     return Object.entries(groupedByMovie).map(([movieId, movieShowtimes]) => {
       if (movieShowtimes.length === 0) return null;
-      
+
       const movieData = movieShowtimes[0];
-      
+
       return (
         <ThemedView key={movieId} style={styles.movieSection}>
-          <ThemedText style={styles.movieTitle}>{movieData.movieTitle}</ThemedText>
-          <ThemedText style={styles.theaterName}>{movieData.theaterName} • {movieData.screenName}</ThemedText>
-          
+          <ThemedText style={styles.movieTitle}>
+            {movieData.movieTitle}
+          </ThemedText>
+          <ThemedText style={styles.theaterName}>
+            {movieData.theaterName} • {movieData.screenName}
+          </ThemedText>
+
           <FlatList
             data={movieShowtimes}
             renderItem={renderShowtimeItem}
@@ -88,7 +94,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 16,
     marginBottom: 12,
   },
@@ -98,7 +104,7 @@ const styles = StyleSheet.create({
   },
   movieTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   theaterName: {
@@ -113,12 +119,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
-    backgroundColor: '#0a7ea4',
+    backgroundColor: "#0a7ea4",
     marginRight: 10,
   },
   showtimeText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '500',
-  }
+    fontWeight: "500",
+  },
 });

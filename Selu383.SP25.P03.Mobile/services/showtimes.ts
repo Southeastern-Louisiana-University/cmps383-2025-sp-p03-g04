@@ -1,5 +1,5 @@
-import * as api from './api';
-import { Showtime } from '@/components/TodaysShowsList';
+import * as api from "./api";
+import { Showtime } from "@/components/TodaysShowsList";
 
 /**
  * Fetches all showtimes from the API
@@ -14,7 +14,9 @@ export async function getShowtimes(): Promise<Showtime[]> {
  * @param movieId The ID of the movie
  * @returns A promise that resolves to an array of showtimes
  */
-export async function getShowtimesByMovie(movieId: number): Promise<Showtime[]> {
+export async function getShowtimesByMovie(
+  movieId: number
+): Promise<Showtime[]> {
   return api.getShowtimesByMovie(movieId);
 }
 
@@ -23,8 +25,10 @@ export async function getShowtimesByMovie(movieId: number): Promise<Showtime[]> 
  * @param theaterId The ID of the theater
  * @returns A promise that resolves to an array of showtimes
  */
-export async function getShowtimesByTheater(theaterId: number): Promise<Showtime[]> {
+export async function getShowtimesByTheater(
+  theaterId: number
+): Promise<Showtime[]> {
   // Filter showtimes by theater ID after fetching all showtimes
   const allShowtimes = await api.getShowtimes();
-  return allShowtimes.filter(showtime => showtime.theaterId === theaterId);
+  return allShowtimes.filter((showtime) => showtime.theaterId === theaterId);
 }

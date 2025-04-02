@@ -11,17 +11,14 @@ import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../components/AuthProvider";
 
-// Components
 import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
 import { MovieCarousel } from "../../components/MovieCarousel";
 
-// Import types from components
 import type { Movie } from "../../components/MovieCarousel";
 import type { Showtime } from "../../components/TodaysShowsList";
 import type { Theater } from "../../components/TheaterSelector";
 
-// Services
 import * as moviesAPI from "../../services/movies";
 import * as theatersAPI from "../../services/theaters";
 import * as showtimesAPI from "../../services/showtimes";
@@ -149,7 +146,6 @@ export default function HomeScreen() {
 
   // Role-based UI rendering
   if (user.role === "customer") {
-    // Original customer UI from master
     return (
       <>
         <Stack.Screen
@@ -160,7 +156,8 @@ export default function HomeScreen() {
                 onPress={() =>
                   setIsTheaterDropdownVisible(!isTheaterDropdownVisible)
                 }
-                style={{ marginRight: 16 }}>
+                style={{ marginRight: 16 }}
+              >
                 <Ionicons name="chevron-down" size={24} color="#242424" />
               </TouchableOpacity>
             ),
@@ -173,7 +170,8 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={theater.id}
                 style={styles.dropdownItem}
-                onPress={() => handleSelectTheater(theater)}>
+                onPress={() => handleSelectTheater(theater)}
+              >
                 <ThemedText style={styles.dropdownText}>
                   {theater.name}
                 </ThemedText>
@@ -190,7 +188,8 @@ export default function HomeScreen() {
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
               />
-            }>
+            }
+          >
             <ThemedText style={styles.welcomeText}>
               Welcome to Lion's Den Cinema
             </ThemedText>
@@ -201,7 +200,8 @@ export default function HomeScreen() {
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={navigateToTickets}>
+                onPress={navigateToTickets}
+              >
                 <Ionicons name="ticket-outline" size={24} color="white" />
                 <ThemedText style={styles.actionButtonText}>
                   My Tickets
@@ -210,7 +210,8 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={navigateToConcessions}>
+                onPress={navigateToConcessions}
+              >
                 <Ionicons name="fast-food-outline" size={24} color="white" />
                 <ThemedText style={styles.actionButtonText}>
                   Order Food
@@ -251,7 +252,8 @@ export default function HomeScreen() {
                         <TouchableOpacity
                           key={showtime.id}
                           style={styles.showtimeBox}
-                          onPress={() => handleSelectShowtime(showtime.id)}>
+                          onPress={() => handleSelectShowtime(showtime.id)}
+                        >
                           <ThemedText style={styles.showtimeText}>
                             {timeString}
                           </ThemedText>
@@ -267,7 +269,6 @@ export default function HomeScreen() {
       </>
     );
   } else if (user.role === "staff") {
-    // Staff home screen
     return (
       <ThemedView style={styles.container}>
         <View style={styles.staffHeader}>
@@ -286,7 +287,8 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => router.push("./orders")}>
+              onPress={() => router.push("./orders")}
+            >
               <ThemedText style={styles.actionButtonText}>View</ThemedText>
             </TouchableOpacity>
           </View>
@@ -301,7 +303,8 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => router.push("./attendance")}>
+              onPress={() => router.push("./attendance")}
+            >
               <ThemedText style={styles.actionButtonText}>View</ThemedText>
             </TouchableOpacity>
           </View>
@@ -312,7 +315,8 @@ export default function HomeScreen() {
             <View style={styles.quickActions}>
               <TouchableOpacity
                 style={styles.quickActionCard}
-                onPress={() => router.push("./scan")}>
+                onPress={() => router.push("./scan")}
+              >
                 <Ionicons name="qr-code" size={28} color="#0A7EA4" />
                 <ThemedText style={styles.quickActionText}>
                   Scan Tickets
@@ -321,7 +325,8 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.quickActionCard}
-                onPress={() => router.push("./delivery")}>
+                onPress={() => router.push("./delivery")}
+              >
                 <Ionicons name="navigate" size={28} color="#0A7EA4" />
                 <ThemedText style={styles.quickActionText}>
                   Deliver Orders
@@ -330,7 +335,8 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.quickActionCard}
-                onPress={() => router.push("./validate")}>
+                onPress={() => router.push("./validate")}
+              >
                 <Ionicons name="checkmark-circle" size={28} color="#0A7EA4" />
                 <ThemedText style={styles.quickActionText}>
                   Validate Tickets
@@ -388,7 +394,8 @@ export default function HomeScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.performanceList}>
+              contentContainerStyle={styles.performanceList}
+            >
               {movies.slice(0, 5).map((movie, index) => (
                 <View key={movie.id} style={styles.performanceCard}>
                   <ThemedText style={styles.movieTitle}>
@@ -409,7 +416,8 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => router.push("./schedule")}>
+              onPress={() => router.push("./schedule")}
+            >
               <Ionicons name="calendar" size={24} color="#C87000" />
               <View style={styles.actionTextContainer}>
                 <ThemedText style={styles.actionTitle}>
@@ -424,7 +432,8 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => router.push("./inventory")}>
+              onPress={() => router.push("./inventory")}
+            >
               <Ionicons name="fast-food" size={24} color="#C87000" />
               <View style={styles.actionTextContainer}>
                 <ThemedText style={styles.actionTitle}>
@@ -439,7 +448,8 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => router.push("./management")}>
+              onPress={() => router.push("./management")}
+            >
               <Ionicons name="people" size={24} color="#C87000" />
               <View style={styles.actionTextContainer}>
                 <ThemedText style={styles.actionTitle}>
@@ -464,7 +474,8 @@ export default function HomeScreen() {
         </ThemedText>
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => router.push("./role-selection")}>
+          onPress={() => router.push("./role-selection")}
+        >
           <ThemedText style={styles.loginButtonText}>
             Log In / Sign Up
           </ThemedText>

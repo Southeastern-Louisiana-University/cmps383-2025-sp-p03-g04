@@ -1,5 +1,5 @@
-import * as api from './api';
-import { Movie } from '@/components/MovieCarousel';
+import * as api from "./api";
+import { Movie } from "@/components/MovieCarousel";
 
 /**
  * Fetches all movies from the API

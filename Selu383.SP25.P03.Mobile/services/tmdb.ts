@@ -1,5 +1,4 @@
-// services/tmdb.ts - Modified version with explicit types for videos
-import * as api from './api';
+import * as api from "./api";
 
 export interface TmdbMovieDetails {
   id: number;
@@ -28,28 +27,32 @@ interface TmdbVideo {
 /**
  * Fetches detailed information about a movie from TMDB, including trailer URLs
  */
-export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
+export async function getMovieDetails(
+  tmdbId: number
+): Promise<TmdbMovieDetails> {
   try {
     // First get the basic movie details
     const movieDetails = await api.fetchTmdbMovieDetails(tmdbId);
-    
+
     // Then fetch videos to find a trailer
     const videos = await api.fetchTmdbMovieVideos(tmdbId);
-    
+
     // Look for an official trailer
     let trailerUrl;
     if (videos && videos.results) {
       // Try to find an official trailer first
       const trailer = videos.results.find(
-        (video: TmdbVideo) => video.type === 'Trailer' && video.site === 'YouTube' && video.official
+        (video: TmdbVideo) =>
+          video.type === "Trailer" && video.site === "YouTube" && video.official
       );
-      
+
       // If no official trailer, try any trailer
       if (!trailer) {
         const anyTrailer = videos.results.find(
-          (video: TmdbVideo) => video.type === 'Trailer' && video.site === 'YouTube'
+          (video: TmdbVideo) =>
+            video.type === "Trailer" && video.site === "YouTube"
         );
-        
+
         if (anyTrailer) {
           trailerUrl = `https://www.youtube.com/watch?v=${anyTrailer.key}`;
         }
@@ -57,13 +60,13 @@ export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails>
         trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
       }
     }
-    
+
     return {
       ...movieDetails,
-      trailerUrl
+      trailerUrl,
     };
   } catch (error) {
-    console.error('Failed to fetch TMDB movie details:', error);
+    console.error("Failed to fetch TMDB movie details:", error);
     throw error;
   }
 }
@@ -72,7 +75,10 @@ export async function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails>
  * Map genres from TMDB to a single string format
  */
 export function formatGenres(genres: { id: number; name: string }[]): string {
-  if (!genres || genres.length === 0) return 'N/A';
-  
-  return genres.slice(0, 2).map(g => g.name).join('/');
+  if (!genres || genres.length === 0) return "N/A";
+
+  return genres
+    .slice(0, 2)
+    .map((g) => g.name)
+    .join("/");
 }

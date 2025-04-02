@@ -118,7 +118,8 @@ const SeatSelection = () => {
                 <div
                   key={seat.id}
                   className={`seat ${seat.status}`}
-                  onClick={() => handleSeatClick(seat.id, rowId)}></div>
+                  onClick={() => handleSeatClick(seat.id, rowId)}
+                ></div>
               ))}
             </React.Fragment>
           ))}
@@ -137,13 +138,15 @@ const SeatSelection = () => {
           <div className="counter">
             <div
               className="counter-btn decrement"
-              onClick={() => handleTicketCountChange(false)}>
+              onClick={() => handleTicketCountChange(false)}
+            >
               -
             </div>
             <div className="counter-value">{ticketCount}</div>
             <div
               className="counter-btn increment"
-              onClick={() => handleTicketCountChange(true)}>
+              onClick={() => handleTicketCountChange(true)}
+            >
               +
             </div>
           </div>
@@ -169,7 +172,8 @@ const SeatSelection = () => {
       <button
         className="checkout-btn"
         onClick={handleCheckout}
-        disabled={selectedSeats.length === 0}>
+        disabled={selectedSeats.length === 0}
+      >
         Proceed to Payment
       </button>
     </div>

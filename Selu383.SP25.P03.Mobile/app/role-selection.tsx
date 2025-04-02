@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, View, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { ThemedView } from '../components/ThemedView';
-import { ThemedText } from '../components/ThemedText';
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
 
-type UserRole = 'customer' | 'staff' | 'manager';
+type UserRole = "customer" | "staff" | "manager";
 
 export default function RoleSelectionScreen() {
   const router = useRouter();
@@ -20,9 +20,9 @@ export default function RoleSelectionScreen() {
   const handleNext = async () => {
     if (selectedRole) {
       // Store the selected role
-      await AsyncStorage.setItem('selectedRole', selectedRole);
+      await AsyncStorage.setItem("selectedRole", selectedRole);
       // Navigate to login
-      router.push('/login');
+      router.push("/login");
     }
   };
 
@@ -31,27 +31,29 @@ export default function RoleSelectionScreen() {
       <View style={styles.logoContainer}>
         <ThemedText style={styles.title}>Lion's Den Cinemas</ThemedText>
         <ThemedText style={styles.subtitle}>Welcome</ThemedText>
-        <ThemedText style={styles.instruction}>Please select your role to continue</ThemedText>
+        <ThemedText style={styles.instruction}>
+          Please select your role to continue
+        </ThemedText>
       </View>
 
       <View style={styles.rolesContainer}>
         <TouchableOpacity
           style={[
             styles.roleButton,
-            selectedRole === 'customer' && styles.selectedRole
+            selectedRole === "customer" && styles.selectedRole,
           ]}
-          onPress={() => handleRoleSelect('customer')}
+          onPress={() => handleRoleSelect("customer")}
         >
           <Ionicons
             name="person"
             size={24}
-            color={selectedRole === 'customer' ? 'white' : '#B4D335'}
+            color={selectedRole === "customer" ? "white" : "#B4D335"}
           />
           <View style={styles.roleTextContainer}>
             <ThemedText
               style={[
                 styles.roleTitle,
-                selectedRole === 'customer' && styles.selectedRoleText
+                selectedRole === "customer" && styles.selectedRoleText,
               ]}
             >
               Customer
@@ -59,34 +61,34 @@ export default function RoleSelectionScreen() {
             <ThemedText
               style={[
                 styles.roleDescription,
-                selectedRole === 'customer' && styles.selectedRoleText
+                selectedRole === "customer" && styles.selectedRoleText,
               ]}
             >
               Book tickets & manage reservations
             </ThemedText>
           </View>
           <View style={styles.radioButton}>
-            {selectedRole === 'customer' && <View style={styles.radioInner} />}
+            {selectedRole === "customer" && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[
             styles.roleButton,
-            selectedRole === 'staff' && styles.selectedRole
+            selectedRole === "staff" && styles.selectedRole,
           ]}
-          onPress={() => handleRoleSelect('staff')}
+          onPress={() => handleRoleSelect("staff")}
         >
           <Ionicons
             name="ticket"
             size={24}
-            color={selectedRole === 'staff' ? 'white' : '#0A7EA4'}
+            color={selectedRole === "staff" ? "white" : "#0A7EA4"}
           />
           <View style={styles.roleTextContainer}>
             <ThemedText
               style={[
                 styles.roleTitle,
-                selectedRole === 'staff' && styles.selectedRoleText
+                selectedRole === "staff" && styles.selectedRoleText,
               ]}
             >
               Staff
@@ -94,34 +96,34 @@ export default function RoleSelectionScreen() {
             <ThemedText
               style={[
                 styles.roleDescription,
-                selectedRole === 'staff' && styles.selectedRoleText
+                selectedRole === "staff" && styles.selectedRoleText,
               ]}
             >
               Ticket validation & service
             </ThemedText>
           </View>
           <View style={styles.radioButton}>
-            {selectedRole === 'staff' && <View style={styles.radioInner} />}
+            {selectedRole === "staff" && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[
             styles.roleButton,
-            selectedRole === 'manager' && styles.selectedRole
+            selectedRole === "manager" && styles.selectedRole,
           ]}
-          onPress={() => handleRoleSelect('manager')}
+          onPress={() => handleRoleSelect("manager")}
         >
           <Ionicons
             name="analytics"
             size={24}
-            color={selectedRole === 'manager' ? 'white' : '#C87000'}
+            color={selectedRole === "manager" ? "white" : "#C87000"}
           />
           <View style={styles.roleTextContainer}>
             <ThemedText
               style={[
                 styles.roleTitle,
-                selectedRole === 'manager' && styles.selectedRoleText
+                selectedRole === "manager" && styles.selectedRoleText,
               ]}
             >
               Manager
@@ -129,14 +131,14 @@ export default function RoleSelectionScreen() {
             <ThemedText
               style={[
                 styles.roleDescription,
-                selectedRole === 'manager' && styles.selectedRoleText
+                selectedRole === "manager" && styles.selectedRoleText,
               ]}
             >
               Administration & analytics
             </ThemedText>
           </View>
           <View style={styles.radioButton}>
-            {selectedRole === 'manager' && <View style={styles.radioInner} />}
+            {selectedRole === "manager" && <View style={styles.radioInner} />}
           </View>
         </TouchableOpacity>
       </View>
@@ -159,48 +161,48 @@ export default function RoleSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: "#121212",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 40,
     paddingHorizontal: 24,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 40,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 20,
-    color: 'white',
+    color: "white",
     marginBottom: 16,
   },
   instruction: {
     fontSize: 16,
-    color: '#9BA1A6',
+    color: "#9BA1A6",
   },
   rolesContainer: {
-    width: '100%',
+    width: "100%",
     marginVertical: 32,
   },
   roleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
-    backgroundColor: '#1E2429',
+    backgroundColor: "#1E2429",
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: "#333333",
   },
   selectedRole: {
-    backgroundColor: '#B4D335',
-    borderColor: '#B4D335',
+    backgroundColor: "#B4D335",
+    borderColor: "#B4D335",
   },
   roleTextContainer: {
     flex: 1,
@@ -208,49 +210,49 @@ const styles = StyleSheet.create({
   },
   roleTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   roleDescription: {
     fontSize: 14,
-    color: '#9BA1A6',
+    color: "#9BA1A6",
   },
   selectedRoleText: {
-    color: 'white',
+    color: "white",
   },
   radioButton: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#B4D335',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#B4D335",
+    justifyContent: "center",
+    alignItems: "center",
   },
   radioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   nextButton: {
-    width: '100%',
-    backgroundColor: '#B4D335',
+    width: "100%",
+    backgroundColor: "#B4D335",
     paddingVertical: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   disabledButton: {
-    backgroundColor: '#4A4A4A',
+    backgroundColor: "#4A4A4A",
   },
   nextButtonText: {
-    color: '#242424',
+    color: "#242424",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   footer: {
     fontSize: 12,
-    color: '#9BA1A6',
+    color: "#9BA1A6",
   },
 });

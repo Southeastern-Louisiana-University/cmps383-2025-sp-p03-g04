@@ -1,5 +1,5 @@
-import * as api from './api';
-import { Theater } from '@/components/TheaterSelector';
+import * as api from "./api";
+import { Theater } from "@/components/TheaterSelector";
 
 /**
  * Fetches all theaters from the API

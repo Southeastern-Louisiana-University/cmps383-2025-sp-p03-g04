@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-import { ThemedView } from '../../components/ThemedView';
-import { ThemedText } from '../../components/ThemedText';
-import { useAuth } from '../../components/AuthProvider';
-import * as api from '../../services/api';
+import { ThemedView } from "../../components/ThemedView";
+import { ThemedText } from "../../components/ThemedText";
+import { useAuth } from "../../components/AuthProvider";
+import * as api from "../../services/api";
 
 export default function TicketsScreen() {
   const { user } = useAuth();
@@ -22,29 +29,29 @@ export default function TicketsScreen() {
   const fetchUserReservations = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       if (!user) {
-        throw new Error('User not logged in');
+        throw new Error("User not logged in");
       }
-      
+
       const userReservations = await api.getUserReservations(user.id);
       setReservations(userReservations);
     } catch (err) {
-      console.error('Failed to fetch reservations:', err);
-      setError('Unable to load your tickets. Please try again later.');
+      console.error("Failed to fetch reservations:", err);
+      setError("Unable to load your tickets. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
     return new Date(dateString).toLocaleString(undefined, options);
   };
@@ -55,26 +62,29 @@ export default function TicketsScreen() {
 
   const handleCancelReservation = async (reservationId: number) => {
     Alert.alert(
-      'Cancel Reservation',
-      'Are you sure you want to cancel this reservation?',
+      "Cancel Reservation",
+      "Are you sure you want to cancel this reservation?",
       [
-        { text: 'No', style: 'cancel' },
-        { 
-          text: 'Yes', 
-          style: 'destructive',
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes",
+          style: "destructive",
           onPress: async () => {
             try {
               await api.cancelReservation(reservationId);
               // Remove from list
-              setReservations(prevReservations => 
-                prevReservations.filter(r => r.id !== reservationId)
+              setReservations((prevReservations) =>
+                prevReservations.filter((r) => r.id !== reservationId)
               );
             } catch (err) {
-              console.error('Failed to cancel reservation:', err);
-              Alert.alert('Error', 'Failed to cancel your reservation. Please try again.');
+              console.error("Failed to cancel reservation:", err);
+              Alert.alert(
+                "Error",
+                "Failed to cancel your reservation. Please try again."
+              );
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -93,7 +103,7 @@ export default function TicketsScreen() {
       </ThemedText>
       <TouchableOpacity
         style={styles.browseButton}
-        onPress={() => router.push('/(tabs)/movies')}
+        onPress={() => router.push("/(tabs)/movies")}
       >
         <ThemedText style={styles.browseButtonText}>Browse Movies</ThemedText>
       </TouchableOpacity>
@@ -105,12 +115,14 @@ export default function TicketsScreen() {
     <View style={styles.ticketCard}>
       <View style={styles.ticketHeader}>
         <ThemedText style={styles.movieTitle}>{item.movieTitle}</ThemedText>
-        <View style={[
-          styles.statusBadge, 
-          item.isPaid ? styles.paidBadge : styles.unpaidBadge
-        ]}>
+        <View
+          style={[
+            styles.statusBadge,
+            item.isPaid ? styles.paidBadge : styles.unpaidBadge,
+          ]}
+        >
           <ThemedText style={styles.statusText}>
-            {item.isPaid ? 'Paid' : 'Unpaid'}
+            {item.isPaid ? "Paid" : "Unpaid"}
           </ThemedText>
         </View>
       </View>
@@ -133,14 +145,15 @@ export default function TicketsScreen() {
         <View style={styles.detailRow}>
           <Ionicons name="people-outline" size={16} color="#9BA1A6" />
           <ThemedText style={styles.detailText}>
-            {item.tickets.length} {item.tickets.length === 1 ? 'Ticket' : 'Tickets'}
+            {item.tickets.length}{" "}
+            {item.tickets.length === 1 ? "Ticket" : "Tickets"}
           </ThemedText>
         </View>
 
         <View style={styles.seatsRow}>
           <Ionicons name="grid-outline" size={16} color="#9BA1A6" />
           <ThemedText style={styles.detailText}>
-            Seats: {item.tickets.map(t => `${t.row}${t.number}`).join(', ')}
+            Seats: {item.tickets.map((t) => `${t.row}${t.number}`).join(", ")}
           </ThemedText>
         </View>
       </View>
@@ -149,25 +162,23 @@ export default function TicketsScreen() {
         <ThemedText style={styles.totalText}>
           Total: ${item.totalAmount.toFixed(2)}
         </ThemedText>
-        
+
         <View style={styles.buttonsRow}>
           {!item.isPaid && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => handleCancelReservation(item.id)}
             >
-              <ThemedText style={styles.cancelButtonText}>
-                Cancel
-              </ThemedText>
+              <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
             </TouchableOpacity>
           )}
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.viewButton}
             onPress={() => handleViewTicket(item.id)}
           >
             <ThemedText style={styles.viewButtonText}>
-              {item.isPaid ? 'View Ticket' : 'Complete Payment'}
+              {item.isPaid ? "View Ticket" : "Complete Payment"}
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -179,9 +190,9 @@ export default function TicketsScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'My Tickets',
+          title: "My Tickets",
           headerRight: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleRefresh}
               style={styles.refreshButton}
             >
@@ -195,7 +206,9 @@ export default function TicketsScreen() {
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#B4D335" />
-            <ThemedText style={styles.loadingText}>Loading your tickets...</ThemedText>
+            <ThemedText style={styles.loadingText}>
+              Loading your tickets...
+            </ThemedText>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
@@ -226,95 +239,95 @@ export default function TicketsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E2429',
+    backgroundColor: "#1E2429",
   },
   refreshButton: {
     marginRight: 15,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
-    color: '#9BA1A6',
+    color: "#9BA1A6",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   errorText: {
-    color: '#E74C3C',
-    textAlign: 'center',
+    color: "#E74C3C",
+    textAlign: "center",
     marginVertical: 10,
   },
   retryButton: {
-    backgroundColor: '#B4D335',
+    backgroundColor: "#B4D335",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     marginTop: 20,
   },
   retryButtonText: {
-    color: '#242424',
-    fontWeight: 'bold',
+    color: "#242424",
+    fontWeight: "bold",
   },
   listContainer: {
     padding: 16,
     paddingBottom: 40,
-    minHeight: '100%',
+    minHeight: "100%",
   },
   emptyStateContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 30,
   },
   emptyStateTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
-    color: 'white',
+    color: "white",
   },
   emptyStateText: {
     fontSize: 16,
-    textAlign: 'center',
-    color: '#9BA1A6',
+    textAlign: "center",
+    color: "#9BA1A6",
     marginBottom: 30,
   },
   browseButton: {
-    backgroundColor: '#B4D335',
+    backgroundColor: "#B4D335",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   browseButtonText: {
-    color: '#242424',
-    fontWeight: 'bold',
+    color: "#242424",
+    fontWeight: "bold",
     fontSize: 16,
   },
   ticketCard: {
-    backgroundColor: '#262D33',
+    backgroundColor: "#262D33",
     borderRadius: 12,
     marginBottom: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   ticketHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   movieTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     flex: 1,
   },
   statusBadge: {
@@ -324,70 +337,70 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   paidBadge: {
-    backgroundColor: 'rgba(76, 217, 100, 0.2)',
+    backgroundColor: "rgba(76, 217, 100, 0.2)",
   },
   unpaidBadge: {
-    backgroundColor: 'rgba(255, 204, 0, 0.2)',
+    backgroundColor: "rgba(255, 204, 0, 0.2)",
   },
   statusText: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   ticketDetails: {
     padding: 16,
   },
   detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   seatsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   detailText: {
     fontSize: 14,
-    color: '#9BA1A6',
+    color: "#9BA1A6",
     marginLeft: 8,
     flex: 1,
   },
   ticketFooter: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
   },
   totalText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 12,
   },
   buttonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   cancelButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E74C3C',
+    borderColor: "#E74C3C",
     marginRight: 10,
   },
   cancelButtonText: {
-    color: '#E74C3C',
-    fontWeight: '500',
+    color: "#E74C3C",
+    fontWeight: "500",
   },
   viewButton: {
     flex: 1,
-    backgroundColor: '#B4D335',
+    backgroundColor: "#B4D335",
     paddingVertical: 10,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   viewButtonText: {
-    color: '#242424',
-    fontWeight: 'bold',
+    color: "#242424",
+    fontWeight: "bold",
   },
 });

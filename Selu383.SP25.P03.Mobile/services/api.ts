@@ -1,4 +1,4 @@
-import { BASE_URL } from '@/constants/BaseUrl';
+import { BASE_URL } from "@/constants/BaseUrl";
 
 // Helper function to handle fetch requests
 async function fetchWithCredentials<T>(
@@ -9,25 +9,26 @@ async function fetchWithCredentials<T>(
     const url = `${BASE_URL}${endpoint}`;
     const response = await fetch(url, {
       ...options,
-      credentials: 'include', // Always include credentials for cookies
+      credentials: "include", // Always include credentials for cookies
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`
+      );
     }
 
-    return await response.json() as T;
+    return (await response.json()) as T;
   } catch (error) {
-    console.error('API request error:', error);
+    console.error("API request error:", error);
     throw error;
   }
 }
 
-// Movie types and functions
 export interface Movie {
   id: number;
   title: string;
@@ -40,14 +41,13 @@ export interface Movie {
 }
 
 export const getMovies = (): Promise<Movie[]> => {
-  return fetchWithCredentials<Movie[]>('/api/movies');
+  return fetchWithCredentials<Movie[]>("/api/movies");
 };
 
 export const getMovie = (id: number): Promise<Movie> => {
   return fetchWithCredentials<Movie>(`/api/movies/${id}`);
 };
 
-// Theater types and functions
 export interface Theater {
   id: number;
   name: string;
@@ -57,14 +57,13 @@ export interface Theater {
 }
 
 export const getTheaters = (): Promise<Theater[]> => {
-  return fetchWithCredentials<Theater[]>('/api/theaters');
+  return fetchWithCredentials<Theater[]>("/api/theaters");
 };
 
 export const getTheater = (id: number): Promise<Theater> => {
   return fetchWithCredentials<Theater>(`/api/theaters/${id}`);
 };
 
-// Showtime types and functions
 export interface Showtime {
   id: number;
   startTime: string;
@@ -78,17 +77,19 @@ export interface Showtime {
 }
 
 export const getShowtimes = (): Promise<Showtime[]> => {
-  return fetchWithCredentials<Showtime[]>('/api/showtimes');
+  return fetchWithCredentials<Showtime[]>("/api/showtimes");
 };
 
 export const getShowtimesByMovie = (movieId: number): Promise<Showtime[]> => {
   return fetchWithCredentials<Showtime[]>(`/api/showtimes/movie/${movieId}`);
 };
 
-export const getShowtimesByTheater = (theaterId: number): Promise<Showtime[]> => {
+export const getShowtimesByTheater = (
+  theaterId: number
+): Promise<Showtime[]> => {
   // Filter showtimes by theater ID
-  return getShowtimes().then(showtimes => 
-    showtimes.filter(showtime => showtime.theaterId === theaterId)
+  return getShowtimes().then((showtimes) =>
+    showtimes.filter((showtime) => showtime.theaterId === theaterId)
   );
 };
 
@@ -96,13 +97,12 @@ export const getShowtime = (id: number): Promise<Showtime> => {
   return fetchWithCredentials<Showtime>(`/api/showtimes/${id}`);
 };
 
-// Seat types and functions
 export interface SeatDto {
   id: number;
   row: string;
   number: number;
   screenId: number;
-  status: 'Available' | 'Selected' | 'Taken';
+  status: "Available" | "Selected" | "Taken";
 }
 
 export interface SeatingLayout {
@@ -116,19 +116,21 @@ export interface SeatingLayout {
   rows: Record<string, SeatDto[]>;
 }
 
-export const getSeatsForShowtime = (showtimeId: number, userId?: number): Promise<SeatingLayout> => {
-  const url = userId 
-    ? `/api/seats/showtime/${showtimeId}?userId=${userId}` 
+export const getSeatsForShowtime = (
+  showtimeId: number,
+  userId?: number
+): Promise<SeatingLayout> => {
+  const url = userId
+    ? `/api/seats/showtime/${showtimeId}?userId=${userId}`
     : `/api/seats/showtime/${showtimeId}`;
-  
+
   return fetchWithCredentials<SeatingLayout>(url);
 };
 
-// Reservation types and functions
 export interface CreateTicketDto {
   seatId: number;
-  ticketType: string; // 'Adult', 'Child', 'Senior'
-  price?: number; // Optional as it will be calculated by the server
+  ticketType: string;
+  price?: number;
 }
 
 export interface CreateReservationRequest {
@@ -160,9 +162,11 @@ export interface ReservationDto {
   tickets: TicketDto[];
 }
 
-export const createReservation = (request: CreateReservationRequest): Promise<ReservationDto> => {
-  return fetchWithCredentials<ReservationDto>('/api/reservations', {
-    method: 'POST',
+export const createReservation = (
+  request: CreateReservationRequest
+): Promise<ReservationDto> => {
+  return fetchWithCredentials<ReservationDto>("/api/reservations", {
+    method: "POST",
     body: JSON.stringify(request),
   });
 };
@@ -171,19 +175,23 @@ export const getReservation = (id: number): Promise<ReservationDto> => {
   return fetchWithCredentials<ReservationDto>(`/api/reservations/${id}`);
 };
 
-export const getUserReservations = (userId: number): Promise<ReservationDto[]> => {
-  return fetchWithCredentials<ReservationDto[]>(`/api/reservations/user/${userId}`);
+export const getUserReservations = (
+  userId: number
+): Promise<ReservationDto[]> => {
+  return fetchWithCredentials<ReservationDto[]>(
+    `/api/reservations/user/${userId}`
+  );
 };
 
 export const payForReservation = (id: number): Promise<ReservationDto> => {
   return fetchWithCredentials<ReservationDto>(`/api/reservations/${id}/pay`, {
-    method: 'PUT',
+    method: "PUT",
   });
 };
 
 export const cancelReservation = (id: number): Promise<void> => {
   return fetchWithCredentials<void>(`/api/reservations/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 };
 
@@ -211,7 +219,7 @@ export interface FoodOrderItem {
 }
 
 export interface FoodOrder {
-  deliveryType: 'Pickup' | 'ToSeat';
+  deliveryType: "Pickup" | "ToSeat";
   reservationId?: number;
   orderItems: FoodOrderItem[];
 }
@@ -238,26 +246,30 @@ export interface FoodOrderDto {
 }
 
 export const getFoodCategories = (): Promise<FoodCategory[]> => {
-  return fetchWithCredentials<FoodCategory[]>('/api/food-categories');
+  return fetchWithCredentials<FoodCategory[]>("/api/food-categories");
 };
 
-export const getFoodItemsByCategory = (categoryId: number): Promise<FoodItem[]> => {
-  return fetchWithCredentials<FoodItem[]>(`/api/food-items/category/${categoryId}`);
+export const getFoodItemsByCategory = (
+  categoryId: number
+): Promise<FoodItem[]> => {
+  return fetchWithCredentials<FoodItem[]>(
+    `/api/food-items/category/${categoryId}`
+  );
 };
 
 export const getAllFoodItems = (): Promise<FoodItem[]> => {
-  return fetchWithCredentials<FoodItem[]>('/api/food-items');
+  return fetchWithCredentials<FoodItem[]>("/api/food-items");
 };
 
 export const createFoodOrder = (order: FoodOrder): Promise<FoodOrderDto> => {
-  return fetchWithCredentials<FoodOrderDto>('/api/food-orders', {
-    method: 'POST',
+  return fetchWithCredentials<FoodOrderDto>("/api/food-orders", {
+    method: "POST",
     body: JSON.stringify(order),
   });
 };
 
 export const getUserFoodOrders = (): Promise<FoodOrderDto[]> => {
-  return fetchWithCredentials<FoodOrderDto[]>('/api/food-orders/my-orders');
+  return fetchWithCredentials<FoodOrderDto[]>("/api/food-orders/my-orders");
 };
 
 export const getFoodOrder = (id: number): Promise<FoodOrderDto> => {
@@ -266,6 +278,14 @@ export const getFoodOrder = (id: number): Promise<FoodOrderDto> => {
 
 export const cancelFoodOrder = (id: number): Promise<void> => {
   return fetchWithCredentials<void>(`/api/food-orders/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 };
+export function fetchTmdbMovieDetails(tmdbId: number) {
+  throw new Error("Function not implemented.");
+}
+
+export function fetchTmdbMovieVideos(tmdbId: number) {
+  throw new Error('Function not implemented.');
+}
+

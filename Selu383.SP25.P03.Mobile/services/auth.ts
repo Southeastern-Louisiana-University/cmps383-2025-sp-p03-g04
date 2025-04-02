@@ -1,5 +1,5 @@
-import { BASE_URL } from '@/constants/BaseUrl';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from "@/constants/BaseUrl";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface User {
   id: number;
@@ -22,14 +22,17 @@ export interface RegisterRequest {
 /**
  * Attempt to log in with the provided credentials
  */
-export const login = async (userName: string, password: string): Promise<User> => {
+export const login = async (
+  userName: string,
+  password: string
+): Promise<User> => {
   try {
     const response = await fetch(`${BASE_URL}/api/authentication/login`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      credentials: 'include', // Important for cookies
+      credentials: "include", // Important for cookies
       body: JSON.stringify({
         userName,
         password,
@@ -42,7 +45,7 @@ export const login = async (userName: string, password: string): Promise<User> =
 
     return await response.json();
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     throw error;
   }
 };
@@ -53,16 +56,15 @@ export const login = async (userName: string, password: string): Promise<User> =
 export const register = async (data: RegisterRequest): Promise<User> => {
   try {
     const response = await fetch(`${BASE_URL}/api/users`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      credentials: 'include', // Important for cookies
+      credentials: "include", // Important for cookies
       body: JSON.stringify({
         Username: data.username,
         Password: data.password,
         Roles: data.roles,
-        // Note: Current API doesn't accept email, so we're not including it
       }),
     });
 
@@ -72,7 +74,7 @@ export const register = async (data: RegisterRequest): Promise<User> => {
 
     return await response.json();
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     throw error;
   }
 };
@@ -83,8 +85,8 @@ export const register = async (data: RegisterRequest): Promise<User> => {
 export const getCurrentUser = async (): Promise<User> => {
   try {
     const response = await fetch(`${BASE_URL}/api/authentication/me`, {
-      method: 'GET',
-      credentials: 'include', // Important for cookies
+      method: "GET",
+      credentials: "include", // Important for cookies
     });
 
     if (!response.ok) {
@@ -93,7 +95,7 @@ export const getCurrentUser = async (): Promise<User> => {
 
     return await response.json();
   } catch (error) {
-    console.error('Get current user error:', error);
+    console.error("Get current user error:", error);
     throw error;
   }
 };
@@ -105,15 +107,15 @@ export const logout = async (): Promise<void> => {
   try {
     // Call the logout endpoint
     const response = await fetch(`${BASE_URL}/api/authentication/logout`, {
-      method: 'POST',
-      credentials: 'include', // Important for cookies
+      method: "POST",
+      credentials: "include", // Important for cookies
     });
 
     if (!response.ok) {
       console.warn(`Logout API call failed with status: ${response.status}`);
     }
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     throw error;
   }
 };

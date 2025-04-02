@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ColorSchemeName } from './useColorScheme';
+import { useEffect, useState } from "react";
+import { ColorSchemeName } from "./useColorScheme";
 
 /**
  * Web-specific implementation of useColorScheme.
@@ -7,7 +7,7 @@ import { ColorSchemeName } from './useColorScheme';
  * We use a hydration check to ensure consistent rendering between server and client.
  */
 export function useColorScheme(): ColorSchemeName {
-  const [colorScheme, setColorScheme] = useState<ColorSchemeName>('light');
+  const [colorScheme, setColorScheme] = useState<ColorSchemeName>("light");
   const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
@@ -15,27 +15,27 @@ export function useColorScheme(): ColorSchemeName {
     setHasHydrated(true);
 
     // Check if user prefers dark mode
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
     // Set initial value
-    setColorScheme(mediaQuery.matches ? 'dark' : 'light');
-    
+    setColorScheme(mediaQuery.matches ? "dark" : "light");
+
     // Listen for changes
     const listener = (event: MediaQueryListEvent) => {
-      setColorScheme(event.matches ? 'dark' : 'light');
+      setColorScheme(event.matches ? "dark" : "light");
     };
-    
-    mediaQuery.addEventListener('change', listener);
-    
+
+    mediaQuery.addEventListener("change", listener);
+
     // Clean up
     return () => {
-      mediaQuery.removeEventListener('change', listener);
+      mediaQuery.removeEventListener("change", listener);
     };
   }, []);
 
   // During server rendering or first client render, return a default
   if (!hasHydrated) {
-    return 'light';
+    return "light";
   }
 
   return colorScheme;
