@@ -1,7 +1,7 @@
-import { useColorScheme as useNativeColorScheme } from 'react-native';
+import { useColorScheme as useNativeColorScheme } from "react-native";
 
 // Type for possible color schemes
-export type ColorSchemeName = 'light' | 'dark' | null;
+export type ColorSchemeName = "light" | "dark" | null;
 
 /**
  * This hook returns the user's preferred color scheme,

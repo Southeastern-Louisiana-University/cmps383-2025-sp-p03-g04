@@ -1,19 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-/**
- * Development utility functions
- * IMPORTANT: Never use these in production!
- */
-
-/**
- * Clears all AsyncStorage data - useful for development to reset authentication state
- */
 export const clearAllStorage = async (): Promise<void> => {
   try {
     await AsyncStorage.clear();
-    console.log('AsyncStorage cleared successfully');
+    console.log("AsyncStorage cleared successfully");
   } catch (error) {
-    console.error('Failed to clear AsyncStorage:', error);
+    console.error("Failed to clear AsyncStorage:", error);
   }
 };
 
@@ -22,10 +14,10 @@ export const clearAllStorage = async (): Promise<void> => {
  */
 export const clearAuthStorage = async (): Promise<void> => {
   try {
-    await AsyncStorage.multiRemove(['userId', 'username', 'userRole']);
-    console.log('Auth storage cleared successfully');
+    await AsyncStorage.multiRemove(["userId", "username", "userRole"]);
+    console.log("Auth storage cleared successfully");
   } catch (error) {
-    console.error('Failed to clear auth storage:', error);
+    console.error("Failed to clear auth storage:", error);
   }
 };
 
@@ -35,14 +27,14 @@ export const clearAuthStorage = async (): Promise<void> => {
 export const logStorageKeys = async (): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    console.log('Current AsyncStorage keys:', keys);
-    
+    console.log("Current AsyncStorage keys:", keys);
+
     // Log values for each key
     for (const key of keys) {
       const value = await AsyncStorage.getItem(key);
       console.log(`${key}: ${value}`);
     }
   } catch (error) {
-    console.error('Failed to log storage keys:', error);
+    console.error("Failed to log storage keys:", error);
   }
 };
