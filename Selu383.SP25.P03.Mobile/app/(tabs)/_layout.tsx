@@ -1,22 +1,22 @@
-import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../components/AuthProvider';
+import { Tabs } from "expo-router";
+import { useColorScheme } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../components/AuthProvider";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user } = useAuth();
-  
+
   // Set color scheme based on user's preference
-  const isDark = colorScheme === 'dark';
-  
+  const isDark = colorScheme === "dark";
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#B4D335', // Lion's Den green
-        tabBarInactiveTintColor: '#9BA1A6',
+        tabBarActiveTintColor: "#B4D335",
+        tabBarInactiveTintColor: "#9BA1A6",
         tabBarStyle: {
-          backgroundColor: '#1E2429',
+          backgroundColor: "#1E2429",
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -27,11 +27,11 @@ export default function TabLayout() {
           fontSize: 12,
         },
         headerStyle: {
-          backgroundColor: '#B4D335', // Lion's Den green
+          backgroundColor: "#B4D335", // Lion's Den green
         },
         headerTitleStyle: {
-          fontWeight: 'bold',
-          color: '#242424',
+          fontWeight: "bold",
+          color: "#242424",
         },
       }}
     >
@@ -46,9 +46,9 @@ export default function TabLayout() {
           ),
         }}
       />
-      
+
       {/* Customer-specific tabs */}
-      {user?.role === 'customer' && (
+      {user?.role === "customer" && (
         <>
           <Tabs.Screen
             name="movies"
@@ -60,7 +60,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="tickets"
             options={{
@@ -71,7 +71,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="concessions"
             options={{
@@ -84,9 +84,9 @@ export default function TabLayout() {
           />
         </>
       )}
-      
+
       {/* Staff-specific tabs */}
-      {user?.role === 'staff' && (
+      {user?.role === "staff" && (
         <>
           <Tabs.Screen
             name="orders"
@@ -98,7 +98,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="delivery"
             options={{
@@ -109,7 +109,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="scan"
             options={{
@@ -122,9 +122,9 @@ export default function TabLayout() {
           />
         </>
       )}
-      
+
       {/* Manager-specific tabs */}
-      {user?.role === 'manager' && (
+      {user?.role === "manager" && (
         <>
           <Tabs.Screen
             name="dashboard"
@@ -136,7 +136,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="schedule"
             options={{
@@ -147,7 +147,7 @@ export default function TabLayout() {
               ),
             }}
           />
-          
+
           <Tabs.Screen
             name="management"
             options={{
@@ -160,7 +160,7 @@ export default function TabLayout() {
           />
         </>
       )}
-      
+
       {/* Profile tab - visible to all users */}
       <Tabs.Screen
         name="profile"

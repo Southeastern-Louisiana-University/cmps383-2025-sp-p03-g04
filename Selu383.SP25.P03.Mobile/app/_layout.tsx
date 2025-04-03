@@ -1,6 +1,6 @@
-import React from 'react';
-import { Stack } from 'expo-router';
-import { AuthProvider } from '../components/AuthProvider';
+import React from "react";
+import { Stack } from "expo-router";
+import { AuthProvider } from "../components/AuthProvider";
 
 export default function RootLayout() {
   return (
@@ -8,11 +8,11 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#B4D335',
+            backgroundColor: "#B4D335",
           },
-          headerTintColor: '#242424',
+          headerTintColor: "#242424",
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: "bold",
           },
         }}
       />

@@ -1,50 +1,46 @@
-import { Text, type TextProps } from 'react-native';
-import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/Colors';
-
-export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-  style?: any;
-};
+import { Text } from "react-native";
+import { useColorScheme } from "react-native";
+import { Colors } from "../styles/theme/colors";
+import { ThemedTextProps } from "../types/components/uiComponents";
 
 export function ThemedText({
   style,
-  type = 'default',
+  type = "default",
   ...rest
 }: ThemedTextProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  
+  const isDark = colorScheme === "dark";
+
   const color = isDark ? Colors.dark.text : Colors.light.text;
-  
+
   let typeStyle = {};
-  
+
   switch (type) {
-    case 'title':
+    case "title":
       typeStyle = {
         fontSize: 32,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         lineHeight: 32,
       };
       break;
-    case 'defaultSemiBold':
+    case "defaultSemiBold":
       typeStyle = {
         fontSize: 16,
         lineHeight: 24,
-        fontWeight: '600',
+        fontWeight: "600",
       };
       break;
-    case 'subtitle':
+    case "subtitle":
       typeStyle = {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontWeight: "bold",
       };
       break;
-    case 'link':
+    case "link":
       typeStyle = {
         lineHeight: 30,
         fontSize: 16,
-        color: '#0a7ea4',
+        color: "#0a7ea4",
       };
       break;
     default:
@@ -54,14 +50,5 @@ export function ThemedText({
       };
   }
 
-  return (
-    <Text
-      style={[
-        { color },
-        typeStyle,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+  return <Text style={[{ color }, typeStyle, style]} {...rest} />;
 }
