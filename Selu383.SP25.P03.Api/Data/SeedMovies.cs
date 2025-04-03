@@ -23,7 +23,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 20),
                             TmdbId = 447273
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "A Working Man")){
                     context.Movies.Add(
@@ -36,7 +36,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 1197306
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Woman In the Yard")){
                     context.Movies.Add(
@@ -49,7 +49,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 1244944
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Chosen: Last Supper Part 1")){
                     context.Movies.Add(
@@ -62,7 +62,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 1380393
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Death of a Unicorn")){
                     context.Movies.Add(
@@ -75,7 +75,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 1153714
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Captain America: Brave New World")){
                     context.Movies.Add(
@@ -88,7 +88,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 13),
                             TmdbId = 822119
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Novocaine")){
                     context.Movies.Add(
@@ -101,7 +101,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 13),
                             TmdbId = 1195506
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Alto Knights")){
                     context.Movies.Add(
@@ -114,7 +114,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 20),
                             TmdbId = 1013601
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Black Bag")){
                     context.Movies.Add(
@@ -127,7 +127,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 13),
                             TmdbId = 1233575
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Penguin Lessons")){
                     context.Movies.Add(
@@ -140,7 +140,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1086497
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Mickey 17")){
                     context.Movies.Add(
