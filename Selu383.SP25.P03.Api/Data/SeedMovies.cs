@@ -153,7 +153,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 6),
                             TmdbId = 696506
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Dog Man")){
                     context.Movies.Add(
@@ -166,7 +166,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 1, 30),
                             TmdbId = 774370
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Day The Earth Blew Up: A Looney Tunes Movie")){
                     context.Movies.Add(
@@ -179,7 +179,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 13),
                             TmdbId = 870360
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Locked")){
                     context.Movies.Add(
@@ -192,7 +192,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 21),
                             TmdbId = 1083968
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "One of Them Days: Laugh Along")){
                     context.Movies.Add(
@@ -205,7 +205,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1280672
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Monkey")){
                     context.Movies.Add(
@@ -218,7 +218,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 20),
                             TmdbId = 1124620
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Wild Robot")){
                     context.Movies.Add(
@@ -231,7 +231,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2024, 9, 26),
                             TmdbId = 1184918
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Last Supper")){
                     context.Movies.Add(
@@ -244,7 +244,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 13),
                             TmdbId = 1380415
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Audrey's Children")){
                     context.Movies.Add(
@@ -257,7 +257,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1003083
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Paddington in Peru")){
                     context.Movies.Add(
@@ -270,7 +270,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 13),
                             TmdbId = 516729
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Mad Square")){
                     context.Movies.Add(
@@ -283,7 +283,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1003083
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Sikandar")){
                     context.Movies.Add(
@@ -296,7 +296,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 29),
                             TmdbId = 607139
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Last Breath")){
                     context.Movies.Add(
@@ -309,7 +309,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 27),
                             TmdbId = 972533
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Magazine Dreams")){
                     context.Movies.Add(
@@ -322,7 +322,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 21),
                             TmdbId = 784524
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Mufasa: The Lion King")){
                     context.Movies.Add(
@@ -335,7 +335,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2024, 12, 20),
                             TmdbId = 762509
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Bob Trevino Likes It")){
                     context.Movies.Add(
@@ -361,7 +361,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 627336
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Imagine Dragons: Live from the Hollywood Bowl")){
                     context.Movies.Add(
@@ -374,7 +374,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 26),
                             TmdbId = 1429460
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Veera Dheera Sooran: Part 2")){
                     context.Movies.Add(
@@ -387,7 +387,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 27),
                             TmdbId = 1198208
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Robinhood")){
                     context.Movies.Add(
@@ -400,7 +400,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1120762
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "The Unbreakable Boy")){
                     context.Movies.Add(
@@ -413,7 +413,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 20),
                             TmdbId = 765897
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Day of Reckoning")){
                     context.Movies.Add(
@@ -426,7 +426,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1120763
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "October 8")){
                     context.Movies.Add(
@@ -439,7 +439,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 14),
                             TmdbId = 1120764
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Princess Mononoke: 4k IMAX Exclusive")){
                     context.Movies.Add(
@@ -452,7 +452,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 26),
                             TmdbId = 1120765
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title =="One of Them Days")){
                     context.Movies.Add(
@@ -465,7 +465,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 1, 16),
                             TmdbId = 1280672
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Court: State VS a Nobody")){
                     context.Movies.Add(
@@ -478,7 +478,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 14),
                             TmdbId = 1424217
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Ash")){
                     context.Movies.Add(
@@ -491,7 +491,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 21),
                             TmdbId = 931349
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "A Complete Unknown")){
                     context.Movies.Add(
@@ -504,7 +504,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2024, 12, 25),
                             TmdbId = 661539
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Wicked")){
                     context.Movies.Add(
@@ -517,7 +517,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2024, 11, 21),
                             TmdbId = 402431
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Becoming Led Zeppelin")){
                     context.Movies.Add(
@@ -530,7 +530,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 2, 7),
                             TmdbId = 857800
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "Top Gun")){
                     context.Movies.Add(
@@ -543,7 +543,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 16),
                             TmdbId = 744
                         }
-                    )
+                    );
                 }
 
                 context.SaveChanges();
