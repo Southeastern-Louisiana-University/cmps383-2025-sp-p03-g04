@@ -348,7 +348,7 @@ namespace Selu383.SP25.P03.Api.Data
                             ReleaseDate = new DateTime(2025, 3, 28),
                             TmdbId = 1169789
                         }
-                    )
+                    );
                 }
                 else if(!context.Movies.Any(x => x.Title == "L2: Empuraan")){
                     context.Movies.Add(
