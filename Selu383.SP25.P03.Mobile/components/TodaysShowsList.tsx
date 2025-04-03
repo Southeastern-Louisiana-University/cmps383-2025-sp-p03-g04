@@ -2,18 +2,9 @@ import React from "react";
 import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
-
-export interface Showtime {
-  id: number;
-  startTime: string;
-  movieId: number;
-  movieTitle: string;
-  screenId: number;
-  screenName: string;
-  theaterId: number;
-  theaterName: string;
-  ticketPrice: number;
-}
+import { Showtime } from "../types/models/movie";
+import { ShowtimeListProps } from "../types/components/movieComponents";
+import { todaysShowsListStyles as styles } from "../styles/components/todaysShowList";
 
 interface TodaysShowsListProps {
   showtimes: Showtime[];
@@ -86,45 +77,3 @@ export function TodaysShowsList({
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 10,
-    paddingBottom: 10,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 16,
-    marginBottom: 12,
-  },
-  movieSection: {
-    marginBottom: 16,
-    paddingHorizontal: 16,
-  },
-  movieTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  theaterName: {
-    fontSize: 14,
-    opacity: 0.8,
-    marginBottom: 10,
-  },
-  showtimesList: {
-    marginTop: 8,
-  },
-  showtimeButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 6,
-    backgroundColor: "#0a7ea4",
-    marginRight: 10,
-  },
-  showtimeText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-});

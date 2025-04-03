@@ -1,18 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as authService from "../services/auth";
-
-// Define the auth context type
-export interface AuthContextType {
-  user: {
-    id: number;
-    username: string;
-    role: string;
-  } | null;
-  isLoading: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
+import * as authService from "../services/auth/authService";
+import { AuthContextType } from "../types/components/uiComponents";
+import { User, UserRole } from "../types/models/user";
+import { UserResponse } from "../types/api/auth";
 
 // Create the context
 const AuthContext = createContext<AuthContextType>({
@@ -50,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 : "customer",
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error loading user:", error);
         // Clear any partial data in case of error
         await AsyncStorage.multiRemove(["userId", "username", "userRole"]);
@@ -85,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         username: response.userName,
         role: appRole,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign in error:", error);
       throw error;
     }
@@ -99,11 +90,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
 
       // Then attempt the API call, but don't wait for it to complete before updating the UI
-      authService.logout().catch((error) => {
+      authService.logout().catch((error: any) => {
         console.error("API logout error (ignored):", error);
         // We already cleared local storage above, so we can ignore this error
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign out error:", error);
       // Make sure we're logged out locally even if there's an error
       setUser(null);

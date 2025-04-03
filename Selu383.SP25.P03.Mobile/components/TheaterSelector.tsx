@@ -1,19 +1,10 @@
 import React from "react";
-import { StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
-
-export interface Theater {
-  id: number;
-  name: string;
-  address: string;
-}
-
-interface TheaterSelectorProps {
-  theaters: Theater[];
-  selectedTheater: Theater | null;
-  onSelectTheater: (theater: Theater) => void;
-}
+import { Theater } from "../types/models/theater";
+import { TheaterSelectorProps } from "../types/components/theaterComponents";
+import { theaterSelectorStyles as styles } from "../styles/components/theaterSelector";
 
 export function TheaterSelector({
   theaters,
@@ -60,42 +51,3 @@ export function TheaterSelector({
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 10,
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 16,
-    marginBottom: 12,
-  },
-  list: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  theaterItem: {
-    padding: 12,
-    marginHorizontal: 6,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-    minWidth: 160,
-    maxWidth: 200,
-  },
-  selectedTheaterItem: {
-    backgroundColor: "#0a7ea4",
-  },
-  theaterName: {
-    fontWeight: "600",
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  theaterAddress: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  selectedTheaterText: {
-    color: "white",
-  },
-});
