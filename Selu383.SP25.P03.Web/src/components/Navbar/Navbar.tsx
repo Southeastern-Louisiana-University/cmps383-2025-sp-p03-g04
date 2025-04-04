@@ -46,13 +46,12 @@ const Navbar: React.FC = () => {
       <div className="primary-menu">
         <NavLink to="/" end>Home</NavLink>
         <NavLink to="/movies">Movies</NavLink>
-        <NavLink to="/coming-soon">Coming Soon</NavLink>
+        <NavLink to="/managerdashboard">Manager Dashboard</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
         <NavLink to="/theaters">Theaters</NavLink>
       </div>
       
       <div className="navbar-right">
-        <button className="theater-mode">THEATER MODE</button>
         <button className="sign-in">SIGN IN</button>
         
         <button 
