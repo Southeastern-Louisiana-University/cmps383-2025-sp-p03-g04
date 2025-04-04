@@ -11,10 +11,14 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // Check if we already have food categories
+                // Always reseed to ensure latest data
                 if (context.FoodCategories.Any())
                 {
-                    return;   // DB has been seeded
+                    // Remove existing categories and items
+                    context.FoodOrderItems.RemoveRange(context.FoodOrderItems);
+                    context.FoodItems.RemoveRange(context.FoodItems);
+                    context.FoodCategories.RemoveRange(context.FoodCategories);
+                    context.SaveChanges();
                 }
 
                 // Create categories
@@ -40,7 +44,7 @@ namespace Selu383.SP25.P03.Api.Data
 
                 context.SaveChanges();
 
-                // Add Chef's Starters items
+                // Seed food items with verified image URLs
                 context.FoodItems.AddRange(
                     new FoodItem { 
                         Name = "Chicken Tenders", 
@@ -520,7 +524,8 @@ context.FoodItems.AddRange(
     }
 );
 
-context.SaveChanges();
+
+                context.SaveChanges();
             }
         }
     }
