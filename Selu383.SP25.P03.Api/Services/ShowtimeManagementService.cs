@@ -21,13 +21,35 @@ namespace Selu383.SP25.P03.Api.Services
         
         public async Task GenerateShowtimesIfNoneExist()
         {
-            // Check if there are any showtimes in the database
-            var hasShowtimes = await _context.Showtimes.AnyAsync();
-            
-            if (!hasShowtimes)
+            try
             {
-                // If no showtimes exist, generate them
-                await GenerateShowtimesForNext48Hours();
+                // Check if there are any showtimes in the database
+                var hasShowtimes = await _context.Showtimes.AnyAsync();
+                
+                if (!hasShowtimes)
+                {
+                    // If no showtimes exist, generate them
+                    await GenerateShowtimesForNext48Hours();
+                }
+                else
+                {
+                    // Count how many future showtimes we have
+                    var now = DateTime.Now;
+                    var futureShowtimesCount = await _context.Showtimes
+                        .Where(s => s.StartTime > now)
+                        .CountAsync();
+                    
+                    // If we have fewer than 20 future showtimes, regenerate them
+                    if (futureShowtimesCount < 20)
+                    {
+                        await GenerateShowtimesForNext48Hours();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception - in a real app you'd use a proper logging mechanism
+                Console.WriteLine($"Error generating showtimes: {ex.Message}");
             }
         }
         
@@ -35,7 +57,7 @@ namespace Selu383.SP25.P03.Api.Services
         {
             // Get today's date and time
             var now = DateTime.Now;
-            var twoDateCutoff = now.AddDays(2);
+            var twoDaysCutoff = now.AddDays(2);
             
             // Get all movies
             var activeMovies = await _context.Movies.ToListAsync();
@@ -64,7 +86,7 @@ namespace Selu383.SP25.P03.Api.Services
             {
                 // Check if any tickets sold
                 var hasTickets = await _context.Reservations
-                    .AnyAsync(r => r.ShowtimeId == showtime.Id);
+                    .AnyAsync(r => r.ShowtimeId == showtime.Id && r.IsPaid);
                     
                 if (!hasTickets)
                 {
@@ -80,7 +102,7 @@ namespace Selu383.SP25.P03.Api.Services
             
             // Get all existing showtimes in the next 48 hours
             var existingShowtimes = await _context.Showtimes
-                .Where(s => s.StartTime >= now && s.StartTime <= twoDateCutoff)
+                .Where(s => s.StartTime >= now && s.StartTime <= twoDaysCutoff)
                 .ToListAsync();
                 
             // Generate new showtimes
@@ -104,38 +126,53 @@ namespace Selu383.SP25.P03.Api.Services
                 // For each screen
                 foreach (var screen in screens)
                 {
-                    // Assign a movie to this screen for today
-                    var movie = activeMovies[random.Next(activeMovies.Count)];
+                    // Assign 2-3 movies to this screen for today
+                    var moviesForScreen = activeMovies
+                        .OrderBy(x => random.Next())
+                        .Take(random.Next(2, 4))
+                        .ToList();
                     
-                    // For each time slot
-                    foreach (var slot in slots)
+                    // For each movie assigned to this screen
+                    foreach (var movie in moviesForScreen)
                     {
-                        var showtimeDateTime = date.Add(slot);
+                        // Pick 2-3 random time slots for this movie
+                        var slotsForMovie = slots
+                            .OrderBy(x => random.Next())
+                            .Take(random.Next(2, 4))
+                            .OrderBy(x => x)
+                            .ToList();
                         
-                        // Skip if in the past
-                        if (showtimeDateTime <= now)
-                            continue;
-                            
-                        // Skip if already exists
-                        if (existingShowtimes.Any(s => 
-                            s.ScreenId == screen.Id && 
-                            s.StartTime.Date == showtimeDateTime.Date &&
-                            Math.Abs((s.StartTime.TimeOfDay - showtimeDateTime.TimeOfDay).TotalMinutes) < 15))
-                            continue;
-                            
-                        // Calculate base price (you can add logic for premium times)
-                        decimal basePrice = 12.99m;
-                        if (slot >= new TimeSpan(17, 0, 0)) // After 5pm
-                            basePrice = 15.99m;
-                        
-                        // Add the showtime
-                        newShowtimes.Add(new Showtime
+                        // For each time slot
+                        foreach (var slot in slotsForMovie)
                         {
-                            MovieId = movie.Id,
-                            ScreenId = screen.Id,
-                            StartTime = showtimeDateTime,
-                            TicketPrice = basePrice
-                        });
+                            var showtimeDateTime = date.Add(slot);
+                            
+                            // Skip if in the past
+                            if (showtimeDateTime <= now)
+                                continue;
+                                
+                            // Skip if already exists
+                            if (existingShowtimes.Any(s => 
+                                s.ScreenId == screen.Id && 
+                                s.MovieId == movie.Id &&
+                                s.StartTime.Date == showtimeDateTime.Date &&
+                                Math.Abs((s.StartTime.TimeOfDay - showtimeDateTime.TimeOfDay).TotalMinutes) < 15))
+                                continue;
+                                
+                            // Calculate base price 
+                            decimal basePrice = 12.99m;
+                            if (slot >= new TimeSpan(17, 0, 0)) // After 5pm
+                                basePrice = 15.99m;
+                            
+                            // Add the showtime
+                            newShowtimes.Add(new Showtime
+                            {
+                                MovieId = movie.Id,
+                                ScreenId = screen.Id,
+                                StartTime = showtimeDateTime,
+                                TicketPrice = basePrice
+                            });
+                        }
                     }
                 }
             }
