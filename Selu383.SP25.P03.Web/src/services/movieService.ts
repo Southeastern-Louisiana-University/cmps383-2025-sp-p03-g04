@@ -44,6 +44,31 @@ export const getMovie = async (id: number): Promise<Movie> => {
 };
 
 /**
+ * Updates a movie by ID
+ */
+export const updateMovie = async (id: number, movieData: Partial<Movie>): Promise<Movie> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/movies/${id}`, {
+      method: 'PUT',
+      headers: {
+        ...DEFAULT_HEADERS,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(movieData)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to update movie: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`Error updating movie with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Fetches movie videos by ID (trailers)
  */
 export const getMovieVideos = async (id: number): Promise<any> => {
