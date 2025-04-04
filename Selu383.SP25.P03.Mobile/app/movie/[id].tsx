@@ -16,41 +16,51 @@ import { Movie } from "../../types/models/movie";
 import { ShowtimesByTheater } from "../../types/models/movie";
 import { movieDetailsStyles as styles } from "../../styles/screens/movieDetails";
 
-// Import from the new service structure
 import {
   getMovie,
   getShowtimesByMovie,
 } from "../../services/movies/movieService";
 import { getMovieDetails } from "../../services/movies/tmdbService";
 
+interface ShowtimesByDate {
+  date: string;
+  dateLabel: string;
+  theaters: ShowtimesByTheater[];
+}
+
 export default function MovieDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [showtimesByTheater, setShowtimesByTheater] = useState<
-    ShowtimesByTheater[]
-  >([]);
+  const [showtimesByDate, setShowtimesByDate] = useState<ShowtimesByDate[]>([]);
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [trailerLoading, setTrailerLoading] = useState(false);
 
   useEffect(() => {
-    const fetchMovieDetails = async () => {
+    const loadData = async () => {
       setIsLoading(true);
       try {
-        // Fetch basic movie details
+        // Fetch movie details
         const movieData = await getMovie(Number(id));
-
         setMovie(movieData);
 
         // Fetch showtimes for this movie
-        const allShowtimes = await getShowtimesByMovie(Number(id));
+        const showtimesData = await getShowtimesByMovie(Number(id));
 
-        // Group showtimes by theater
-        const theaterShowtimes: Record<number, ShowtimesByTheater> = {};
+        // Group by date and theater
+        const grouped: Record<string, Record<number, ShowtimesByTheater>> = {};
 
-        allShowtimes.forEach((showtime) => {
-          if (!theaterShowtimes[showtime.theaterId]) {
-            theaterShowtimes[showtime.theaterId] = {
+        showtimesData.forEach((showtime) => {
+          const dateStr = new Date(showtime.startTime)
+            .toISOString()
+            .split("T")[0];
+          if (!grouped[dateStr]) {
+            grouped[dateStr] = {};
+          }
+
+          if (!grouped[dateStr][showtime.theaterId]) {
+            grouped[dateStr][showtime.theaterId] = {
               theaterId: showtime.theaterId,
               theaterName: showtime.theaterName,
               distance: "2.5 miles", // Example
@@ -58,22 +68,49 @@ export default function MovieDetailsScreen() {
             };
           }
 
-          theaterShowtimes[showtime.theaterId].showtimes.push({
+          grouped[dateStr][showtime.theaterId].showtimes.push({
             id: showtime.id,
             startTime: showtime.startTime,
           });
         });
 
-        setShowtimesByTheater(Object.values(theaterShowtimes));
+        // Convert to array structure
+        const dates = Object.keys(grouped).sort();
+        const showtimesByDateArray = dates.map((date) => ({
+          date,
+          // Format the date for display (e.g., "Today", "Tomorrow", or "Wed, Apr 5")
+          dateLabel: getDateLabel(date),
+          theaters: Object.values(grouped[date]),
+        }));
+
+        setShowtimesByDate(showtimesByDateArray);
       } catch (error) {
-        console.error("Error fetching movie details:", error);
+        console.error("Error loading data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMovieDetails();
+    loadData();
   }, [id]);
+
+  const getDateLabel = (dateStr: string) => {
+    const today = new Date().toISOString().split("T")[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    if (dateStr === today) return "Today";
+    if (dateStr === tomorrowStr) return "Tomorrow";
+
+    // Format as "Mon, Apr 5"
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const handleWatchTrailer = async () => {
     if (!movie?.trailerUrl) {
@@ -202,61 +239,94 @@ export default function MovieDetailsScreen() {
         </View>
 
         <View style={styles.showtimesContainer}>
-          <ThemedText style={styles.sectionTitle}>Today's Showtimes</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Showtimes</ThemedText>
 
-          {showtimesByTheater.map((theaterShowtimes) => (
-            <View
-              key={theaterShowtimes.theaterId}
-              style={styles.theaterShowtimes}
-            >
-              <View style={styles.theaterHeader}>
-                <ThemedText style={styles.theaterName}>
-                  {theaterShowtimes.theaterName}
-                </ThemedText>
-                <ThemedText style={styles.distance}>
-                  {theaterShowtimes.distance}
-                </ThemedText>
-              </View>
-
-              <View style={styles.showtimesGrid}>
-                {theaterShowtimes.showtimes.map((showtime) => {
-                  const { time, period } = formatTime(showtime.startTime);
-
-                  return (
-                    <TouchableOpacity
-                      key={showtime.id}
-                      style={styles.showtimeItem}
-                      onPress={() => handleBookTickets(showtime.id)}
-                    >
-                      <ThemedText style={styles.showtimeTime}>
-                        {time}
-                      </ThemedText>
-                      <ThemedText style={styles.showtimePeriod}>
-                        {period}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+          {/* Date selector tabs */}
+          {showtimesByDate.length > 0 && (
+            <View style={styles.dateTabsContainer}>
+              {showtimesByDate.map((dateGroup, index) => (
+                <TouchableOpacity
+                  key={dateGroup.date}
+                  style={[
+                    styles.dateTab,
+                    selectedDateIndex === index && styles.selectedDateTab
+                  ]}
+                  onPress={() => setSelectedDateIndex(index)}
+                >
+                  <ThemedText style={[
+                    styles.dateTabText,
+                    selectedDateIndex === index && styles.selectedDateTabText
+                  ]}>
+                    {dateGroup.dateLabel}
+                  </ThemedText>
+                </TouchableOpacity>
+              ))}
             </View>
-          ))}
+          )}
+
+          {/* Show theaters and showtimes for selected date */}
+          {showtimesByDate.length > 0 && selectedDateIndex < showtimesByDate.length ? (
+            showtimesByDate[selectedDateIndex].theaters.map((theaterShowtimes) => (
+              <View
+                key={theaterShowtimes.theaterId}
+                style={styles.theaterShowtimes}
+              >
+                <View style={styles.theaterHeader}>
+                  <ThemedText style={styles.theaterName}>
+                    {theaterShowtimes.theaterName}
+                  </ThemedText>
+                  <ThemedText style={styles.distance}>
+                    {theaterShowtimes.distance}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.showtimesGrid}>
+                  {theaterShowtimes.showtimes.map((showtime) => {
+                    const { time, period } = formatTime(showtime.startTime);
+
+                    return (
+                      <TouchableOpacity
+                        key={showtime.id}
+                        style={styles.showtimeItem}
+                        onPress={() => handleBookTickets(showtime.id)}
+                      >
+                        <ThemedText style={styles.showtimeTime}>
+                          {time}
+                        </ThemedText>
+                        <ThemedText style={styles.showtimePeriod}>
+                          {period}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            ))
+          ) : (
+            <View style={styles.noShowtimesContainer}>
+              <Ionicons name="calendar-outline" size={40} color="#666" />
+              <ThemedText style={styles.noShowtimesText}>
+                No showtimes available for this movie
+              </ThemedText>
+            </View>
+          )}
         </View>
 
         {/* Book Tickets Button */}
-        <TouchableOpacity
-          style={styles.bookButton}
-          onPress={() => {
-            // Navigate to first showtime by default
-            if (
-              showtimesByTheater.length > 0 &&
-              showtimesByTheater[0].showtimes.length > 0
-            ) {
-              handleBookTickets(showtimesByTheater[0].showtimes[0].id);
-            }
-          }}
-        >
-          <ThemedText style={styles.bookButtonText}>Book Tickets</ThemedText>
-        </TouchableOpacity>
+        {showtimesByDate.length > 0 && 
+          selectedDateIndex < showtimesByDate.length && 
+          showtimesByDate[selectedDateIndex].theaters.length > 0 && 
+          showtimesByDate[selectedDateIndex].theaters[0].showtimes.length > 0 && (
+          <TouchableOpacity
+            style={styles.bookButton}
+            onPress={() => {
+              // Navigate to first showtime of selected date
+              handleBookTickets(showtimesByDate[selectedDateIndex].theaters[0].showtimes[0].id);
+            }}
+          >
+            <ThemedText style={styles.bookButtonText}>Book Tickets</ThemedText>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </>
   );

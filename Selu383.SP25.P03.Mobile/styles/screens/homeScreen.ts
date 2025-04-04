@@ -46,16 +46,22 @@ export const homeScreenStyles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: "#1E3A55",
+    backgroundColor: "#1E2429",
     padding: 16,
     borderRadius: 10,
     alignItems: "center",
     marginHorizontal: 5,
     flexDirection: "row",
     justifyContent: "center",
+
+    shadowColor: "#B4D335",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   actionButtonText: {
-    color: "white",
+    color: "#B4D335", // Brand green
     fontWeight: "bold",
     marginLeft: 8,
   },
@@ -69,11 +75,11 @@ export const homeScreenStyles = StyleSheet.create({
     backgroundColor: "#1E2429",
     borderRadius: 10,
     padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowColor: "#B4D335",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   movieTitle: {
     fontSize: 18,
@@ -91,7 +97,7 @@ export const homeScreenStyles = StyleSheet.create({
     marginTop: 10,
   },
   showtimeBox: {
-    backgroundColor: "#0a7ea4",
+    backgroundColor: "#1E2429",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -99,9 +105,14 @@ export const homeScreenStyles = StyleSheet.create({
     marginBottom: 10,
     minWidth: 80,
     alignItems: "center",
+    shadowColor: "#B4D335",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
   showtimeText: {
-    color: "white",
+    color: "#B4D335",
     fontWeight: "500",
   },
   loadingContainer: {
@@ -296,5 +307,40 @@ export const homeScreenStyles = StyleSheet.create({
   },
   chevron: {
     marginLeft: "auto",
+  },
+  dateTabs: {
+    flexDirection: "row",
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  dateTab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: "#262D33",
+  },
+  activeDateTab: {
+    backgroundColor: "#B4D335",
+  },
+  dateTabText: {
+    color: "white",
+    fontSize: 14,
+  },
+  activeDateTabText: {
+    color: "#242424",
+    fontWeight: "bold",
+  },
+  emptyStateContainer: {
+    alignItems: "center",
+    padding: 30,
+    backgroundColor: "#262D33",
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  emptyStateText: {
+    color: "#9BA1A6",
+    marginTop: 10,
+    textAlign: "center",
   },
 });

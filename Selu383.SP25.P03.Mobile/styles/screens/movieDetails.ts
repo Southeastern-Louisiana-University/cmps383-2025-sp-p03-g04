@@ -159,4 +159,39 @@ export const movieDetailsStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  dateTabsContainer: {
+    flexDirection: "row",
+    marginBottom: 15,
+    paddingHorizontal: 5,
+  },
+  dateTab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: "#444444",
+  },
+  selectedDateTab: {
+    backgroundColor: "#65a30d",
+  },
+  dateTabText: {
+    color: "white",
+    fontSize: 14,
+  },
+  selectedDateTabText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  noShowtimesContainer: {
+    alignItems: "center",
+    padding: 30,
+    backgroundColor: "#333333",
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  noShowtimesText: {
+    color: "#9BA1A6",
+    marginTop: 10,
+    textAlign: "center",
+  },
 });

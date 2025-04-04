@@ -1,8 +1,8 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import { Colors } from '../theme/colors';
-import { Spacing, BorderRadius } from '../theme/spacing';
+import { StyleSheet, Dimensions } from "react-native";
+import { Colors } from "../theme/colors";
+import { Spacing, BorderRadius } from "../theme/spacing";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width * 0.33;
 
 export const movieCarouselStyles = StyleSheet.create({
@@ -11,7 +11,7 @@ export const movieCarouselStyles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: Spacing.s,
     marginBottom: Spacing.s,
   },
@@ -22,15 +22,24 @@ export const movieCarouselStyles = StyleSheet.create({
     width: ITEM_WIDTH,
     marginRight: Spacing.m,
   },
+  posterContainer: {
+    // Add shadow/glow effect
+    shadowColor: "#B4D335", // Lion's Den green
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    elevation: 10, // For Android
+    borderRadius: BorderRadius.s,
+  },
   poster: {
-    width: '100%',
+    width: "100%",
     height: ITEM_WIDTH * 1.5,
     borderRadius: BorderRadius.s,
   },
   title: {
     marginTop: Spacing.xs,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   runtime: {
     fontSize: 12,
