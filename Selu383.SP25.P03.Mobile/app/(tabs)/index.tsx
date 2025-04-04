@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Properly typed state variables
+  // State variables
   const [movies, setMovies] = useState<Movie[]>([]);
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
@@ -34,8 +34,14 @@ export default function HomeScreen() {
   const [isTheaterDropdownVisible, setIsTheaterDropdownVisible] =
     useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<"today" | "tomorrow">(
+    "today"
+  );
+  const [showtimesByDate, setShowtimesByDate] = useState<
+    Record<string, Showtime[]>
+  >({});
 
-  // Load data on component mount
+  // Load data on mount
   useEffect(() => {
     loadData();
   }, []);
@@ -47,23 +53,64 @@ export default function HomeScreen() {
     }
   }, [user]);
 
-  // Filter showtimes based on selected theater
+  // Load theater showtimes when selected theater changes
   useEffect(() => {
-    if (selectedTheater) {
-      movieService
-        .getShowtimesByTheater(selectedTheater.id)
-        .then((data: Showtime[]) => setShowtimes(data));
-    } else if (theaters.length > 0) {
-      setSelectedTheater(theaters[0]);
-      movieService
-        .getShowtimesByTheater(theaters[0].id)
-        .then((data: Showtime[]) => setShowtimes(data));
-    } else {
-      movieService.getShowtimes().then((data: Showtime[]) => setShowtimes(data));
-    }
-  }, [selectedTheater, theaters]);
+    const fetchShowtimes = async () => {
+      try {
+        let theaterId = selectedTheater?.id;
+        if (!theaterId && theaters.length > 0) {
+          // If no theater is selected but we have theaters, use the first one
+          theaterId = theaters[0].id;
+          setSelectedTheater(theaters[0]);
+        }
 
-  // Load data function
+        if (theaterId) {
+          // Fetch showtimes for this theater
+          const allShowtimes = await movieService.getShowtimesByTheater(
+            theaterId
+          );
+
+          // Organize showtimes by date
+          const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+          // Create date buckets
+          const byDate: Record<string, Showtime[]> = {
+            [today]: [],
+            [tomorrowStr]: [],
+          };
+
+          // Fill the buckets
+          allShowtimes.forEach((showtime) => {
+            const showtimeDate = new Date(showtime.startTime)
+              .toISOString()
+              .split("T")[0];
+
+            if (showtimeDate === today) {
+              byDate[today].push(showtime);
+            } else if (showtimeDate === tomorrowStr) {
+              byDate[tomorrowStr].push(showtime);
+            }
+          });
+
+          setShowtimesByDate(byDate);
+
+          // Set showtimes based on selected date
+          setShowtimes(
+            selectedDate === "today" ? byDate[today] : byDate[tomorrowStr]
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching showtimes:", error);
+      }
+    };
+
+    fetchShowtimes();
+  }, [selectedTheater, theaters, selectedDate]);
+
+  // Load all data
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -84,7 +131,24 @@ export default function HomeScreen() {
     }
   };
 
-  // Handler functions with proper typing
+  // Handle date tab selection
+  const handleDateChange = (date: "today" | "tomorrow") => {
+    setSelectedDate(date);
+
+    // Update showtimes based on selected date
+    const today = new Date().toISOString().split("T")[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    if (date === "today") {
+      setShowtimes(showtimesByDate[today] || []);
+    } else {
+      setShowtimes(showtimesByDate[tomorrowStr] || []);
+    }
+  };
+
+  // Handler functions
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadData();
@@ -112,16 +176,18 @@ export default function HomeScreen() {
     router.push("./concessions");
   };
 
-  // Group showtimes by movie with proper typing
+  // Group showtimes by movie
   const groupedByMovie: Record<string, Showtime[]> = {};
 
-  showtimes.forEach((showtime) => {
-    const movieIdStr = String(showtime.movieId);
-    if (!groupedByMovie[movieIdStr]) {
-      groupedByMovie[movieIdStr] = [];
-    }
-    groupedByMovie[movieIdStr].push(showtime);
-  });
+  if (showtimes && showtimes.length > 0) {
+    showtimes.forEach((showtime) => {
+      const movieIdStr = String(showtime.movieId);
+      if (!groupedByMovie[movieIdStr]) {
+        groupedByMovie[movieIdStr] = [];
+      }
+      groupedByMovie[movieIdStr].push(showtime);
+    });
+  }
 
   // Loading state
   if (isLoading) {
@@ -148,7 +214,14 @@ export default function HomeScreen() {
       <>
         <Stack.Screen
           options={{
-            title: selectedTheater ? selectedTheater.name : "Theater",
+            title: selectedTheater ? selectedTheater.name : "Select Theater",
+            headerStyle: {
+              backgroundColor: "#1E2429",
+            },
+            headerTitleStyle: {
+              color: "#FFFFFF",
+              fontSize: 18,
+            },
             headerRight: () => (
               <TouchableOpacity
                 onPress={() =>
@@ -156,21 +229,21 @@ export default function HomeScreen() {
                 }
                 style={{ marginRight: 16 }}
               >
-                <Ionicons name="chevron-down" size={24} color="#242424" />
+                <Ionicons name="chevron-down" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             ),
           }}
         />
 
         {isTheaterDropdownVisible && (
-          <View style={styles.dropdown}>
+          <View style={[styles.dropdown, { backgroundColor: "#2A2A2A" }]}>
             {theaters.map((theater) => (
               <TouchableOpacity
                 key={theater.id}
                 style={styles.dropdownItem}
                 onPress={() => handleSelectTheater(theater)}
               >
-                <ThemedText style={styles.dropdownText}>
+                <ThemedText style={[styles.dropdownText, { color: "#FFFFFF" }]}>
                   {theater.name}
                 </ThemedText>
               </TouchableOpacity>
@@ -197,71 +270,124 @@ export default function HomeScreen() {
             {/* Action Buttons */}
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity
-                style={styles.actionButton}
+                style={[styles.actionButton, { backgroundColor: "#1E2429" }]}
                 onPress={navigateToTickets}
               >
-                <Ionicons name="ticket-outline" size={24} color="white" />
-                <ThemedText style={styles.actionButtonText}>
+                <Ionicons name="ticket-outline" size={24} color="#B4D335" />
+                <ThemedText
+                  style={[styles.actionButtonText, { color: "#B4D335" }]}
+                >
                   My Tickets
                 </ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.actionButton}
+                style={[styles.actionButton, { backgroundColor: "#1E2429" }]}
                 onPress={navigateToConcessions}
               >
-                <Ionicons name="fast-food-outline" size={24} color="white" />
-                <ThemedText style={styles.actionButtonText}>
+                <Ionicons name="fast-food-outline" size={24} color="#B4D335" />
+                <ThemedText
+                  style={[styles.actionButtonText, { color: "#B4D335" }]}
+                >
                   Order Food
                 </ThemedText>
               </TouchableOpacity>
             </View>
 
+            {/* Date selector tabs */}
+            <View style={styles.dateTabs}>
+              <TouchableOpacity
+                style={[
+                  styles.dateTab,
+                  selectedDate === "today" && styles.activeDateTab,
+                ]}
+                onPress={() => handleDateChange("today")}
+              >
+                <ThemedText
+                  style={[
+                    styles.dateTabText,
+                    selectedDate === "today" && styles.activeDateTabText,
+                  ]}
+                >
+                  Today
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.dateTab,
+                  selectedDate === "tomorrow" && styles.activeDateTab,
+                ]}
+                onPress={() => handleDateChange("tomorrow")}
+              >
+                <ThemedText
+                  style={[
+                    styles.dateTabText,
+                    selectedDate === "tomorrow" && styles.activeDateTabText,
+                  ]}
+                >
+                  Tomorrow
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+
+            {/* Showtimes section */}
             <ThemedText style={styles.sectionTitle}>
-              Today's Showtimes
+              {selectedDate === "today"
+                ? "Today's Showtimes"
+                : "Tomorrow's Showtimes"}
             </ThemedText>
 
-            {/* Showtimes by Movie */}
-            {Object.keys(groupedByMovie).map((movieIdStr) => {
-              const movieShowtimes = groupedByMovie[movieIdStr];
-              if (movieShowtimes.length === 0) return null;
+            {Object.keys(groupedByMovie).length > 0 ? (
+              Object.keys(groupedByMovie).map((movieIdStr) => {
+                const movieShowtimes = groupedByMovie[movieIdStr];
+                if (movieShowtimes.length === 0) return null;
 
-              const movieData = movieShowtimes[0];
+                const movieData = movieShowtimes[0];
 
-              return (
-                <View key={movieIdStr} style={styles.movieShowtimesContainer}>
-                  <ThemedText style={styles.movieTitle}>
-                    {movieData.movieTitle}
-                  </ThemedText>
-                  <ThemedText style={styles.screenInfo}>
-                    {movieData.theaterName} • {movieData.screenName}
-                  </ThemedText>
+                return (
+                  <View key={movieIdStr} style={styles.movieShowtimesContainer}>
+                    <ThemedText style={styles.movieTitle}>
+                      {movieData.movieTitle}
+                    </ThemedText>
+                    <ThemedText style={styles.screenInfo}>
+                      {movieData.theaterName} • {movieData.screenName}
+                    </ThemedText>
 
-                  <View style={styles.showtimesGrid}>
-                    {movieShowtimes.map((showtime) => {
-                      // Format the time
-                      const date = new Date(showtime.startTime);
-                      const timeString = date.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
+                    <View style={styles.showtimesGrid}>
+                      {movieShowtimes.map((showtime) => {
+                        // Format the time
+                        const date = new Date(showtime.startTime);
+                        const timeString = date.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
 
-                      return (
-                        <TouchableOpacity
-                          key={showtime.id}
-                          style={styles.showtimeBox}
-                          onPress={() => handleSelectShowtime(showtime.id)}
-                        >
-                          <ThemedText style={styles.showtimeText}>
-                            {timeString}
-                          </ThemedText>
-                        </TouchableOpacity>
-                      );
-                    })}
+                        return (
+                          <TouchableOpacity
+                            key={showtime.id}
+                            style={styles.showtimeBox}
+                            onPress={() => handleSelectShowtime(showtime.id)}
+                          >
+                            <ThemedText style={styles.showtimeText}>
+                              {timeString}
+                            </ThemedText>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })
+            ) : (
+              <View style={styles.emptyStateContainer}>
+                <Ionicons name="calendar-outline" size={50} color="#666" />
+                <ThemedText style={styles.emptyStateText}>
+                  No showtimes available for{" "}
+                  {selectedDate === "today" ? "today" : "tomorrow"}
+                </ThemedText>
+              </View>
+            )}
           </ScrollView>
         </ThemedView>
       </>

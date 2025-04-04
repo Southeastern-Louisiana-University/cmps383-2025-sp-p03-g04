@@ -10,13 +10,16 @@ export default function TabLayout() {
   // Set color scheme based on user's preference
   const isDark = colorScheme === "dark";
 
+  // Define common colors for consistency
+  const tabBarBgColor = "#1E2429";
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#B4D335",
         tabBarInactiveTintColor: "#9BA1A6",
         tabBarStyle: {
-          backgroundColor: "#1E2429",
+          backgroundColor: tabBarBgColor,
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -27,15 +30,16 @@ export default function TabLayout() {
           fontSize: 12,
         },
         headerStyle: {
-          backgroundColor: "#B4D335", // Lion's Den green
+          backgroundColor: tabBarBgColor,
         },
         headerTitleStyle: {
           fontWeight: "bold",
-          color: "#242424",
+          color: "#FFFFFF",
         },
+        headerTitle: "",
       }}
     >
-      {/* Home tab - visible to all users */}
+      {/* The rest of the component remains the same */}
       <Tabs.Screen
         name="index"
         options={{

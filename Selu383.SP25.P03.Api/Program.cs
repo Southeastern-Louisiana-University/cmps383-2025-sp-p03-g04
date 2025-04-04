@@ -84,23 +84,25 @@ namespace Selu383.SP25.P03.Api
 
             builder.Services.AddHttpClient<TmdbService>();
             builder.Services.AddScoped<TmdbService>();
+            builder.Services.AddScoped<ShowtimeManagementService>();
 
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-                await db.Database.MigrateAsync();
-
-
-                
-                SeedTheaters.Initialize(scope.ServiceProvider);
-                await SeedRoles.Initialize(scope.ServiceProvider);
-                await SeedUsers.Initialize(scope.ServiceProvider);
-                SeedMovies.Initialize(scope.ServiceProvider);
-                SeedShowtimes.Initialize(scope.ServiceProvider);
-                SeedConcessions.Initialize(scope.ServiceProvider);
-            }
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await db.Database.MigrateAsync();
+    
+    SeedTheaters.Initialize(scope.ServiceProvider);
+    await SeedRoles.Initialize(scope.ServiceProvider);
+    await SeedUsers.Initialize(scope.ServiceProvider);
+    SeedMovies.Initialize(scope.ServiceProvider);
+    SeedConcessions.Initialize(scope.ServiceProvider);
+    
+    // Generate showtimes on startup if none exist
+    var showtimeService = scope.ServiceProvider.GetRequiredService<ShowtimeManagementService>();
+    await showtimeService.GenerateShowtimesIfNoneExist();
+}
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
