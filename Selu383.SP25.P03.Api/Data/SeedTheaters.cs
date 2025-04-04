@@ -9,10 +9,35 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // Look for any theaters.
-                if (context.Theaters.Any())
+                // reseed the theaters (remove existing ones first)
+                bool reseed = true;
+                
+                if (reseed)
                 {
-                    return;   // DB has been seeded
+                    // First check if there are any theaters to remove
+                    if (context.Theaters.Any())
+                    {
+                        try
+                        {
+                            // First remove all seats
+                            var seats = context.Seats.ToList();
+                            context.Seats.RemoveRange(seats);
+                            
+                            // Then remove all screens
+                            var screens = context.Screens.ToList();
+                            context.Screens.RemoveRange(screens);
+                            
+                            // Finally remove all theaters
+                            var theaters = context.Theaters.ToList();
+                            context.Theaters.RemoveRange(theaters);
+                            
+                            context.SaveChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error clearing existing theaters: {ex.Message}");
+                        }
+                    }
                 }
                 
                 // Create theaters
