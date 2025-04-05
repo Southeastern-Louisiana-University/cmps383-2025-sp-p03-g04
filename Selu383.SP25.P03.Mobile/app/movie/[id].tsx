@@ -134,7 +134,10 @@ export default function MovieDetailsScreen() {
   };
 
   const handleBookTickets = (showtimeId: number) => {
-    router.push(`/book/${showtimeId}/seats`);
+    router.push({
+      pathname: "/booking/[id]/seats",
+      params: { id: showtimeId.toString() }
+    });
   };
 
   const formatTime = (timeString: string) => {

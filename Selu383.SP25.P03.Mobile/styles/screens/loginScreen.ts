@@ -1,13 +1,12 @@
 import { StyleSheet } from "react-native";
 import { Colors } from "../theme/colors";
-import { Spacing, BorderRadius } from "../theme/spacing";
 
 export const loginStyles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#1E2429",
   },
   content: {
-    flex: 1,
     padding: 24,
     alignItems: "center",
   },
@@ -16,13 +15,18 @@ export const loginStyles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 40,
   },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+  },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "white",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
-  portalText: {
+  subtitle: {
     fontSize: 18,
     color: "#9BA1A6",
   },
@@ -46,7 +50,7 @@ export const loginStyles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    color: "white",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   inputContainer: {
@@ -65,7 +69,7 @@ export const loginStyles = StyleSheet.create({
     flex: 1,
     height: "100%",
     paddingLeft: 10,
-    color: "white",
+    color: "#FFFFFF",
   },
   visibilityIcon: {
     padding: 15,
@@ -97,31 +101,51 @@ export const loginStyles = StyleSheet.create({
   forgotText: {
     fontSize: 14,
     fontWeight: "500",
+    color: "#B4D335",
   },
-  loginButton: {
+  authButton: {
     width: "100%",
+    backgroundColor: "#B4D335",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 24,
   },
-  loginButtonText: {
-    color: "#242424",
+  disabledButton: {
+    backgroundColor: "#4A4A4A",
+    opacity: 0.7,
+  },
+  authButtonText: {
+    color: "#1E2429",
     fontSize: 16,
     fontWeight: "bold",
   },
-  signupContainer: {
+  toggleContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 30,
   },
-  signupText: {
+  toggleText: {
     color: "#9BA1A6",
     fontSize: 14,
     marginRight: 4,
   },
-  signupLink: {
+  toggleLink: {
     fontSize: 14,
     fontWeight: "600",
+    color: "#B4D335",
+  },
+  skipButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: "#9BA1A6",
+    borderRadius: 8,
+    marginBottom: 40,
+  },
+  skipButtonText: {
+    color: "#9BA1A6",
+    fontSize: 14,
   },
 });
