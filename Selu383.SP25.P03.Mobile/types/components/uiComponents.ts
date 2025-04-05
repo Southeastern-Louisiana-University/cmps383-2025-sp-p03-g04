@@ -1,6 +1,11 @@
-import { TextProps, ViewProps } from 'react-native';
+import { TextProps, ViewProps } from "react-native";
 
-export type ThemedTextType = 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+export type ThemedTextType =
+  | "default"
+  | "title"
+  | "defaultSemiBold"
+  | "subtitle"
+  | "link";
 
 export interface ThemedTextProps extends TextProps {
   type?: ThemedTextType;
@@ -19,6 +24,19 @@ export interface AuthContextType {
     role: string;
   } | null;
   isLoading: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
+  isAuthenticated: boolean;
+  signIn: (username: string, password: string) => Promise<string>;
   signOut: () => Promise<void>;
+  signUp: (
+    username: string,
+    password: string,
+    email?: string
+  ) => Promise<string>;
+}
+
+export interface ThemeContextType {
+  isDarkMode: boolean;
+  isTheaterMode: boolean;
+  toggleDarkMode: () => void;
+  toggleTheaterMode: () => void;
 }
