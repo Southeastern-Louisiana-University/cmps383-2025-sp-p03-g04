@@ -343,4 +343,32 @@ export const homeScreenStyles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
+  headerContainer: {
+    padding: 16,
+    backgroundColor: "#262D33",
+    alignItems: "center",
+  },
+
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: "#9BA1A6",
+    textAlign: "center",
+  },
 });
