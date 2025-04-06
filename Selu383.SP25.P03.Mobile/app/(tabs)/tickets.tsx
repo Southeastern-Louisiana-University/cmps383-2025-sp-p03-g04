@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
@@ -17,31 +18,37 @@ import { ReservationResponse } from "../../types/api/reservations";
 import { ticketsScreenStyles as styles } from "../../styles/screens/ticketsScreen";
 
 export default function TicketsScreen() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [reservations, setReservations] = useState<ReservationResponse[]>([]);
+  const [guestTickets, setGuestTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUserReservations();
-  }, []);
+    loadTickets();
+  }, [isAuthenticated]);
 
-  const fetchUserReservations = async () => {
+  const loadTickets = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      if (!user) {
-        throw new Error("User not logged in");
+      if (isAuthenticated && user) {
+        // Load authenticated user's tickets
+        const userReservations = await reservationService.getUserReservations(
+          user.id
+        );
+        setReservations(userReservations);
+      } else {
+        // Load guest tickets from local storage
+        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+        if (guestTicketsStr) {
+          setGuestTickets(JSON.parse(guestTicketsStr));
+        }
       }
-
-      const userReservations = await reservationService.getUserReservations(
-        user.id
-      );
-      setReservations(userReservations);
     } catch (err) {
-      console.error("Failed to fetch reservations:", err);
+      console.error("Failed to fetch tickets:", err);
       setError("Unable to load your tickets. Please try again later.");
     } finally {
       setIsLoading(false);
@@ -59,8 +66,12 @@ export default function TicketsScreen() {
     return new Date(dateString).toLocaleString(undefined, options);
   };
 
-  const handleViewTicket = (reservationId: number) => {
-    router.push(`./ticket/${reservationId}`);
+  const handleViewTicket = (ticketId: number, isGuest: boolean = false) => {
+    if (isGuest) {
+      router.push(`./booking/guest/confirmation?ticketId=${ticketId}`);
+    } else {
+      router.push(`/booking/${ticketId}/confirmation`);
+    }
   };
 
   const handleCancelReservation = async (reservationId: number) => {
@@ -93,8 +104,34 @@ export default function TicketsScreen() {
   };
 
   const handleRefresh = () => {
-    fetchUserReservations();
+    loadTickets();
   };
+
+  const handleLogin = () => {
+    router.push("/login?returnTo=/tickets");
+  };
+
+  // If not authenticated and no guest tickets, show login prompt
+  if (!isAuthenticated && guestTickets.length === 0 && !isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <Stack.Screen options={{ title: "My Tickets" }} />
+        <View style={styles.emptyStateContainer}>
+          <Ionicons name="ticket-outline" size={60} color="#9BA1A6" />
+          <ThemedText style={styles.emptyStateTitle}>
+            Sign in to view your tickets
+          </ThemedText>
+          <ThemedText style={styles.emptyStateText}>
+            Create an account or sign in to save and view your tickets in one
+            place.
+          </ThemedText>
+          <TouchableOpacity style={styles.browseButton} onPress={handleLogin}>
+            <ThemedText style={styles.browseButtonText}>Sign In</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
+  }
 
   // Content to render when there are no tickets
   const renderEmptyState = () => (
@@ -189,6 +226,73 @@ export default function TicketsScreen() {
     </View>
   );
 
+  // Render guest ticket item
+  const renderGuestTicketItem = ({ item }: { item: any }) => (
+    <View style={styles.ticketCard}>
+      <View style={styles.ticketHeader}>
+        <ThemedText style={styles.movieTitle}>{item.movieTitle}</ThemedText>
+        <View style={[styles.statusBadge, styles.paidBadge]}>
+          <ThemedText style={styles.statusText}>Paid</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.ticketDetails}>
+        <View style={styles.detailRow}>
+          <Ionicons name="calendar-outline" size={16} color="#9BA1A6" />
+          <ThemedText style={styles.detailText}>
+            {formatDate(item.showtimeStartTime)}
+          </ThemedText>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Ionicons name="business-outline" size={16} color="#9BA1A6" />
+          <ThemedText style={styles.detailText}>
+            {item.theaterName} • {item.screenName}
+          </ThemedText>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Ionicons name="people-outline" size={16} color="#9BA1A6" />
+          <ThemedText style={styles.detailText}>
+            {item.tickets.length}{" "}
+            {item.tickets.length === 1 ? "Ticket" : "Tickets"}
+          </ThemedText>
+        </View>
+
+        <View style={styles.seatsRow}>
+          <Ionicons name="grid-outline" size={16} color="#9BA1A6" />
+          <ThemedText style={styles.detailText}>
+            Seats:{" "}
+            {item.tickets
+              .map((t: { row: any; number: any }) => `${t.row}${t.number}`)
+              .join(", ")}
+          </ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.ticketFooter}>
+        <ThemedText style={styles.totalText}>
+          Total: ${item.totalAmount.toFixed(2)}
+        </ThemedText>
+
+        <View style={styles.buttonsRow}>
+          <TouchableOpacity
+            style={styles.viewButton}
+            onPress={() => handleViewTicket(item.reservationId, true)}
+          >
+            <ThemedText style={styles.viewButtonText}>View Ticket</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
+  // Combine authenticated and guest tickets for display
+  const allTickets = [
+    ...reservations.map((item) => ({ ...item, isGuest: false })),
+    ...guestTickets.map((item) => ({ ...item, isGuest: true })),
+  ];
+
   return (
     <>
       <Stack.Screen
@@ -199,7 +303,7 @@ export default function TicketsScreen() {
               onPress={handleRefresh}
               style={styles.refreshButton}
             >
-              <Ionicons name="refresh" size={22} color="#242424" />
+              <Ionicons name="refresh" size={22} color="#B4D335" />
             </TouchableOpacity>
           ),
         }}
@@ -226,9 +330,13 @@ export default function TicketsScreen() {
           </View>
         ) : (
           <FlatList
-            data={reservations}
-            renderItem={renderReservationItem}
-            keyExtractor={(item) => item.id.toString()}
+            data={allTickets}
+            renderItem={({ item }) =>
+              item.isGuest
+                ? renderGuestTicketItem({ item })
+                : renderReservationItem({ item })
+            }
+            keyExtractor={(item, index) => `${item.id || index}`}
             contentContainerStyle={styles.listContainer}
             ListEmptyComponent={renderEmptyState}
             showsVerticalScrollIndicator={false}

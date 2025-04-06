@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
+  TouchableOpacity,
   View,
   TextInput,
-  TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   ActivityIndicator,
   Alert,
-  Image,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -83,7 +81,7 @@ export default function LoginScreen() {
 
     try {
       if (isLogin) {
-        // Login
+        // Login - the role is automatically detected by the backend
         const role = await signIn(username, password);
 
         // Save username if remember me is checked
@@ -95,9 +93,9 @@ export default function LoginScreen() {
 
         // Navigation after successful login
         if (returnTo) {
-          router.push(returnTo as any);
+          router.replace(returnTo as any);
         } else {
-          router.push("/");
+          router.replace("/(tabs)");
         }
       } else {
         // Register
@@ -105,9 +103,9 @@ export default function LoginScreen() {
 
         // Navigate home after successful registration
         if (returnTo) {
-          router.push(returnTo as any);
+          router.replace(returnTo as any);
         } else {
-          router.push("/");
+          router.replace("/(tabs)");
         }
       }
     } catch (error: any) {
@@ -338,9 +336,9 @@ export default function LoginScreen() {
               style={styles.skipButton}
               onPress={() => {
                 if (returnTo) {
-                  router.push(returnTo as any);
+                  router.replace(returnTo as any);
                 } else {
-                  router.push("/");
+                  router.replace("/(tabs)");
                 }
               }}
             >
