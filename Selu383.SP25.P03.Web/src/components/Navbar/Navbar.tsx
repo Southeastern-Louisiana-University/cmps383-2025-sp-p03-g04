@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import TypewriterBanner from '../TypewriterBanner/TypewriterBanner';
+import Cart from '../Cart/Cart';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
@@ -52,6 +53,9 @@ const Navbar: React.FC = () => {
       </div>
       
       <div className="navbar-right">
+        {/* Add Cart component here */}
+        <Cart />
+        
         <button className="sign-in">SIGN IN</button>
         
         <button 
