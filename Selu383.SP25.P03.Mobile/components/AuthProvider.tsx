@@ -5,15 +5,19 @@ import { AuthContextType } from "../types/components/uiComponents";
 import { User, UserRole } from "../types/models/user";
 
 // Create the context
-
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
-  signIn: async (username: string, password: string) => { return "customer"; },
+  signIn: async (username: string, password: string) => {
+    return "customer";
+  },
   signOut: async () => {},
-  signUp: async (username: string, password: string, email?: string) => { return "customer"; },
+  signUp: async (username: string, password: string, email?: string) => {
+    return "customer";
+  },
   isAuthenticated: false,
 });
+
 // Hook to use the auth context
 export const useAuth = () => useContext(AuthContext);
 

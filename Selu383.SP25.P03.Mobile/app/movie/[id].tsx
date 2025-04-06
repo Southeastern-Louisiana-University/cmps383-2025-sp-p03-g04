@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
-import { Movie } from "../../types/models/movie";
+import { Movie, Showtime } from "../../types/models/movie";
 import { ShowtimesByTheater } from "../../types/models/movie";
 import { movieDetailsStyles as styles } from "../../styles/screens/movieDetails";
 
@@ -136,7 +136,7 @@ export default function MovieDetailsScreen() {
   const handleBookTickets = (showtimeId: number) => {
     router.push({
       pathname: "/booking/[id]/seats",
-      params: { id: showtimeId.toString() }
+      params: { id: showtimeId.toString() },
     });
   };
 
@@ -252,14 +252,16 @@ export default function MovieDetailsScreen() {
                   key={dateGroup.date}
                   style={[
                     styles.dateTab,
-                    selectedDateIndex === index && styles.selectedDateTab
+                    selectedDateIndex === index && styles.selectedDateTab,
                   ]}
                   onPress={() => setSelectedDateIndex(index)}
                 >
-                  <ThemedText style={[
-                    styles.dateTabText,
-                    selectedDateIndex === index && styles.selectedDateTabText
-                  ]}>
+                  <ThemedText
+                    style={[
+                      styles.dateTabText,
+                      selectedDateIndex === index && styles.selectedDateTabText,
+                    ]}
+                  >
                     {dateGroup.dateLabel}
                   </ThemedText>
                 </TouchableOpacity>
@@ -268,43 +270,46 @@ export default function MovieDetailsScreen() {
           )}
 
           {/* Show theaters and showtimes for selected date */}
-          {showtimesByDate.length > 0 && selectedDateIndex < showtimesByDate.length ? (
-            showtimesByDate[selectedDateIndex].theaters.map((theaterShowtimes) => (
-              <View
-                key={theaterShowtimes.theaterId}
-                style={styles.theaterShowtimes}
-              >
-                <View style={styles.theaterHeader}>
-                  <ThemedText style={styles.theaterName}>
-                    {theaterShowtimes.theaterName}
-                  </ThemedText>
-                  <ThemedText style={styles.distance}>
-                    {theaterShowtimes.distance}
-                  </ThemedText>
-                </View>
+          {showtimesByDate.length > 0 &&
+          selectedDateIndex < showtimesByDate.length ? (
+            showtimesByDate[selectedDateIndex].theaters.map(
+              (theaterShowtimes) => (
+                <View
+                  key={theaterShowtimes.theaterId}
+                  style={styles.theaterShowtimes}
+                >
+                  <View style={styles.theaterHeader}>
+                    <ThemedText style={styles.theaterName}>
+                      {theaterShowtimes.theaterName}
+                    </ThemedText>
+                    <ThemedText style={styles.distance}>
+                      {theaterShowtimes.distance}
+                    </ThemedText>
+                  </View>
 
-                <View style={styles.showtimesGrid}>
-                  {theaterShowtimes.showtimes.map((showtime) => {
-                    const { time, period } = formatTime(showtime.startTime);
+                  <View style={styles.showtimesGrid}>
+                    {theaterShowtimes.showtimes.map((showtime) => {
+                      const { time, period } = formatTime(showtime.startTime);
 
-                    return (
-                      <TouchableOpacity
-                        key={showtime.id}
-                        style={styles.showtimeItem}
-                        onPress={() => handleBookTickets(showtime.id)}
-                      >
-                        <ThemedText style={styles.showtimeTime}>
-                          {time}
-                        </ThemedText>
-                        <ThemedText style={styles.showtimePeriod}>
-                          {period}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    );
-                  })}
+                      return (
+                        <TouchableOpacity
+                          key={showtime.id}
+                          style={styles.showtimeItem}
+                          onPress={() => handleBookTickets(showtime.id)}
+                        >
+                          <ThemedText style={styles.showtimeTime}>
+                            {time}
+                          </ThemedText>
+                          <ThemedText style={styles.showtimePeriod}>
+                            {period}
+                          </ThemedText>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
-              </View>
-            ))
+              )
+            )
           ) : (
             <View style={styles.noShowtimesContainer}>
               <Ionicons name="calendar-outline" size={40} color="#666" />
@@ -316,20 +321,25 @@ export default function MovieDetailsScreen() {
         </View>
 
         {/* Book Tickets Button */}
-        {showtimesByDate.length > 0 && 
-          selectedDateIndex < showtimesByDate.length && 
-          showtimesByDate[selectedDateIndex].theaters.length > 0 && 
-          showtimesByDate[selectedDateIndex].theaters[0].showtimes.length > 0 && (
-          <TouchableOpacity
-            style={styles.bookButton}
-            onPress={() => {
-              // Navigate to first showtime of selected date
-              handleBookTickets(showtimesByDate[selectedDateIndex].theaters[0].showtimes[0].id);
-            }}
-          >
-            <ThemedText style={styles.bookButtonText}>Book Tickets</ThemedText>
-          </TouchableOpacity>
-        )}
+        {showtimesByDate.length > 0 &&
+          selectedDateIndex < showtimesByDate.length &&
+          showtimesByDate[selectedDateIndex].theaters.length > 0 &&
+          showtimesByDate[selectedDateIndex].theaters[0].showtimes.length >
+            0 && (
+            <TouchableOpacity
+              style={styles.bookButton}
+              onPress={() => {
+                // Navigate to first showtime of selected date
+                handleBookTickets(
+                  showtimesByDate[selectedDateIndex].theaters[0].showtimes[0].id
+                );
+              }}
+            >
+              <ThemedText style={styles.bookButtonText}>
+                Book Tickets
+              </ThemedText>
+            </TouchableOpacity>
+          )}
       </ScrollView>
     </>
   );

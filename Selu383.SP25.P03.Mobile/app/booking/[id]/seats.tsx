@@ -30,7 +30,9 @@ export default function SeatSelectionScreen() {
   const { isDarkMode, isTheaterMode } = useTheme();
 
   // State variables
-  const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(null);
+  const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(
+    null
+  );
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
   const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -145,7 +147,7 @@ export default function SeatSelectionScreen() {
               text: "Sign In",
               onPress: () => {
                 // Navigate to login with return path
-                router.push(`/login?returnTo=/book/${id}/payment`);
+                router.push(`/login?returnTo=/booking/${id}/payment`);
               },
             },
             {
@@ -177,11 +179,9 @@ export default function SeatSelectionScreen() {
           );
 
           // Continue to payment with reservation ID
-          const idStr = String(id);
-          const reservationIdStr = String(reservation.id);
           router.push({
-            pathname: `/booking/[id]/payment`,
-            params: { id: idStr, reservationId: reservationIdStr },
+            pathname: `/booking/${id}/payment` as any,
+            params: { reservationId: reservation.id.toString() },
           });
         } catch (error) {
           console.error("Failed to create reservation:", error);

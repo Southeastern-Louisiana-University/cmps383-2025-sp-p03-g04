@@ -6,29 +6,24 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../../components/AuthProvider";
+import { ThemeProvider, useTheme } from "../../components/ThemeProvider";
 import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
-import { useAuth } from "../../components/AuthProvider";
 import { profileScreenStyles as styles } from "../../styles/screens/profileScreen";
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const router = useRouter();
-  const colorScheme = useColorScheme();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
-  const [darkMode, setDarkMode] = useState(colorScheme === "dark");
   const [notifications, setNotifications] = useState(true);
   const [theaterMode, setTheaterMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-    AsyncStorage.setItem("userColorScheme", !darkMode ? "dark" : "light");
-  };
 
   // Handle logout
   const handleLogout = async () => {
@@ -45,8 +40,8 @@ export default function ProfileScreen() {
             setIsProcessing(true);
             await signOut();
 
-            // Force navigation to role selection
-            router.push("/role-selection");
+            // Force navigation to home
+            router.replace("/(tabs)");
           } catch (error) {
             console.error("Logout error:", error);
             Alert.alert("Error", "Failed to log out. Please try again.");
@@ -57,6 +52,77 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
+  const handleLogin = () => {
+    router.push("/login?returnTo=/profile");
+  };
+
+  // If user is not authenticated, show login screen
+  if (!isAuthenticated) {
+    return (
+      <ThemedView style={styles.container}>
+        <Stack.Screen options={{ title: "Profile" }} />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Ionicons name="person-circle-outline" size={100} color="#B4D335" />
+          <ThemedText
+            style={{
+              fontSize: 24,
+              fontWeight: "bold",
+              marginTop: 20,
+              marginBottom: 10,
+            }}
+          >
+            Sign in to your account
+          </ThemedText>
+          <ThemedText
+            style={{ textAlign: "center", marginBottom: 30, color: "#9BA1A6" }}
+          >
+            Create an account or sign in to view your profile, tickets, and
+            manage your preferences.
+          </ThemedText>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#B4D335",
+              paddingVertical: 14,
+              paddingHorizontal: 30,
+              borderRadius: 8,
+              marginBottom: 16,
+            }}
+            onPress={handleLogin}
+          >
+            <ThemedText
+              style={{ color: "#1E2429", fontWeight: "bold", fontSize: 16 }}
+            >
+              Sign In
+            </ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              borderWidth: 1,
+              borderColor: "#B4D335",
+              paddingVertical: 14,
+              paddingHorizontal: 30,
+              borderRadius: 8,
+            }}
+            onPress={() => router.push("/register")}
+          >
+            <ThemedText
+              style={{ color: "#B4D335", fontWeight: "bold", fontSize: 16 }}
+            >
+              Create Account
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
+  }
 
   // Get role-specific settings sections
   const getRoleSettings = () => {
@@ -258,6 +324,7 @@ export default function ProfileScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <Stack.Screen options={{ title: "Profile" }} />
       <View style={[styles.header, { backgroundColor: getHeaderColor() }]}>
         <View style={styles.profileCircle}>
           <ThemedText style={styles.profileInitial}>
@@ -334,8 +401,8 @@ export default function ProfileScreen() {
               <ThemedText style={styles.settingLabel}>Dark Mode</ThemedText>
             </View>
             <Switch
-              value={darkMode}
-              onValueChange={handleDarkModeToggle}
+              value={isDarkMode}
+              onValueChange={toggleDarkMode}
               trackColor={{ false: "#3e3e3e", true: getHeaderColor() }}
               thumbColor={"#f4f3f4"}
             />

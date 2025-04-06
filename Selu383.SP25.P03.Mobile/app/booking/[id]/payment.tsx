@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Image,
   TextInput,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -256,9 +255,13 @@ export default function PaymentScreen() {
 
         // Navigate to confirmation screen
         router.push({
-            pathname: "/booking/[id]/confirmation",
-            params: { id: guestSelection.showtimeId.toString(), reservationId: newReservation.id.toString() }
-          });
+          pathname: "/booking/[id]/confirmation",
+          params: {
+            id: guestSelection.showtimeId.toString(),
+            reservationId: newReservation.id.toString(),
+            guest: "true",
+          },
+        });
       }
     } catch (error) {
       console.error("Payment processing error:", error);

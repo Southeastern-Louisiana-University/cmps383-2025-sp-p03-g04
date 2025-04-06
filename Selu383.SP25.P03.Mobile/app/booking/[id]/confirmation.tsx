@@ -69,7 +69,7 @@ export default function ConfirmationScreen() {
         Alert.alert("Error", "No booking information found.", [
           {
             text: "OK",
-            onPress: () => router.push("/"),
+            onPress: () => router.push("/(tabs)"),
           },
         ]);
       }
@@ -150,12 +150,12 @@ export default function ConfirmationScreen() {
 
   // Navigate to home
   const handleDone = () => {
-    router.push("/");
+    router.push("/(tabs)");
   };
 
   // Navigate to food ordering
   const handleOrderFood = () => {
-    router.push("/concessions");
+    router.push("/(tabs)/concessions");
   };
 
   // Render loading state
