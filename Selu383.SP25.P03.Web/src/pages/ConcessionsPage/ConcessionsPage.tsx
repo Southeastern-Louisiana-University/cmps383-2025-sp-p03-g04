@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import "./ConcessionsPage.css";
 import Footer from "../../components/Footer/Footer";
 import { FoodItem, FoodCategory } from "../../types/Concessions";
 
 const ConcessionsPage: React.FC = () => {
-  const navigate = useNavigate();
+  
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
