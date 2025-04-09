@@ -1,327 +1,294 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { getShowtime } from "../../services/showtimeService";
-import { getSeatsForShowtime } from "../../services/seatService";
-import { getTicketPrices } from "../../services/ticketService";
-import { Seat, TicketType, CartItem } from "../../types/booking";
-import { useCart } from "../../contexts/CartContext";
-import "./BookingPage.css";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Showtime } from '../../types/Showtime';
+import { Movie } from '../../types/Movie';
+import { getShowtime } from '../../services/showtimeService';
+import { getMovie } from '../../services/movieService';
+import { getSeatsForShowtime } from '../../services/seatService';
+import { createReservation } from '../../services/reservationService';
+import { useCart } from '../../contexts/CartContext';
+import { useTheater } from '../../contexts/TheaterContext';
+import Footer from '../../components/Footer/Footer';
+import { CartItem } from '../../types/CartItem';
+import './BookingPage.css';
+
+type SeatStatus = 'Available' | 'Selected' | 'Taken';
+
+interface Seat {
+  id: number;
+  row: string;
+  number: number;
+  status: SeatStatus;
+}
 
 const BookingPage: React.FC = () => {
-  const { showtimeId } = useParams<{ showtimeId: string }>();
-  const { cartItems, addToCart } = useCart();
-
-  // State for showtime details
-  const [showtime, setShowtime] = useState<any>(null);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { selectedTheater } = useTheater();
+  
+  const [showtime, setShowtime] = useState<Showtime | null>(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [seats, setSeats] = useState<{ [key: string]: Seat[] }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // State for seats
-  const [seatingLayout, setSeatingLayout] = useState<Record<string, Seat[]>>({});
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
-
-  // State for ticket types
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
-
-  // State for modal
-  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
+  const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
+  
+  const [ticketOptions] = useState([
+    { type: 'Adult', multiplier: 1 },
+    { type: 'Child', multiplier: 0.75 },
+    { type: 'Senior', multiplier: 0.8 }
+  ]);
+  
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchShowtimeData = async () => {
-      if (!showtimeId) return;
-
+    const fetchData = async () => {
+      if (!id) return;
+      
       try {
         setLoading(true);
-
-        // Fetch showtime details
-        const showtimeData = await getShowtime(parseInt(showtimeId));
-        setShowtime(showtimeData);
-
-        // Fetch seats for this showtime
-        const seatsData = await getSeatsForShowtime(parseInt(showtimeId));
-        setSeatingLayout(seatsData.rows || {});
         
-        // Fetch ticket types and prices from API
-        try {
-          const ticketPricesData = await getTicketPrices(parseInt(showtimeId));
-          setTicketTypes(ticketPricesData);
-        } catch (error) {
-          console.error("Error fetching ticket prices:", error);
-          // API not yet fully implemented - in a real production app, this should be handled better
-          // by showing an appropriate error message or implementing a retry mechanism
+        const showtimeData = await getShowtime(parseInt(id));
+        if (selectedTheater && showtimeData.theaterId !== selectedTheater.id) {
+          setError('This showtime is not available at the selected theater.');
+          return;
         }
+        
+        setShowtime(showtimeData);
+        
+        const movieData = await getMovie(showtimeData.movieId);
+        setMovie(movieData);
+        
+        const seatingLayout = await getSeatsForShowtime(parseInt(id));
+        
+        const transformedSeats: { [key: string]: Seat[] } = {};
+        Object.entries(seatingLayout.rows).forEach(([row, rowSeats]) => {
+          transformedSeats[row] = rowSeats.map(seat => ({
+            id: seat.id,
+            row: seat.row,
+            number: seat.number,
+            status: seat.status as SeatStatus
+          }));
+        });
+        
+        setSeats(transformedSeats);
+        
       } catch (err) {
-        console.error("Error fetching showtime data:", err);
-        setError("Failed to load booking information. Please try again later.");
+        console.error('Error fetching booking data:', err);
+        setError('Failed to load booking information. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchShowtimeData();
-  }, [showtimeId]);
-
-  // Handle seat selection
-  const handleSeatClick = (seat: Seat) => {
-    if (seat.status === "Taken") return;
-
-    // If this seat is already selected, deselect it
-    if (selectedSeat && selectedSeat.id === seat.id) {
-      setSelectedSeat(null);
-      return;
+    
+    fetchData();
+  }, [id, selectedTheater]);
+  
+  const toggleSeatSelection = (rowKey: string, seatIndex: number) => {
+    const updatedSeats = { ...seats };
+    const seat = updatedSeats[rowKey][seatIndex];
+    
+    if (seat.status !== 'Available') return;
+    
+    seat.status = seat.status === 'Available' ? 'Selected' : 'Available';
+    setSeats(updatedSeats);
+    
+    if (seat.status === 'Selected') {
+      setSelectedSeats(prevSeats => [...prevSeats, seat]);
+      setTicketTypes(prevTicketTypes => ({ ...prevTicketTypes, [seat.id]: 'Adult' }));
+    } else {
+      setSelectedSeats(prevSeats => prevSeats.filter(s => s.id !== seat.id));
+      setTicketTypes(prevTicketTypes => {
+        const newTicketTypes = { ...prevTicketTypes };
+        delete newTicketTypes[seat.id];
+        return newTicketTypes;
+      });
     }
-
-    // Otherwise, select the seat
-    setSelectedSeat(seat);
   };
 
-  // Handle ticket type selection
-  const handleTicketCountChange = (type: "Adult" | "Child" | "Senior", change: number) => {
-    const updatedTicketTypes = ticketTypes.map((ticket) => {
-      if (ticket.type === type) {
-        const newCount = Math.max(0, ticket.count + change);
-        return { ...ticket, count: newCount };
+  // Function to change ticket type for a seat
+  const changeTicketType = (seatId: number, ticketType: string) => {
+    setTicketTypes(prevTicketTypes => ({ ...prevTicketTypes, [seatId]: ticketType }));
+  };
+
+  const calculateTotal = () => {
+    if (!showtime) return '0.00';
+    
+    let total = 0;
+    
+    selectedSeats.forEach(seat => {
+      const ticketType = ticketTypes[seat.id] || 'Adult';
+      const ticketOption = ticketOptions.find(option => option.type === ticketType);
+      
+      if (ticketOption) {
+        total += showtime.ticketPrice * ticketOption.multiplier;
       }
-      return ticket;
     });
-
-    setTicketTypes(updatedTicketTypes);
-  };
-
-  // Add to cart
-  const handleAddToCart = () => {
-    if (!selectedSeat) {
-      alert("Please select a seat first");
-      return;
-    }
-
-    const totalTickets = ticketTypes.reduce((sum, ticket) => sum + ticket.count, 0);
     
-    if (totalTickets === 0) {
-      alert("Please select at least one ticket");
+    return total.toFixed(2);
+  };
+
+  const handleCheckout = async () => {
+    if (selectedSeats.length === 0) {
+      alert('Please select at least one seat.');
       return;
     }
-
-    if (totalTickets > 1) {
-      alert("Only one ticket per seat is allowed");
-      return;
-    }
-
-    // Get the selected ticket type (the one with count > 0)
-    const selectedTicketType = ticketTypes.find(ticket => ticket.count > 0);
     
-    if (!selectedTicketType) {
-      alert("Please select a ticket type");
+    if (!showtime || !movie) {
+      alert('Booking information is incomplete.');
       return;
     }
+    
+    try {
+      const reservationRequest = {
+        showtimeId: showtime.id,
+        tickets: selectedSeats.map(seat => ({
+          seatId: seat.id,
+          ticketType: ticketTypes[seat.id] || 'Adult'
+        }))
+      };
+      
+      const reservation = await createReservation(reservationRequest);
+      
+      selectedSeats.forEach(seat => {
+        const ticketType = ticketTypes[seat.id] || 'Adult';
+        const ticketOption = ticketOptions.find(option => option.type === ticketType);
+        
+        if (ticketOption && movie && showtime) {
+          const cartItem: CartItem = {
+            id: seat.id,
+            name: `${movie.title} - Seat ${seat.row}${seat.number}`,
+            price: showtime.ticketPrice * ticketOption.multiplier,
+            quantity: 1,
+            type: 'ticket',
+            showtime: {
+              id: showtime.id,
+              movieId: movie.id,
+              movieTitle: movie.title,
+              startTime: showtime.startTime,
+              screenName: showtime.screenName,
+              theaterName: showtime.theaterName
+            },
+            seat: {
+              id: seat.id,
+              row: seat.row,
+              number: seat.number
+            },
+            ticketType,
+            showtimeId: 0,
+            seatId: 0,
+            seatLabel: ''
+          };
 
-    // Create a cart item
-    const cartItem: CartItem = {
-      seatId: selectedSeat.id,
-      seatLabel: `${selectedSeat.row}${selectedSeat.number}`,
-      ticketType: selectedTicketType.type,
-      price: selectedTicketType.price,
-      showtimeId: parseInt(showtimeId || '0'),
-      movieTitle: showtime.movieTitle
-    };
-
-    // Add to cart using context
-    addToCart(cartItem);
-
-    // Reset selection
-    setSelectedSeat(null);
-    setTicketTypes(ticketTypes.map(ticket => ({ ...ticket, count: 0 })));
-
-    // Show the cart modal
-    setIsCartModalOpen(true);
-  };
-
-  // Handle continuing to checkout
-  const handleContinue = () => {
-    if (cartItems.length === 0) {
-      alert("Your cart is empty");
-      return;
+          addToCart(cartItem);
+        }
+      });
+      
+      alert('Tickets reserved successfully!');
+      navigate('/payment', { 
+        state: { 
+          reservationId: reservation.id, 
+          total: parseFloat(calculateTotal()) 
+        } 
+      });
+      
+    } catch (error) {
+      console.error('Reservation failed:', error);
+      alert('Failed to create reservation. Please try again.');
     }
-
-    // To be implemented in future
-    setIsCartModalOpen(false);
   };
-
-  // Close cart modal
-  const handleCloseCartModal = () => {
-    setIsCartModalOpen(false);
-  };
-
-  // Loading state
+  
   if (loading) {
     return <div className="loading-container">Loading booking information...</div>;
   }
-
-  // Error state
-  if (error || !showtime) {
-    return <div className="error-container">{error || "Showtime not found"}</div>;
+  
+  if (error || !showtime || !movie) {
+    return <div className="error-container">{error || 'Booking information not found'}</div>;
   }
-
+  
   return (
     <div className="booking-page">
       <div className="booking-header">
-        <h1>{showtime.movieTitle}</h1>
-        <div className="showtime-info">
-          <span className="theater-name">{showtime.theaterName}</span>
-          <span className="screen-name">{showtime.screenName}</span>
-          <span className="start-time">
-            {new Date(showtime.startTime).toLocaleString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            })}
-          </span>
+        <div className="movie-info">
+          <h1>Select Your Seats</h1>
+          <div className="booking-details">
+            <div className="movie-poster">
+              <img 
+                src={movie.posterUrl} 
+                alt={`${movie.title} poster`}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/images/placeholder-poster.jpg";
+                }}
+              />
+            </div>
+            <div className="booking-movie-info">
+              <h2>{movie.title}</h2>
+              <p><strong>Theater:</strong> {showtime.theaterName}</p>
+              <p><strong>Screen:</strong> {showtime.screenName}</p>
+              <p><strong>Date:</strong> {new Date(showtime.startTime).toLocaleDateString(undefined, { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</p>
+              <p><strong>Time:</strong> {new Date(showtime.startTime).toLocaleTimeString(undefined, { 
+                hour: 'numeric', 
+                minute: 'numeric' 
+              })}</p>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <div className="seating-layout">
+  {Object.entries(seats).map(([row, rowSeats]) => (
+    <div key={row} className="row">
+      <span className="row-label">{row}</span>
+      <div className="seats">
+        {rowSeats.map((seat, idx) => (
+          <button
+            key={seat.id}
+            className={`seat ${seat.status === 'Available' ? 'available' : 
+                          seat.status === 'Selected' ? 'selected' : 
+                          seat.status === 'Taken' ? 'taken' : ''}`} 
+            onClick={() => toggleSeatSelection(row, idx)}
+          >
+            {seat.number}
+          </button>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
 
-      <div className="booking-content">
-        <div className="seating-section">
-          <h2>Select Your Seat</h2>
-          
-          <div className="screen-indicator">
-            <div className="screen">Screen</div>
-          </div>
-
-          <div className="seating-layout">
-            {Object.entries(seatingLayout).sort().map(([row, seats]) => (
-              <div key={row} className="row">
-                <div className="row-label">{row}</div>
-                <div className="seats">
-                  {seats.sort((a, b) => a.number - b.number).map((seat) => (
-                    <div
-                      key={seat.id}
-                      className={`seat ${seat.status.toLowerCase()} ${
-                        selectedSeat?.id === seat.id ? "selected" : ""
-                      }`}
-                      onClick={() => handleSeatClick(seat)}
-                    >
-                      {seat.number}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="seat-legend">
-            <div className="legend-item">
-              <div className="seat-sample available"></div>
-              <span>Available</span>
-            </div>
-            <div className="legend-item">
-              <div className="seat-sample selected"></div>
-              <span>Selected</span>
-            </div>
-            <div className="legend-item">
-              <div className="seat-sample taken"></div>
-              <span>Taken</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="ticket-selection">
-          <h2>Select Ticket Type</h2>
-          
-          {selectedSeat ? (
-            <div className="selected-seat-info">
-              Selected Seat: <strong>{selectedSeat.row}{selectedSeat.number}</strong>
-            </div>
-          ) : (
-            <div className="no-seat-selected">Please select a seat first</div>
-          )}
-
-          <div className="ticket-types">
-            {ticketTypes.map((ticket) => (
-              <div key={ticket.type} className="ticket-type">
-                <div className="ticket-info">
-                  <span className="ticket-name">{ticket.type}</span>
-                  <span className="ticket-price">${ticket.price.toFixed(2)}</span>
-                </div>
-                <div className="ticket-quantity">
-                  <button 
-                    className="quantity-btn decrease" 
-                    onClick={() => handleTicketCountChange(ticket.type, -1)}
-                    disabled={ticket.count === 0 || !selectedSeat}
-                  >
-                    -
-                  </button>
-                  <span className="quantity">{ticket.count}</span>
-                  <button 
-                    className="quantity-btn increase" 
-                    onClick={() => handleTicketCountChange(ticket.type, 1)}
-                    disabled={!selectedSeat}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="add-to-cart">
-            <button 
-              className="add-btn" 
-              onClick={handleAddToCart}
-              disabled={!selectedSeat || ticketTypes.every(t => t.count === 0)}
+      
+      <div className="selected-seats">
+        <h2>Selected Seats</h2>
+        {selectedSeats.map(seat => (
+          <div key={seat.id} className="selected-seat">
+            <span>Seat {seat.row}{seat.number}</span>
+            <select
+              value={ticketTypes[seat.id] || 'Adult'}
+              onChange={(e) => changeTicketType(seat.id, e.target.value)}
             >
-              Add to Cart
-            </button>
+              {ticketOptions.map(option => (
+                <option key={option.type} value={option.type}>
+                  {option.type}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Cart Modal */}
-      {isCartModalOpen && (
-        <div className="cart-modal-overlay">
-          <div className="cart-modal">
-            <div className="cart-modal-header">
-              <h2>Your Cart</h2>
-              <button className="close-modal" onClick={handleCloseCartModal}>✕</button>
-            </div>
-            
-            <div className="cart-items">
-              {cartItems.length === 0 ? (
-                <p className="empty-cart">Your cart is empty</p>
-              ) : (
-                <>
-                  {cartItems.map((item, index) => (
-                    <div key={index} className="cart-item">
-                      <div className="item-details">
-                        <span className="seat-label">Seat {item.seatLabel}</span>
-                        <span className="ticket-type">{item.ticketType}</span>
-                      </div>
-                      <span className="item-price">${item.price.toFixed(2)}</span>
-                    </div>
-                  ))}
-                  
-                  <div className="cart-total">
-                    <span>Total:</span>
-                    <span>
-                      ${cartItems.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            <div className="cart-actions">
-              <button className="continue-btn" onClick={handleContinue}>
-                Continue to Checkout
-              </button>
-              <button className="keep-shopping-btn" onClick={handleCloseCartModal}>
-                Keep Shopping
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="footer">
+        <button className="checkout-btn" onClick={handleCheckout}>
+          Proceed to Checkout - Total: ${calculateTotal()}
+        </button>
+        <Footer />
+      </div>
     </div>
   );
 };

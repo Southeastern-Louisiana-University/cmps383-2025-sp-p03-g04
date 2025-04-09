@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Movie } from "../../types/Movie";
 import { Showtime } from "../../types/Showtime";
+import { Theater } from "../../types/Theater";
 import { getMovie, getMovieVideos } from "../../services/movieService";
 import { getShowtimesByMovie } from "../../services/showtimeService";
+import { getTheater } from "../../services/theaterService";
 import Footer from "../../components/Footer/Footer";
 import "./MovieDetailsPage.css";
 
 const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const theaterId = queryParams.get('theaterId');
+  
   const [movie, setMovie] = useState<Movie | null>(null);
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
+  const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [trailer, setTrailer] = useState<string | null>(null);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [trailerModalOpen, setTrailerModalOpen] = useState(false);
+  
+  // Reference for the trailer modal
+  const trailerModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -28,30 +39,59 @@ const MovieDetails: React.FC = () => {
         const movieData = await getMovie(movieId);
         setMovie(movieData);
 
-        // Fetch showtimes for this movie
-        const showtimesData = await getShowtimesByMovie(movieId);
-        setShowtimes(showtimesData);
+        // Check if a theater is specified in the URL
+        if (!theaterId) {
+          // If no theater is specified, redirect back to home page to select a theater
+          setError("Please select a theater from the home page first.");
+          return;
+        }
+        
+        // Fetch the selected theater information
+        try {
+          const theaterData = await getTheater(parseInt(theaterId));
+          setSelectedTheater(theaterData);
+          
+          // Fetch showtimes for this movie and theater
+          const showtimesData = await getShowtimesByMovie(movieId);
+          const filteredShowtimes = showtimesData.filter(
+            st => st.theaterId === theaterData.id
+          );
+          setShowtimes(filteredShowtimes);
+        } catch (theaterError) {
+          console.error("Error fetching theater:", theaterError);
+          setError("The selected theater could not be found. Please return to the home page to select a theater.");
+          return;
+        }
 
         // Try to fetch trailer
         try {
+          console.log("Fetching trailer for movie ID:", movieId);
           const videosData = await getMovieVideos(movieId);
-          if (
-            videosData &&
-            videosData.results &&
-            videosData.results.length > 0
-          ) {
-            const trailerVideo = videosData.results.find(
-              (video: any) =>
-                video.type === "Trailer" && video.site === "YouTube"
-            );
+          console.log("Video data received:", videosData);
 
-            if (trailerVideo) {
-              setTrailer(`https://www.youtube.com/embed/${trailerVideo.key}`);
+          if (videosData && videosData.results && videosData.results.length > 0) {
+            // Look for an official trailer first
+            let trailerVideo = videosData.results.find(
+              (video: any) => video.type === "Trailer" && video.site === "YouTube"
+            );
+            
+            // If no trailer is found, look for any YouTube video
+            if (!trailerVideo) {
+              trailerVideo = videosData.results.find((video: any) => video.site === "YouTube");
             }
+            
+            if (trailerVideo) {
+              console.log("Found trailer with key:", trailerVideo.key);
+              setTrailerKey(trailerVideo.key);
+            } else {
+              console.log("No suitable trailer found in results");
+            }
+          } else {
+            console.log("No video results found");
           }
         } catch (videoError) {
           console.error("Error fetching trailer:", videoError);
-          // We don't need to set error state for trailer issues
+          // We don't set error state for trailer issues
         }
       } catch (err) {
         console.error("Error fetching movie data:", err);
@@ -62,7 +102,33 @@ const MovieDetails: React.FC = () => {
     };
 
     fetchMovieData();
-  }, [id]);
+  }, [id, theaterId, navigate]);
+  
+  // Handle body scrolling when modal is open
+  useEffect(() => {
+    if (trailerModalOpen) {
+      // Disable body scrolling
+      document.body.style.overflow = 'hidden';
+      
+      // Add event listener for escape key
+      const handleEscKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          closeTrailerModal();
+        }
+      };
+      
+      window.addEventListener('keydown', handleEscKey);
+      
+      // Cleanup
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleEscKey);
+      };
+    } else {
+      // Re-enable body scrolling
+      document.body.style.overflow = '';
+    }
+  }, [trailerModalOpen]);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -82,24 +148,19 @@ const MovieDetails: React.FC = () => {
     return `${hours}h ${mins}m`;
   };
 
-  // Group showtimes by theater and date
-  const groupedShowtimes = showtimes.reduce<
-    Record<string, Record<string, Showtime[]>>
-  >((acc, showtime) => {
-    const theaterName = showtime.theaterName;
-    const date = new Date(showtime.startTime).toLocaleDateString();
+  // Group showtimes by date
+  const groupedShowtimesByDate = showtimes.reduce<Record<string, Showtime[]>>(
+    (acc, showtime) => {
+      const date = new Date(showtime.startTime).toLocaleDateString();
 
-    if (!acc[theaterName]) {
-      acc[theaterName] = {};
-    }
+      if (!acc[date]) {
+        acc[date] = [];
+      }
 
-    if (!acc[theaterName][date]) {
-      acc[theaterName][date] = [];
-    }
-
-    acc[theaterName][date].push(showtime);
-    return acc;
-  }, {});
+      acc[date].push(showtime);
+      return acc;
+    }, {}
+  );
 
   // Format showtime
   const formatShowtime = (datetime: string) => {
@@ -115,26 +176,26 @@ const MovieDetails: React.FC = () => {
     navigate(`/booking/${showtimeId}`);
   };
 
-  // Handle play trailer
-  const handlePlayTrailer = () => {
-    if (trailer) {
-      document.getElementById("trailer-modal")?.classList.add("active");
-    } else {
-      alert("No trailer available for this movie");
-    }
+  // Open trailer modal
+  const openTrailerModal = () => {
+    setTrailerModalOpen(true);
   };
 
   // Close trailer modal
   const closeTrailerModal = () => {
-    document.getElementById("trailer-modal")?.classList.remove("active");
+    setTrailerModalOpen(false);
+  };
 
-    // Stop video playback
-    const iframe = document.querySelector(
-      ".trailer-iframe"
-    ) as HTMLIFrameElement;
-    if (iframe && iframe.src) {
-      iframe.src = iframe.src;
+  // Handle background click to close modal
+  const handleModalBackgroundClick = (e: React.MouseEvent) => {
+    if (trailerModalRef.current === e.target) {
+      closeTrailerModal();
     }
+  };
+
+  // Handle returning to home page
+  const handleReturnHome = () => {
+    navigate('/');
   };
 
   // Loading state
@@ -144,7 +205,14 @@ const MovieDetails: React.FC = () => {
 
   // Error state
   if (error || !movie) {
-    return <div className="error-container">{error || "Movie not found"}</div>;
+    return (
+      <div className="error-container">
+        <p>{error || "Movie not found"}</p>
+        <button className="btn return-home" onClick={handleReturnHome}>
+          Return to Home Page
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -195,8 +263,8 @@ const MovieDetails: React.FC = () => {
                   BOOK TICKETS
                 </button>
 
-                {trailer && (
-                  <button className="btn-play" onClick={handlePlayTrailer}>
+                {trailerKey && (
+                  <button className="btn-play" onClick={openTrailerModal}>
                     <i className="play-icon">▶</i>
                     <span>WATCH TRAILER</span>
                   </button>
@@ -215,68 +283,76 @@ const MovieDetails: React.FC = () => {
       {/* Showtimes section */}
       <section id="showtimes" className="showtimes-section">
         <h2 className="section-title">Showtimes</h2>
+        
+        {/* Show selected theater heading */}
+        {selectedTheater && (
+          <div className="selected-theater-info">
+            <h3> {selectedTheater.name}</h3>
+            <p className="theater-address">{selectedTheater.address}</p>
+          </div>
+        )}
 
-        {Object.keys(groupedShowtimes).length === 0 ? (
+        {Object.keys(groupedShowtimesByDate).length === 0 ? (
           <div className="no-showtimes">
-            <p>No showtimes available for this movie.</p>
+            <p>No showtimes available for this movie at {selectedTheater?.name || 'the selected theater'}.</p>
+            <button className="btn return-home" onClick={handleReturnHome}>
+              Return to Home Page
+            </button>
           </div>
         ) : (
-          <div className="theaters-container">
-            {Object.entries(groupedShowtimes).map(
-              ([theater, dateShowtimes]) => (
-                <div key={theater} className="theater-showtimes">
-                  <h3 className="theater-name">{theater}</h3>
+          <div className="showtimes-container">
+            {Object.entries(groupedShowtimesByDate).map(([date, showtimes]) => (
+              <div key={date} className="date-showtimes">
+                <h4 className="date">
+                  {new Date(date).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </h4>
 
-                  {Object.entries(dateShowtimes).map(([date, showtimes]) => (
-                    <div key={date} className="date-showtimes">
-                      <h4 className="date">
-                        {new Date(date).toLocaleDateString(undefined, {
-                          weekday: "long",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </h4>
-
-                      <div className="times-grid">
-                        {showtimes
-                          .sort(
-                            (a, b) =>
-                              new Date(a.startTime).getTime() -
-                              new Date(b.startTime).getTime()
-                          )
-                          .map((showtime) => (
-                            <button
-                              key={showtime.id}
-                              className="time-slot"
-                              onClick={() => handleBookShowtime(showtime.id)}
-                            >
-                              {formatShowtime(showtime.startTime)}
-                              <span className="time-price">
-                                ${showtime.ticketPrice.toFixed(2)}
-                              </span>
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="times-grid">
+                  {showtimes
+                    .sort(
+                      (a, b) =>
+                        new Date(a.startTime).getTime() -
+                        new Date(b.startTime).getTime()
+                    )
+                    .map((showtime) => (
+                      <button
+                        key={showtime.id}
+                        className="time-slot"
+                        onClick={() => handleBookShowtime(showtime.id)}
+                      >
+                        {formatShowtime(showtime.startTime)}
+                        <span className="time-price">
+                          ${showtime.ticketPrice.toFixed(2)}
+                        </span>
+                      </button>
+                    ))}
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      {/* Trailer modal */}
-      {trailer && (
-        <div id="trailer-modal" className="trailer-modal">
-          <div className="trailer-modal-content">
-            <button className="close-modal" onClick={closeTrailerModal}>
+      {/* YouTube Trailer Modal */}
+      {trailerModalOpen && trailerKey && (
+        <div 
+          className="trailer-modal" 
+          ref={trailerModalRef}
+          onClick={handleModalBackgroundClick}
+        >
+          <div className="trailer-container">
+            <button className="close-trailer" onClick={closeTrailerModal}>
               ✕
             </button>
             <iframe
-              className="trailer-iframe"
-              src={trailer}
-              title={`${movie.title} Trailer`}
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+              title="YouTube Trailer"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

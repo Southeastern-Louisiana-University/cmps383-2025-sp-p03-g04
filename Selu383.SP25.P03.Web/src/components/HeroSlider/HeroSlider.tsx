@@ -1,3 +1,4 @@
+// src/components/HeroSlider/HeroSlider.tsx
 import React, { useState, useEffect } from "react";
 import { Movie } from "../../types/Movie";
 import { getMovieVideos } from "../../services/movieService";
@@ -10,6 +11,8 @@ interface HeroSliderProps {
 
 const HeroSlider: React.FC<HeroSliderProps> = ({ movies, onBookNow }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+  const [showTrailerModal, setShowTrailerModal] = useState(false);
 
   // Auto slide change
   useEffect(() => {
@@ -46,10 +49,8 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies, onBookNow }) => {
         );
 
         if (trailer) {
-          window.open(
-            `https://www.youtube.com/watch?v=${trailer.key}`,
-            "_blank"
-          );
+          setTrailerUrl(`https://www.youtube.com/embed/${trailer.key}`);
+          setShowTrailerModal(true);
         } else {
           alert("No trailer available for this movie");
         }
@@ -60,6 +61,12 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies, onBookNow }) => {
       console.error("Error fetching trailer:", error);
       alert("Failed to load trailer");
     }
+  };
+
+  // Close trailer modal
+  const closeTrailerModal = () => {
+    setShowTrailerModal(false);
+    setTrailerUrl(null);
   };
 
   if (movies.length === 0) {
@@ -126,6 +133,25 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ movies, onBookNow }) => {
           ></span>
         ))}
       </div>
+
+      {/* Trailer Modal */}
+      {showTrailerModal && trailerUrl && (
+        <div className="trailer-modal active">
+          <div className="trailer-modal-content">
+            <button className="close-modal" onClick={closeTrailerModal}>
+              ✕
+            </button>
+            <iframe
+              className="trailer-iframe"
+              src={trailerUrl}
+              title="Movie Trailer"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
