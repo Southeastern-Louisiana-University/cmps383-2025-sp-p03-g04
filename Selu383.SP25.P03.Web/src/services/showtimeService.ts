@@ -44,6 +44,27 @@ export const getShowtimesByMovie = async (movieId: number): Promise<Showtime[]> 
 };
 
 /**
+ * Fetches a specific showtime by ID
+ */
+export const getShowtime = async (id: number): Promise<Showtime> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/showtimes/${id}`, {
+      method: 'GET',
+      headers: DEFAULT_HEADERS
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch showtime ${id}: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching showtime ID ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Fetches showtimes for a specific theater
  */
 export const getShowtimesByTheater = async (theaterId: number): Promise<Showtime[]> => {
