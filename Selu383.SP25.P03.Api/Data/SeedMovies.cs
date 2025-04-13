@@ -80,7 +80,7 @@ namespace Selu383.SP25.P03.Api.Data
         Description = "After meeting with newly elected U.S. President Thaddeus Ross, Sam finds himself in the middle of an international incident.",
         PosterUrl = "https://s3.us-east-1.amazonaws.com/mt-website-prod-contentbucket-1tg1jr7b5zn9a/images/movie-posters/HO00005936.jpg?w=205&h=307",
         Runtime = 118,
-        Rating = "PG-13",
+        Rating = "TBD",
         ReleaseDate = new DateTime(2025, 2, 13),
         TmdbId = 822119
     },
@@ -386,7 +386,7 @@ namespace Selu383.SP25.P03.Api.Data
         Description = "Becoming Led Zeppelin, a documentary that dives into the rise of the epochal rock group, has been completed. It is the only documentary of its kind that the band themselves have participated in. The documentary, which was first announced in 2019, includes new interviews with Jimmy Page, Robert Plant and John Paul Jones, as well as rare archival interviews with the band's late drummer John Bonham.",
         PosterUrl = "https://s3.us-east-1.amazonaws.com/mt-website-prod-contentbucket-1tg1jr7b5zn9a/images/movie-posters/HO00005953.jpg?w=205&h=307",
         Runtime = 121,
-        Rating = "PG-13",
+        Rating = "TBD",
         ReleaseDate = new DateTime(2025, 2, 7),
         TmdbId = 857800
     },
