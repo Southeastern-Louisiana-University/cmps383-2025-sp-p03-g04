@@ -16,12 +16,15 @@ import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
 import { MovieCarousel } from "../../components/MovieCarousel";
 import { UIColors } from "../../styles/theme/colors";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 import * as movieService from "../../services/movies/movieService";
 import * as theaterService from "../../services/theaters/theaterService";
 
 import { Movie, Showtime } from "../../types/models/movie";
 import { Theater } from "../../types/models/theater";
+import { TheaterSelector } from "@/components/TheaterSelector";
+import { TodaysShowsList } from "@/components/TodaysShowsList";
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -51,11 +54,11 @@ export default function HomeScreen() {
   }, []);
 
   // Check authentication
-  useEffect(() => {
-    if (!user) {
-      router.replace("./role-selection");
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.replace("./role-selection");
+  //   }
+  // }, [user]);
 
   // Load theater showtimes when selected theater changes
   useEffect(() => {
@@ -202,12 +205,187 @@ export default function HomeScreen() {
 
   // If not logged in, show loading until redirect happens
   if (!user) {
+    function handleSelectTheater(theater: Theater): void {
+      setSelectedTheater(theater);
+    }
+
     return (
-      <ThemeAwareScreen>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={UIColors.brandGreen} />
-        </View>
-      </ThemeAwareScreen>
+      <ThemedView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: selectedTheater ? selectedTheater.name : "Lion's Den Cinemas",
+            headerStyle: {
+              backgroundColor: isDark
+                ? UIColors.dark.navBar
+                : UIColors.light.navBar,
+            },
+            headerTitleStyle: {
+              color: isDark ? UIColors.dark.text : UIColors.light.text,
+              fontSize: 18,
+            },
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() => router.push("/login")}
+                style={{ marginRight: 15 }}
+              >
+                <Ionicons name="person-outline" size={24} color="#B4D335" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[UIColors.brandGreen]}
+              tintColor={UIColors.brandGreen}
+            />
+          }
+        >
+          <View style={styles.logoContainer}>
+            <Ionicons
+              name="film-outline"
+              size={80}
+              color="#B4D335"
+              style={{ marginBottom: 16 }}
+            />
+            <ThemedText style={styles.welcomeText}>
+              Welcome to Lion's Den Cinema
+            </ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Experience movies like never before
+            </ThemedText>
+          </View>
+  
+          <TheaterSelector
+            theaters={theaters}
+            selectedTheater={selectedTheater}
+            onSelectTheater={handleSelectTheater}
+          />
+  
+          <MovieCarousel movies={movies} onSelectMovie={handleSelectMovie} />
+  
+          {/* Action Buttons */}
+          <View style={styles.actionButtonsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: isDark
+                    ? UIColors.dark.surface
+                    : UIColors.light.surface,
+                },
+              ]}
+              onPress={() => router.push("/login")}
+            >
+              <Ionicons
+                name="person-outline"
+                size={24}
+                color={UIColors.brandGreen}
+              />
+              <ThemedText style={styles.actionButtonText}>
+                Sign In
+              </ThemedText>
+            </TouchableOpacity>
+  
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: isDark
+                    ? UIColors.dark.surface
+                    : UIColors.light.surface,
+                },
+              ]}
+              onPress={() => router.push("/movies")}
+            >
+              <Ionicons
+                name="film-outline"
+                size={24}
+                color={UIColors.brandGreen}
+              />
+              <ThemedText style={styles.actionButtonText}>
+                Browse Movies
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+  
+          {/* Date selector tabs */}
+          <View style={styles.dateTabs}>
+            <TouchableOpacity
+              style={[
+                styles.dateTab,
+                {
+                  backgroundColor: isDark
+                    ? UIColors.dark.card
+                    : UIColors.light.card,
+                },
+                selectedDate === "today" && {
+                  backgroundColor: UIColors.brandGreen,
+                },
+              ]}
+              onPress={() => handleDateChange("today")}
+            >
+              <ThemedText
+                style={[
+                  styles.dateTabText,
+                  selectedDate === "today" && {
+                    color: "#242424",
+                    fontWeight: "bold",
+                  },
+                ]}
+              >
+                Today
+              </ThemedText>
+            </TouchableOpacity>
+  
+            <TouchableOpacity
+              style={[
+                styles.dateTab,
+                {
+                  backgroundColor: isDark
+                    ? UIColors.dark.card
+                    : UIColors.light.card,
+                },
+                selectedDate === "tomorrow" && {
+                  backgroundColor: UIColors.brandGreen,
+                },
+              ]}
+              onPress={() => handleDateChange("tomorrow")}
+            >
+              <ThemedText
+                style={[
+                  styles.dateTabText,
+                  selectedDate === "tomorrow" && {
+                    color: "#242424",
+                    fontWeight: "bold",
+                  },
+                ]}
+              >
+                Tomorrow
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+  
+          {/* Showtimes section */}
+          <ThemedText style={styles.sectionTitle}>
+            {selectedDate === "today"
+              ? "Today's Showtimes"
+              : "Tomorrow's Showtimes"}
+          </ThemedText>
+  
+          <TodaysShowsList
+            showtimes={showtimes}
+            onSelectShowtime={handleSelectShowtime}
+          />
+        </ScrollView>
+        
+        {/* Theme toggle */}
+        <ThemeToggle position="bottomRight" size={40} />
+      </ThemedView>
     );
   }
 
@@ -794,11 +972,21 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
   },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
   welcomeText: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
+    marginBottom: 10,
   },
   dropdown: {
     position: "absolute",
