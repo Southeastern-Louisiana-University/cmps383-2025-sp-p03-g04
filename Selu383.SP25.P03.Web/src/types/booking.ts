@@ -14,7 +14,7 @@ export enum SeatStatus {
 }
 
 export interface SeatingLayout {
-  showTimeId: number;
+  showtimeId: number;
   movieTitle: string;
   startTime: string;
   screenName: string;

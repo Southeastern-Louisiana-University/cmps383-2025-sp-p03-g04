@@ -4,7 +4,8 @@
   justify-content: space-between;
   align-items: center;
   background-color: #000000;
-  padding: 1rem 2rem;
+  /* --- MODIFIED: Reduced top/bottom padding --- */
+  padding: 0.11rem 2rem;
   border-bottom: 1px solid #65A30D;
   position: sticky;
   top: 0;
@@ -14,7 +15,8 @@
 }
 
 .navbar.scrolled {
-  padding: 0.75rem 2rem;
+  /* --- MODIFIED: Reduced top/bottom padding --- */
+  padding: 0.4rem 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -28,6 +30,9 @@
   text-decoration: none;
   color: #f8f9fa;
   transition: transform 0.3s ease;
+  /* Optional: If logo/text is too tall, adjust its font-size or max-height */
+  /* font-size: 1rem; */
+  /* max-height: 30px; */ /* Example if it's an image */
 }
 
 .welcome-logo:hover {
@@ -44,13 +49,14 @@
 .primary-menu a {
   color: #f8f9fa;
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  /* --- MODIFIED: Reduced top/bottom padding --- */
+  padding: 0.25rem 1rem;
   margin: 0 0.5rem;
   border-radius: 4px;
   transition: all 0.3s ease;
   position: relative;
   font-weight: 500;
-  font-size: large;
+  font-size: large; /* You might want to reduce this too, e.g., to 'medium' or '1rem' */
 }
 
 /* Underline animation */
@@ -59,7 +65,7 @@
   position: absolute;
   width: 0;
   height: 2px;
-  bottom: 0;
+  bottom: 0; /* Adjust if underline looks off with new padding */
   left: 50%;
   background-color: #65A30D;
   transition: all 0.3s ease;
@@ -93,7 +99,8 @@
 }
 
 .theater-mode {
-  padding: 0.5rem 1rem;
+  /* --- MODIFIED: Reduced top/bottom padding --- */
+  padding: 0.25rem 1rem;
   background-color: transparent;
   border: 1px solid #65A30D;
   color: #65A30D;
@@ -106,7 +113,7 @@
   background-repeat: no-repeat;
   background-position: right 0.7rem top 50%;
   background-size: 0.65rem auto;
-  min-width: 180px;
+  min-width: 180px; /* You might need to adjust min-width if text wraps */
 }
 
 .theater-mode:hover {
@@ -121,7 +128,8 @@
 }
 
 .sign-in {
-  padding: 0.5rem 1.5rem;
+  /* --- MODIFIED: Reduced top/bottom padding --- */
+  padding: 0.25rem 1.5rem;
   background-color: #65A30D;
   color: #ffffff;
   border: none;
@@ -143,7 +151,7 @@
   background: none;
   border: none;
   color: #f8f9fa;
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Adjust if needed for vertical alignment */
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -157,7 +165,7 @@
 .mobile-menu {
   display: none;
   position: absolute;
-  top: 100%;
+  top: 100%; /* This will attach below the now shorter navbar */
   left: 0;
   width: 100%;
   background-color: #000000;
@@ -169,16 +177,16 @@
 }
 
 .mobile-menu.active {
-  max-height: 300px;
-  padding: 1rem 0;
+  max-height: 300px; /* Adjust if content gets cut off */
+  padding: 0.5rem 0; /* Slightly reduced padding */
   border-bottom: 1px solid #65A30D;
 }
 
 .mobile-menu a {
   color: #f8f9fa;
   text-decoration: none;
-  padding: 0.75rem 2rem;
-  margin: 0.25rem 0;
+  padding: 0.6rem 2rem; /* Slightly reduced padding */
+  margin: 0.1rem 0; /* Slightly reduced margin */
   transition: all 0.3s ease;
 }
 
@@ -196,7 +204,7 @@
 .mobile-theater-dropdown {
   display: flex;
   align-items: center;
-  padding: 0.75rem 2rem;
+  padding: 0.6rem 2rem; /* Slightly reduced padding */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -207,7 +215,7 @@
 
 .mobile-theater-dropdown select {
   flex-grow: 1;
-  padding: 0.5rem;
+  padding: 0.4rem; /* Slightly reduced padding */
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #f8f9fa;
@@ -225,61 +233,65 @@
   .navbar-left {
     width: 30%;
   }
-  
+
   .primary-menu {
     width: 40%;
   }
-  
+
   .navbar-right {
     width: 30%;
   }
-  
+
   .primary-menu a {
-    padding: 0.5rem 0.75rem;
+    /* --- MODIFIED: Consistent padding reduction --- */
+    padding: 0.25rem 0.75rem;
     margin: 0 0.25rem;
   }
 }
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 1rem;
+    /* --- MODIFIED: Consistent padding reduction --- */
+    padding: 0.5rem 1rem;
   }
-  
+
   .navbar-left {
     width: 70%;
   }
-  
+
   .primary-menu {
     display: none;
   }
-  
+
   .menu-toggle {
     display: block;
   }
-  
+
   .navbar-right {
     width: 30%;
     justify-content: flex-end;
   }
-  
+
   .mobile-menu {
     display: flex;
   }
-  
+
   .theater-mode, .sign-in {
     display: none;
   }
 }
 
+/* Note: The @media (max-width: 480px) rule didn't directly style the navbar height, */
+/* so it remains unchanged unless specific adjustments are needed for very small screens. */
 @media (max-width: 480px) {
   .welcome-banner .text-container {
     width: 120px;
   }
-  
+
   .animated-text {
     font-size: 1rem;
   }
-  
+
   .movie-icon {
     font-size: 1.5rem;
   }
