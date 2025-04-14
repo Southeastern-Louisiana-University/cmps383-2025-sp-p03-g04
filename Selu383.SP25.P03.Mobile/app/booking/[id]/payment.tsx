@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  StyleSheet,
   TextInput,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -12,266 +13,156 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../../components/AuthProvider";
 import { useTheme } from "../../../components/ThemeProvider";
-
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
+import { ThemeToggle } from "../../../components/ThemeToggle";
 
 import * as reservationService from "../../../services/reservations/reservationService";
-
-import { ReservationResponse } from "../../../types/api/reservations";
-import { paymentScreenStyles as styles } from "../../../styles/screens/paymentScreen";
-
-// Payment method type definition
-type PaymentMethod = {
-  id: string;
-  label: string;
-  cardNumber?: string;
-  icon: string;
-  isDefault?: boolean;
-};
+import * as movieService from "../../../services/movies/movieService";
 
 export default function PaymentScreen() {
   const { id, reservationId } = useLocalSearchParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const { isDarkMode } = useTheme();
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === "dark";
 
   // State variables
-  const [reservation, setReservation] = useState<ReservationResponse | null>(
-    null
-  );
+  const [reservation, setReservation] = useState<any>(null);
   const [guestSelection, setGuestSelection] = useState<any>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("visa");
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    string | null
-  >(null);
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [nameOnCard, setNameOnCard] = useState("");
-
-  // Sample payment methods
-  const paymentMethods: PaymentMethod[] = [
-    {
-      id: "visa",
-      label: "Visa ending in 4242",
-      cardNumber: "•••• •••• •••• 4242",
-      icon: "card",
-      isDefault: true,
-    },
-    {
-      id: "mastercard",
-      label: "Mastercard ending in 5555",
-      cardNumber: "•••• •••• •••• 5555",
-      icon: "card",
-    },
-    {
-      id: "applepay",
-      label: "Apple Pay",
-      icon: "logo-apple",
-    },
-    {
-      id: "googlepay",
-      label: "Google Pay",
-      icon: "logo-google",
-    },
-    {
-      id: "new-card",
-      label: "Add new payment method",
-      icon: "add-circle-outline",
-    },
-  ];
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [showtime, setShowtime] = useState<any>(null);
 
   useEffect(() => {
     loadData();
-  }, [id, reservationId]);
+  }, [reservationId, id]);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // If we have a reservation ID, fetch it
       if (reservationId) {
+        // Load reservation data for authenticated users
         const reservationData = await reservationService.getReservation(
           Number(reservationId)
         );
         setReservation(reservationData);
-        setSelectedPaymentMethod(paymentMethods[0].id); // Set default payment method
+        setTotalAmount(reservationData.totalAmount);
+
+        // Load showtime data
+        const showtimeData = await movieService.getShowtime(Number(id));
+        setShowtime(showtimeData);
       } else {
-        // Otherwise, load guest selection from AsyncStorage
-        const selectionData = await AsyncStorage.getItem("guestSelection");
-        if (selectionData) {
-          setGuestSelection(JSON.parse(selectionData));
-          setSelectedPaymentMethod(paymentMethods[0].id); // Set default payment method
+        // Load guest selection from local storage
+        const guestSelectionData = await AsyncStorage.getItem("guestSelection");
+        if (guestSelectionData) {
+          const parsedData = JSON.parse(guestSelectionData);
+          setGuestSelection(parsedData);
+          setTotalAmount(parsedData.totalPrice);
+
+          // Load showtime data
+          const showtimeData = await movieService.getShowtime(Number(id));
+          setShowtime(showtimeData);
         } else {
-          // No selection data found
-          Alert.alert(
-            "Error",
-            "No booking information found. Please try again.",
-            [
-              {
-                text: "OK",
-                onPress: () => router.back(),
-              },
-            ]
-          );
+          // No selection data
+          Alert.alert("Error", "No booking information found.", [
+            { text: "OK", onPress: () => router.back() },
+          ]);
         }
       }
     } catch (error) {
-      console.error("Failed to load data:", error);
-      Alert.alert(
-        "Error",
-        "Failed to load booking information. Please try again."
-      );
+      console.error("Failed to load payment data:", error);
+      Alert.alert("Error", "Failed to load booking details.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePaymentMethodSelect = (methodId: string) => {
-    setSelectedPaymentMethod(methodId);
-
-    // Clear form if adding new card
-    if (methodId === "new-card") {
-      setCardNumber("");
-      setExpiryDate("");
-      setCvv("");
-      setNameOnCard("");
-    }
-  };
-
-  // Format card number input with spaces
-  const formatCardNumber = (text: string) => {
-    const cleaned = text.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const chunks = [];
-
-    for (let i = 0; i < cleaned.length; i += 4) {
-      chunks.push(cleaned.substring(i, i + 4));
-    }
-
-    return chunks.join(" ").trim();
-  };
-
-  // Format expiry date input with slash
-  const formatExpiryDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, "");
-
-    if (cleaned.length >= 3) {
-      return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 4)}`;
-    } else if (cleaned.length === 2) {
-      return `${cleaned}/`;
-    }
-
-    return cleaned;
-  };
-
+  // Simulate payment processing
   const handlePayment = async () => {
-    // Validate new card details if selected
-    if (selectedPaymentMethod === "new-card") {
-      if (!cardNumber || cardNumber.replace(/\s+/g, "").length < 16) {
-        Alert.alert("Invalid Card", "Please enter a valid card number.");
-        return;
-      }
-
-      if (!expiryDate || expiryDate.length < 5) {
-        Alert.alert(
-          "Invalid Expiry Date",
-          "Please enter a valid expiry date (MM/YY)."
-        );
-        return;
-      }
-
-      if (!cvv || cvv.length < 3) {
-        Alert.alert("Invalid CVV", "Please enter a valid CVV code.");
-        return;
-      }
-
-      if (!nameOnCard) {
-        Alert.alert("Invalid Name", "Please enter the name on card.");
-        return;
-      }
-    }
-
     setIsProcessing(true);
 
-    try {
-      // For authenticated users with existing reservation
-      if (reservation) {
-        // Mark reservation as paid
-        await reservationService.payForReservation(reservation.id);
+    // Simulate payment processing with a delay
+    setTimeout(async () => {
+      try {
+        if (isAuthenticated && reservation) {
+          // For authenticated users with a reservation
+          await reservationService.payForReservation(reservation.id);
 
-        // Navigate to confirmation screen
-        router.push({
-          pathname: "/booking/[id]/confirmation",
-          params: {
-            id: id?.toString() || "",
-            reservationId: reservation.id.toString(),
-          },
-        });
-      }
-      // For guest users
-      else if (guestSelection) {
-        // Create a reservation and mark as paid immediately
-        const tickets = guestSelection.seats.map((seatId: number) => ({
-          seatId,
-          ticketType: guestSelection.ticketTypes[seatId] || "Adult",
-        }));
+          // Navigate to confirmation
+          router.push({
+            pathname: `./booking/${id}/confirmation`,
+            params: { reservationId: reservation.id.toString() },
+          });
+        } else if (guestSelection) {
+          // For guest users
+          // Create a temporary reservation object for the guest
+          const guestReservation = {
+            id: new Date().getTime(), // Use timestamp as ID
+            movieTitle: showtime?.movieTitle || guestSelection.movieTitle,
+            theaterName: showtime?.theaterName || guestSelection.theaterName,
+            screenName: showtime?.screenName || guestSelection.screenName,
+            showtimeStartTime: showtime?.startTime || guestSelection.startTime,
+            showtimeId: Number(id),
+            totalAmount: guestSelection.totalPrice,
+            isPaid: true,
+            reservationTime: new Date().toISOString(),
+            tickets: guestSelection.seats.map((seatId: number) => ({
+              id: seatId,
+              seatId: seatId,
+              row: String.fromCharCode(65 + Math.floor(Math.random() * 8)), // Random row A-H
+              number: Math.floor(Math.random() * 20) + 1, // Random seat number 1-20
+              ticketType: guestSelection.ticketTypes[seatId] || "Adult",
+              price: guestSelection.totalPrice / guestSelection.seats.length,
+            })),
+          };
 
-        const reservationRequest = {
-          showtimeId: guestSelection.showtimeId,
-          tickets,
-          processPayment: true, // Process payment immediately
-        };
+          // Store guest ticket for future reference
+          const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
+          const guestTickets = existingTicketsStr
+            ? JSON.parse(existingTicketsStr)
+            : [];
 
-        const newReservation = await reservationService.createReservation(
-          reservationRequest
+          guestTickets.push({
+            reservationId: guestReservation.id,
+            movieTitle: guestReservation.movieTitle,
+            theaterName: guestReservation.theaterName,
+            screenName: guestReservation.screenName,
+            showtimeStartTime: guestReservation.showtimeStartTime,
+            totalAmount: guestReservation.totalAmount,
+            tickets: guestReservation.tickets,
+            purchaseDate: new Date().toISOString(),
+          });
+
+          await AsyncStorage.setItem(
+            "guestTickets",
+            JSON.stringify(guestTickets)
+          );
+
+          // Clear the selection
+          await AsyncStorage.removeItem("guestSelection");
+
+          // Navigate to confirmation
+          router.push({
+            pathname: `./booking/${id}/confirmation`,
+            params: {
+              reservationId: guestReservation.id.toString(),
+              guest: "true",
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Payment error:", error);
+        Alert.alert(
+          "Payment Failed",
+          "There was an error processing your payment."
         );
-
-        // Save ticket info for guest users
-        const guestTicketInfo = {
-          reservationId: newReservation.id,
-          movieTitle: newReservation.movieTitle,
-          theaterName: newReservation.theaterName,
-          screenName: newReservation.screenName,
-          showtimeStartTime: newReservation.showtimeStartTime,
-          totalAmount: newReservation.totalAmount,
-          tickets: newReservation.tickets,
-          purchaseDate: new Date().toISOString(),
-        };
-
-        // Store guest ticket info
-        const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
-        let guestTickets = existingTicketsStr
-          ? JSON.parse(existingTicketsStr)
-          : [];
-        guestTickets.push(guestTicketInfo);
-        await AsyncStorage.setItem(
-          "guestTickets",
-          JSON.stringify(guestTickets)
-        );
-
-        // Clean up guest selection
-        await AsyncStorage.removeItem("guestSelection");
-
-        // Navigate to confirmation screen
-        router.push({
-          pathname: "/booking/[id]/confirmation",
-          params: {
-            id: guestSelection.showtimeId.toString(),
-            reservationId: newReservation.id.toString(),
-            guest: "true",
-          },
-        });
+        setIsProcessing(false);
       }
-    } catch (error) {
-      console.error("Payment processing error:", error);
-      Alert.alert(
-        "Payment Failed",
-        "There was an error processing your payment. Please try again."
-      );
-    } finally {
-      setIsProcessing(false);
-    }
+    }, 1500); // 1.5 second delay to simulate processing
   };
 
   // Render loading state
@@ -286,18 +177,31 @@ export default function PaymentScreen() {
     );
   }
 
+  // Payment methods data
+  const paymentMethods = [
+    { id: "visa", label: "Visa ending in 4242", icon: "card" },
+    { id: "mastercard", label: "Mastercard ending in 5555", icon: "card" },
+    { id: "applepay", label: "Apple Pay", icon: "logo-apple" },
+    { id: "googlepay", label: "Google Pay", icon: "logo-google" },
+    {
+      id: "new-card",
+      label: "Add new payment method",
+      icon: "add-circle-outline",
+    },
+  ];
+
   return (
     <>
       <Stack.Screen
         options={{
           title: "Payment",
           headerStyle: {
-            backgroundColor: "#1E2429",
+            backgroundColor: isDark ? "#1E2429" : "#FFFFFF",
           },
           headerTitleStyle: {
-            color: "#FFFFFF",
+            color: isDark ? "#FFFFFF" : "#242424",
           },
-          headerTintColor: "#B4D335",
+          headerTintColor: isDark ? "#FFFFFF" : "#242424",
         }}
       />
 
@@ -309,17 +213,26 @@ export default function PaymentScreen() {
 
             <View style={styles.summaryContent}>
               <ThemedText style={styles.movieTitle}>
-                {reservation?.movieTitle || guestSelection?.movieTitle}
+                {reservation?.movieTitle ||
+                  showtime?.movieTitle ||
+                  guestSelection?.movieTitle}
               </ThemedText>
 
               <ThemedText style={styles.theaterInfo}>
-                {reservation?.theaterName || guestSelection?.theaterName} •{" "}
-                {reservation?.screenName || guestSelection?.screenName}
+                {reservation?.theaterName ||
+                  showtime?.theaterName ||
+                  guestSelection?.theaterName}{" "}
+                •{" "}
+                {reservation?.screenName ||
+                  showtime?.screenName ||
+                  guestSelection?.screenName}
               </ThemedText>
 
               <ThemedText style={styles.showtime}>
                 {new Date(
-                  reservation?.showtimeStartTime || guestSelection?.startTime
+                  reservation?.showtimeStartTime ||
+                    showtime?.startTime ||
+                    guestSelection?.startTime
                 ).toLocaleString(undefined, {
                   weekday: "short",
                   month: "short",
@@ -331,204 +244,334 @@ export default function PaymentScreen() {
 
               <View style={styles.ticketsContainer}>
                 <ThemedText style={styles.ticketsLabel}>Tickets:</ThemedText>
-                {reservation?.tickets
-                  ? reservation.tickets.map((ticket, index) => (
+                {reservation?.tickets ? (
+                  reservation.tickets.map((ticket: any, index: number) => (
+                    <ThemedText key={index} style={styles.ticketItem}>
+                      {ticket.ticketType} - Seat {ticket.row}
+                      {ticket.number} (${ticket.price.toFixed(2)})
+                    </ThemedText>
+                  ))
+                ) : guestSelection?.seats ? (
+                  guestSelection.seats.map((seatId: number, index: number) => {
+                    const ticketType =
+                      guestSelection.ticketTypes[seatId] || "Adult";
+                    const price =
+                      guestSelection.totalPrice / guestSelection.seats.length;
+                    return (
                       <ThemedText key={index} style={styles.ticketItem}>
-                        {ticket.ticketType} - Seat {ticket.row}
-                        {ticket.number} (${ticket.price.toFixed(2)})
+                        {ticketType} - Seat {index + 1} (${price.toFixed(2)})
                       </ThemedText>
-                    ))
-                  : guestSelection?.seats.map(
-                      (seatId: number, index: number) => {
-                        const ticketType =
-                          guestSelection.ticketTypes[seatId] || "Adult";
-                        // Normally we'd have seat row/number info here, but in this simplified version
-                        // we'll just show seat IDs
-                        return (
-                          <ThemedText key={index} style={styles.ticketItem}>
-                            {ticketType} - Seat ID: {seatId}
-                          </ThemedText>
-                        );
-                      }
-                    )}
+                    );
+                  })
+                ) : (
+                  <ThemedText style={styles.ticketItem}>
+                    No tickets found
+                  </ThemedText>
+                )}
               </View>
 
-              <View style={styles.totalContainer}>
+              <View style={styles.totalRow}>
                 <ThemedText style={styles.totalLabel}>Total:</ThemedText>
-                <ThemedText style={styles.totalValue}>
-                  $
-                  {(
-                    reservation?.totalAmount ||
-                    guestSelection?.totalPrice ||
-                    0
-                  ).toFixed(2)}
+                <ThemedText style={styles.totalPrice}>
+                  ${totalAmount.toFixed(2)}
                 </ThemedText>
               </View>
             </View>
           </View>
 
           {/* Payment methods */}
-          <View style={styles.paymentContainer}>
+          <View style={styles.paymentMethodsContainer}>
             <ThemedText style={styles.sectionTitle}>Payment Method</ThemedText>
 
             {paymentMethods.map((method) => (
               <TouchableOpacity
                 key={method.id}
                 style={[
-                  styles.paymentMethod,
+                  styles.paymentMethodItem,
                   selectedPaymentMethod === method.id &&
                     styles.selectedPaymentMethod,
                 ]}
-                onPress={() => handlePaymentMethodSelect(method.id)}
+                onPress={() => setSelectedPaymentMethod(method.id)}
               >
-                <View style={styles.paymentMethodIcon}>
-                  <Ionicons
-                    name={method.icon as any}
-                    size={24}
-                    color="#B4D335"
-                  />
-                </View>
-
-                <View style={styles.paymentMethodDetails}>
-                  <ThemedText style={styles.paymentMethodLabel}>
-                    {method.label}
-                    {method.isDefault && (
-                      <ThemedText style={styles.defaultLabel}>
-                        {" "}
-                        (Default)
-                      </ThemedText>
-                    )}
-                  </ThemedText>
-
-                  {method.cardNumber && (
-                    <ThemedText style={styles.cardNumber}>
-                      {method.cardNumber}
-                    </ThemedText>
-                  )}
-                </View>
-
-                <View style={styles.paymentMethodCheck}>
+                <Ionicons
+                  name={method.icon as any}
+                  size={24}
+                  color={
+                    selectedPaymentMethod === method.id
+                      ? "#B4D335"
+                      : isDark
+                      ? "#FFFFFF"
+                      : "#242424"
+                  }
+                  style={styles.paymentIcon}
+                />
+                <ThemedText
+                  style={[
+                    styles.paymentLabel,
+                    selectedPaymentMethod === method.id &&
+                      styles.selectedPaymentLabel,
+                  ]}
+                >
+                  {method.label}
+                </ThemedText>
+                <View style={styles.radioButton}>
                   {selectedPaymentMethod === method.id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color="#B4D335"
-                    />
+                    <View style={styles.radioButtonInner} />
                   )}
                 </View>
               </TouchableOpacity>
             ))}
-
-            {/* New card form */}
-            {selectedPaymentMethod === "new-card" && (
-              <View style={styles.newCardForm}>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Card Number</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="1234 5678 9012 3456"
-                    placeholderTextColor="#9BA1A6"
-                    value={cardNumber}
-                    onChangeText={(text) =>
-                      setCardNumber(formatCardNumber(text))
-                    }
-                    keyboardType="numeric"
-                    maxLength={19} // 16 digits + 3 spaces
-                  />
-                </View>
-
-                <View style={styles.rowInputs}>
-                  <View style={[styles.inputGroup, styles.halfInput]}>
-                    <ThemedText style={styles.inputLabel}>
-                      Expiry Date
-                    </ThemedText>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="MM/YY"
-                      placeholderTextColor="#9BA1A6"
-                      value={expiryDate}
-                      onChangeText={(text) =>
-                        setExpiryDate(formatExpiryDate(text))
-                      }
-                      keyboardType="numeric"
-                      maxLength={5} // MM/YY
-                    />
-                  </View>
-
-                  <View style={[styles.inputGroup, styles.halfInput]}>
-                    <ThemedText style={styles.inputLabel}>CVV</ThemedText>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="123"
-                      placeholderTextColor="#9BA1A6"
-                      value={cvv}
-                      onChangeText={(text) => setCvv(text.replace(/\D/g, ""))}
-                      keyboardType="numeric"
-                      maxLength={4}
-                      secureTextEntry
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>
-                    Name on Card
-                  </ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="John Doe"
-                    placeholderTextColor="#9BA1A6"
-                    value={nameOnCard}
-                    onChangeText={setNameOnCard}
-                    autoCapitalize="words"
-                  />
-                </View>
-
-                <View style={styles.saveCardContainer}>
-                  <Ionicons name="checkbox-outline" size={24} color="#B4D335" />
-                  <ThemedText style={styles.saveCardText}>
-                    Save card for future purchases
-                  </ThemedText>
-                </View>
-              </View>
-            )}
           </View>
 
-          {/* Billing Address section would go here in a real app */}
+          {/* Add new card form (conditionally rendered) */}
+          {selectedPaymentMethod === "new-card" && (
+            <View style={styles.newCardContainer}>
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Card Number</ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { color: isDark ? "#FFFFFF" : "#242424" },
+                  ]}
+                  placeholder="4242 4242 4242 4242"
+                  placeholderTextColor={isDark ? "#666666" : "#999999"}
+                  keyboardType="number-pad"
+                  maxLength={19}
+                />
+              </View>
 
-          {/* Payment button */}
+              <View style={styles.inputRow}>
+                <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
+                  <ThemedText style={styles.inputLabel}>Expiration</ThemedText>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: isDark ? "#FFFFFF" : "#242424" },
+                    ]}
+                    placeholder="MM/YY"
+                    placeholderTextColor={isDark ? "#666666" : "#999999"}
+                    keyboardType="number-pad"
+                    maxLength={5}
+                  />
+                </View>
+
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <ThemedText style={styles.inputLabel}>CVV</ThemedText>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: isDark ? "#FFFFFF" : "#242424" },
+                    ]}
+                    placeholder="123"
+                    placeholderTextColor={isDark ? "#666666" : "#999999"}
+                    keyboardType="number-pad"
+                    maxLength={4}
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Name on Card</ThemedText>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { color: isDark ? "#FFFFFF" : "#242424" },
+                  ]}
+                  placeholder="John Doe"
+                  placeholderTextColor={isDark ? "#666666" : "#999999"}
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Pay button */}
           <TouchableOpacity
             style={[styles.payButton, isProcessing && styles.disabledButton]}
             onPress={handlePayment}
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color="#242424" />
             ) : (
-              <>
-                <ThemedText style={styles.payButtonText}>
-                  Pay $
-                  {(
-                    reservation?.totalAmount ||
-                    guestSelection?.totalPrice ||
-                    0
-                  ).toFixed(2)}
-                </ThemedText>
-                <Ionicons
-                  name="lock-closed"
-                  size={16}
-                  color="#FFFFFF"
-                  style={styles.secureIcon}
-                />
-              </>
+              <ThemedText style={styles.payButtonText}>
+                Pay ${totalAmount.toFixed(2)}
+              </ThemedText>
             )}
           </TouchableOpacity>
 
-          <ThemedText style={styles.secureNote}>
-            Your payment information is secure and encrypted
+          <ThemedText style={styles.secureText}>
+            <Ionicons name="lock-closed" size={14} color="#B4D335" /> All
+            payments are secure and encrypted
           </ThemedText>
         </ScrollView>
+
+        {/* Theme toggle */}
+        <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    color: "#9BA1A6",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  summaryContainer: {
+    backgroundColor: "#262D33",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  summaryContent: {
+    paddingTop: 8,
+  },
+  movieTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  theaterInfo: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  showtime: {
+    fontSize: 16,
+    color: "#B4D335",
+    marginBottom: 16,
+  },
+  ticketsContainer: {
+    marginBottom: 16,
+  },
+  ticketsLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  ticketItem: {
+    fontSize: 14,
+    marginBottom: 4,
+    paddingLeft: 8,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+    paddingTop: 16,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  totalPrice: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#B4D335",
+  },
+  paymentMethodsContainer: {
+    backgroundColor: "#262D33",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  paymentMethodItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
+  },
+  selectedPaymentMethod: {
+    backgroundColor: "rgba(180, 211, 53, 0.1)",
+  },
+  paymentIcon: {
+    marginRight: 12,
+  },
+  paymentLabel: {
+    fontSize: 16,
+    flex: 1,
+  },
+  selectedPaymentLabel: {
+    fontWeight: "bold",
+    color: "#B4D335",
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#B4D335",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioButtonInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#B4D335",
+  },
+  newCardContainer: {
+    backgroundColor: "#262D33",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  inputRow: {
+    flexDirection: "row",
+  },
+  payButton: {
+    backgroundColor: "#B4D335",
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  payButtonText: {
+    color: "#1E2429",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  secureText: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#9BA1A6",
+    marginBottom: 20,
+  },
+});
