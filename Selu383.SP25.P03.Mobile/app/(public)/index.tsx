@@ -27,7 +27,7 @@ import { homeScreenStyles as styles } from "../../styles/screens/homeScreen";
 
 export default function HomeScreen() {
   const { user, isAuthenticated } = useAuth();
-  const { isDarkMode, isTheaterMode } = useTheme();
+  const {} = useTheme();
   const router = useRouter();
 
   // State variables

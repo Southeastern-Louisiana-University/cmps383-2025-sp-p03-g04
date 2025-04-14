@@ -5,27 +5,31 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../components/AuthProvider";
-
+import { useTheme } from "../../components/ThemeProvider";
 import { ThemedView } from "../../components/ThemedView";
 import { ThemedText } from "../../components/ThemedText";
 import { MovieCarousel } from "../../components/MovieCarousel";
 import { TheaterSelector } from "../../components/TheaterSelector";
 import { TodaysShowsList } from "../../components/TodaysShowsList";
+import { ThemeToggle } from "../../components/ThemeToggle";
+import { UIColors } from "../../styles/theme/colors";
 
 import * as movieService from "../../services/movies/movieService";
 import * as theaterService from "../../services/theaters/theaterService";
 
 import { Movie, Showtime } from "../../types/models/movie";
 import { Theater } from "../../types/models/theater";
-import { homeScreenStyles as styles } from "../../styles/screens/homeScreen";
 
 export default function HomeScreen() {
   const { user, isAuthenticated } = useAuth();
+  const { colorScheme } = useTheme();
   const router = useRouter();
+  const isDark = colorScheme === "dark";
 
   // State variables
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -119,6 +123,8 @@ export default function HomeScreen() {
       }
     } catch (error) {
       console.error("Failed to load data:", error);
+      setMovies([]);
+      setTheaters([]);
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +142,6 @@ export default function HomeScreen() {
   };
 
   const handleSelectShowtime = (showtimeId: number) => {
-    // Navigate to booking flow - no authentication required
     router.push(`/booking/${showtimeId}/seats`);
   };
 
@@ -159,15 +164,15 @@ export default function HomeScreen() {
   }
 
   return (
-    <>
+    <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
           title: selectedTheater ? selectedTheater.name : "Lion's Den Cinemas",
           headerStyle: {
-            backgroundColor: "#1E2429",
+            backgroundColor: isDark ? "#1E2429" : "#FFFFFF",
           },
           headerTitleStyle: {
-            color: "#FFFFFF",
+            color: isDark ? "#FFFFFF" : "#242424",
             fontSize: 18,
           },
           headerRight: () => (
@@ -192,123 +197,173 @@ export default function HomeScreen() {
         }}
       />
 
-      <ThemedView style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              colors={["#B4D335"]}
-              tintColor="#B4D335"
-            />
-          }
-        >
-          <ThemedText style={styles.welcomeText}>
-            Welcome to Lion's Den Cinema
-          </ThemedText>
-
-          <TheaterSelector
-            theaters={theaters}
-            selectedTheater={selectedTheater}
-            onSelectTheater={handleSelectTheater}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["#B4D335"]}
+            tintColor="#B4D335"
           />
+        }
+      >
+        <ThemedText style={styles.welcomeText}>
+          Welcome to Lion's Den Cinema
+        </ThemedText>
 
-          <MovieCarousel movies={movies} onSelectMovie={handleSelectMovie} />
+        <MovieCarousel movies={movies} onSelectMovie={handleSelectMovie} />
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push("/movies")}
-            >
-              <Ionicons name="film-outline" size={24} color="#B4D335" />
-              <ThemedText style={styles.actionButtonText}>
-                Browse Movies
-              </ThemedText>
-            </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              isAuthenticated ? router.push("/tickets") : router.push("/login")
+            }
+          >
+            <Ionicons name="ticket-outline" size={24} color="#B4D335" />
+            <ThemedText style={styles.actionButtonText}>My Tickets</ThemedText>
+          </TouchableOpacity>
 
-            {isAuthenticated ? (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => router.push("/tickets")}
-              >
-                <Ionicons name="ticket-outline" size={24} color="#B4D335" />
-                <ThemedText style={styles.actionButtonText}>
-                  My Tickets
-                </ThemedText>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={handleLoginPress}
-              >
-                <Ionicons name="log-in-outline" size={24} color="#B4D335" />
-                <ThemedText style={styles.actionButtonText}>Sign In</ThemedText>
-              </TouchableOpacity>
-            )}
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/concessions")}
+          >
+            <Ionicons name="fast-food-outline" size={24} color="#B4D335" />
+            <ThemedText style={styles.actionButtonText}>Order Food</ThemedText>
+          </TouchableOpacity>
+        </View>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push("/concessions")}
-            >
-              <Ionicons name="fast-food-outline" size={24} color="#B4D335" />
-              <ThemedText style={styles.actionButtonText}>
-                Order Food
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Date selector tabs */}
-          <View style={styles.dateTabs}>
-            <TouchableOpacity
+        {/* Date selector tabs */}
+        <View style={styles.dateTabs}>
+          <TouchableOpacity
+            style={[
+              styles.dateTab,
+              selectedDate === "today" && styles.activeDateTab,
+            ]}
+            onPress={() => setSelectedDate("today")}
+          >
+            <ThemedText
               style={[
-                styles.dateTab,
-                selectedDate === "today" && styles.activeDateTab,
+                styles.dateTabText,
+                selectedDate === "today" && styles.activeDateTabText,
               ]}
-              onPress={() => setSelectedDate("today")}
             >
-              <ThemedText
-                style={[
-                  styles.dateTabText,
-                  selectedDate === "today" && styles.activeDateTabText,
-                ]}
-              >
-                Today
-              </ThemedText>
-            </TouchableOpacity>
+              Today
+            </ThemedText>
+          </TouchableOpacity>
 
-            <TouchableOpacity
+          <TouchableOpacity
+            style={[
+              styles.dateTab,
+              selectedDate === "tomorrow" && styles.activeDateTab,
+            ]}
+            onPress={() => setSelectedDate("tomorrow")}
+          >
+            <ThemedText
               style={[
-                styles.dateTab,
-                selectedDate === "tomorrow" && styles.activeDateTab,
+                styles.dateTabText,
+                selectedDate === "tomorrow" && styles.activeDateTabText,
               ]}
-              onPress={() => setSelectedDate("tomorrow")}
             >
-              <ThemedText
-                style={[
-                  styles.dateTabText,
-                  selectedDate === "tomorrow" && styles.activeDateTabText,
-                ]}
-              >
-                Tomorrow
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
+              Tomorrow
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
 
-          {/* Showtimes section */}
-          <ThemedText style={styles.sectionTitle}>
-            {selectedDate === "today"
-              ? "Today's Showtimes"
-              : "Tomorrow's Showtimes"}
-          </ThemedText>
+        {/* Today's/Tomorrow's Showtimes */}
+        <ThemedText style={styles.sectionTitle}>
+          {selectedDate === "today"
+            ? "Today's Showtimes"
+            : "Tomorrow's Showtimes"}
+        </ThemedText>
 
-          <TodaysShowsList
-            showtimes={showtimes}
-            onSelectShowtime={handleSelectShowtime}
-          />
-        </ScrollView>
-      </ThemedView>
-    </>
+        <TodaysShowsList
+          showtimes={showtimes}
+          onSelectShowtime={handleSelectShowtime}
+        />
+      </ScrollView>
+
+      {/* Theme toggle */}
+      <ThemeToggle position="bottomRight" size={40} />
+    </ThemedView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    color: "#9BA1A6",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 20,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: "#1E2429",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 5,
+    flexDirection: "row",
+    justifyContent: "center",
+    shadowColor: "#B4D335",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  actionButtonText: {
+    color: "#B4D335",
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  dateTabs: {
+    flexDirection: "row",
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  dateTab: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginRight: 8,
+    borderRadius: 24,
+    backgroundColor: "#262D33",
+  },
+  activeDateTab: {
+    backgroundColor: "#B4D335",
+  },
+  dateTabText: {
+    color: "white",
+    fontSize: 16,
+  },
+  activeDateTabText: {
+    color: "#242424",
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+});
