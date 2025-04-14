@@ -3,159 +3,131 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert,
   Share,
+  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import QRCode from "react-native-qrcode-svg";
 import { useAuth } from "../../../components/AuthProvider";
 import { useTheme } from "../../../components/ThemeProvider";
-
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
-import { QRCode } from "../../../components/QRCode";
+import { ThemeToggle } from "../../../components/ThemeToggle";
 
 import * as reservationService from "../../../services/reservations/reservationService";
-
-import { ReservationResponse } from "../../../types/api/reservations";
-import { confirmationScreenStyles as styles } from "../../../styles/screens/confirmationScreen";
 
 export default function ConfirmationScreen() {
   const { id, reservationId, guest } = useLocalSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
-  const { isDarkMode, isTheaterMode } = useTheme();
+  const { user, isAuthenticated } = useAuth();
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === "dark";
 
   // State variables
-  const [reservation, setReservation] = useState<ReservationResponse | null>(
-    null
-  );
-  const [guestTicket, setGuestTicket] = useState<any>(null);
+  const [reservation, setReservation] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [confirmationCode, setConfirmationCode] = useState("");
+  const [qrValue, setQrValue] = useState<string>("");
 
   useEffect(() => {
     loadData();
-    generateConfirmationCode();
-  }, [reservationId]);
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      if (reservationId) {
-        // For authenticated users or after creating a guest reservation
+      // Check if we're loading for a guest
+      if (guest === "true") {
+        // Find the guest ticket in AsyncStorage
+        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+        if (guestTicketsStr) {
+          const guestTickets = JSON.parse(guestTicketsStr);
+          const foundTicket = guestTickets.find(
+            (ticket: any) => ticket.reservationId === Number(reservationId)
+          );
+
+          if (foundTicket) {
+            setReservation(foundTicket);
+
+            // Generate a QR code value with reservation info
+            const qrData = {
+              type: "ticket",
+              reservationId: foundTicket.reservationId,
+              movieTitle: foundTicket.movieTitle,
+              theaterName: foundTicket.theaterName,
+              showtime: foundTicket.showtimeStartTime,
+              seats: foundTicket.tickets
+                .map((t: any) => `${t.row}${t.number}`)
+                .join(","),
+              isGuest: true,
+            };
+
+            setQrValue(JSON.stringify(qrData));
+          }
+        }
+      } else {
+        // Load authenticated user reservation
         const reservationData = await reservationService.getReservation(
           Number(reservationId)
         );
         setReservation(reservationData);
 
-        // For guest users, we also need to check local storage
-        if (guest === "true") {
-          const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
-          if (guestTicketsStr) {
-            const guestTickets = JSON.parse(guestTicketsStr);
-            const ticket = guestTickets.find(
-              (t: any) => t.reservationId === Number(reservationId)
-            );
-            if (ticket) {
-              setGuestTicket(ticket);
-            }
-          }
-        }
-      } else {
-        // No reservation ID provided
-        Alert.alert("Error", "No booking information found.", [
-          {
-            text: "OK",
-            onPress: () => router.push("/(tabs)"),
-          },
-        ]);
+        // Generate a QR code value with reservation info
+        const qrData = {
+          type: "ticket",
+          reservationId: reservationData.id,
+          movieTitle: reservationData.movieTitle,
+          theaterName: reservationData.theaterName,
+          showtime: reservationData.showtimeStartTime,
+          seats: reservationData.tickets
+            .map((t: any) => `${t.row}${t.number}`)
+            .join(","),
+          isGuest: false,
+          userId: user?.id,
+        };
+
+        setQrValue(JSON.stringify(qrData));
       }
     } catch (error) {
-      console.error("Failed to load reservation data:", error);
-      Alert.alert(
-        "Error",
-        "Failed to load ticket information. Please try again."
-      );
+      console.error("Failed to load confirmation data:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Generate a random confirmation code
-  const generateConfirmationCode = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "";
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setConfirmationCode(code);
-  };
-
-  // Create QR code data
-  const getQRCodeData = () => {
-    const data = {
-      reservationId: reservation?.id || Number(reservationId),
-      movieTitle: reservation?.movieTitle || guestTicket?.movieTitle,
-      theaterName: reservation?.theaterName || guestTicket?.theaterName,
-      screenName: reservation?.screenName || guestTicket?.screenName,
-      showtimeStartTime:
-        reservation?.showtimeStartTime || guestTicket?.showtimeStartTime,
-      tickets: reservation?.tickets || guestTicket?.tickets,
-      confirmationCode,
-      isGuest: guest === "true",
-    };
-
-    return JSON.stringify(data);
-  };
-
-  // Share ticket
   const handleShareTicket = async () => {
     try {
-      const movieTitle = reservation?.movieTitle || guestTicket?.movieTitle;
-      const theaterName = reservation?.theaterName || guestTicket?.theaterName;
-      const date = new Date(
-        reservation?.showtimeStartTime || guestTicket?.showtimeStartTime
-      ).toLocaleDateString();
-      const time = new Date(
-        reservation?.showtimeStartTime || guestTicket?.showtimeStartTime
-      ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-      const shareMessage = `I'm going to see ${movieTitle} at ${theaterName} on ${date} at ${time}. My confirmation code is ${confirmationCode}. See you there!`;
+      // Format the ticket information for sharing
+      const message = `
+      🎬 Movie Ticket: ${reservation.movieTitle}
+      🏢 Theater: ${reservation.theaterName} - ${
+        reservation.screenName || "Screen 1"
+      }
+      🕒 Showtime: ${new Date(reservation.showtimeStartTime).toLocaleString()}
+      🎟️ Seats: ${reservation.tickets
+        .map((t: any) => `${t.row}${t.number}`)
+        .join(", ")}
+      
+      💡 Show this message at the entrance to access your seats
+      `;
 
       await Share.share({
-        message: shareMessage,
-        title: "My Movie Ticket",
+        message,
+        title: "Lion's Den Cinemas - Your Movie Ticket",
       });
     } catch (error) {
-      console.error("Error sharing ticket:", error);
+      console.error("Failed to share ticket:", error);
     }
   };
 
-  // Add to wallet
-  const handleAddToWallet = () => {
-    // This would integrate with Apple Wallet/Google Pay in a real app
-    Alert.alert(
-      "Add to Wallet",
-      "This feature would add your ticket to Apple Wallet or Google Pay in a real app.",
-      [
-        {
-          text: "OK",
-        },
-      ]
-    );
-  };
-
-  // Navigate to home
-  const handleDone = () => {
+  const handleGoHome = () => {
     router.push("/(tabs)");
   };
 
-  // Navigate to food ordering
-  const handleOrderFood = () => {
-    router.push("/(tabs)/concessions");
+  const handleViewTickets = () => {
+    router.push("/(tabs)/tickets");
   };
 
   // Render loading state
@@ -164,8 +136,22 @@ export default function ConfirmationScreen() {
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#B4D335" />
         <ThemedText style={styles.loadingText}>
-          Loading your ticket...
+          Loading ticket details...
         </ThemedText>
+      </ThemedView>
+    );
+  }
+
+  if (!reservation) {
+    return (
+      <ThemedView style={styles.errorContainer}>
+        <Ionicons name="alert-circle-outline" size={60} color="#E74C3C" />
+        <ThemedText style={styles.errorText}>
+          Ticket not found. Please check your bookings.
+        </ThemedText>
+        <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
+          <ThemedText style={styles.homeButtonText}>Go to Home</ThemedText>
+        </TouchableOpacity>
       </ThemedView>
     );
   }
@@ -174,151 +160,295 @@ export default function ConfirmationScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Booking Confirmed",
+          title: "Ticket Confirmation",
           headerStyle: {
-            backgroundColor: "#1E2429",
+            backgroundColor: isDark ? "#1E2429" : "#FFFFFF",
           },
           headerTitleStyle: {
-            color: "#FFFFFF",
+            color: isDark ? "#FFFFFF" : "#242424",
           },
-          headerTintColor: "#B4D335",
-          // Disable back button
-          headerBackVisible: false,
+          headerTintColor: isDark ? "#FFFFFF" : "#242424",
         }}
       />
 
       <ThemedView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Success message */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.successContainer}>
-            <Ionicons name="checkmark-circle" size={60} color="#B4D335" />
+            <Ionicons name="checkmark-circle" size={80} color="#B4D335" />
             <ThemedText style={styles.successTitle}>
-              Booking Confirmed!
+              Purchase Complete!
             </ThemedText>
-            <ThemedText style={styles.successMessage}>
-              Your ticket has been booked successfully. Please show this screen
-              when entering the theater.
+            <ThemedText style={styles.successText}>
+              Your tickets have been purchased successfully. Show the QR code
+              below at the entrance.
             </ThemedText>
           </View>
 
-          {/* Ticket */}
           <View style={styles.ticketContainer}>
             <View style={styles.ticketHeader}>
-              <View style={styles.theaterInfo}>
-                <ThemedText style={styles.theaterName}>
-                  {reservation?.theaterName || guestTicket?.theaterName}
-                </ThemedText>
-                <ThemedText style={styles.screenName}>
-                  {reservation?.screenName || guestTicket?.screenName}
-                </ThemedText>
-              </View>
-
-              <View style={styles.logoContainer}>
-                <Ionicons name="film-outline" size={24} color="#B4D335" />
-              </View>
+              <ThemedText style={styles.theaterName}>
+                {reservation.theaterName}
+              </ThemedText>
+              <ThemedText style={styles.screenName}>
+                {reservation.screenName || "Screen 1"}
+              </ThemedText>
             </View>
 
             <View style={styles.ticketBody}>
               <ThemedText style={styles.movieTitle}>
-                {reservation?.movieTitle || guestTicket?.movieTitle}
+                {reservation.movieTitle}
               </ThemedText>
 
-              <ThemedText style={styles.showtimeDate}>
-                {new Date(
-                  reservation?.showtimeStartTime ||
-                    guestTicket?.showtimeStartTime
-                ).toLocaleDateString(undefined, {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+              <ThemedText style={styles.showtime}>
+                {new Date(reservation.showtimeStartTime).toLocaleString(
+                  undefined,
+                  {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}
               </ThemedText>
 
-              <ThemedText style={styles.showtimeTime}>
-                {new Date(
-                  reservation?.showtimeStartTime ||
-                    guestTicket?.showtimeStartTime
-                ).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </ThemedText>
-
-              <View style={styles.ticketsInfo}>
-                <ThemedText style={styles.ticketsLabel}>Tickets:</ThemedText>
-                <View style={styles.ticketsList}>
-                  {(reservation?.tickets || guestTicket?.tickets)?.map(
-                    (ticket: any, index: number) => (
-                      <ThemedText key={index} style={styles.ticketItem}>
-                        {ticket.ticketType} - Seat {ticket.row}
-                        {ticket.number}
-                      </ThemedText>
-                    )
-                  )}
-                </View>
-              </View>
-
-              <View style={styles.confirmationContainer}>
-                <ThemedText style={styles.confirmationLabel}>
-                  Confirmation Code:
-                </ThemedText>
-                <ThemedText style={styles.confirmationCode}>
-                  {confirmationCode}
+              <View style={styles.seatsContainer}>
+                <ThemedText style={styles.seatsLabel}>Seats:</ThemedText>
+                <ThemedText style={styles.seatsValue}>
+                  {reservation.tickets
+                    .map((t: any) => `${t.row}${t.number}`)
+                    .join(", ")}
                 </ThemedText>
               </View>
+
+              <View style={styles.divider} />
 
               <View style={styles.qrContainer}>
-                <QRCode
-                  value={getQRCodeData()}
-                  size={180}
-                  backgroundColor="#FFFFFF"
-                  color="#000000"
-                />
+                {qrValue ? (
+                  <QRCode
+                    value={qrValue}
+                    size={200}
+                    color="#000000"
+                    backgroundColor="white"
+                  />
+                ) : (
+                  <ActivityIndicator size="large" color="#B4D335" />
+                )}
               </View>
+
+              <ThemedText style={styles.scanText}>
+                Scan this QR code at the entrance
+              </ThemedText>
+
+              <ThemedText style={styles.transactionId}>
+                Transaction ID: {reservation.id || reservation.reservationId}
+              </ThemedText>
             </View>
 
             <View style={styles.ticketFooter}>
-              <ThemedText style={styles.ticketFooterText}>
-                Present this QR code or confirmation code at the theater
-                entrance
-              </ThemedText>
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={handleShareTicket}
+              >
+                <Ionicons name="share-outline" size={20} color="#FFFFFF" />
+                <ThemedText style={styles.shareButtonText}>
+                  Share Ticket
+                </ThemedText>
+              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Action buttons */}
-          <View style={styles.actionsContainer}>
+          <View style={styles.actionButtons}>
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleShareTicket}
+              style={styles.viewTicketsButton}
+              onPress={handleViewTickets}
             >
-              <Ionicons name="share-outline" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.actionButtonText}>Share</ThemedText>
+              <ThemedText style={styles.viewTicketsText}>
+                View All Tickets
+              </ThemedText>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleAddToWallet}
-            >
-              <Ionicons name="wallet-outline" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.actionButtonText}>
-                Add to Wallet
+            <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
+              <ThemedText style={styles.homeButtonText}>
+                Back to Home
               </ThemedText>
             </TouchableOpacity>
           </View>
-
-          {/* Order food button */}
-          <TouchableOpacity style={styles.foodButton} onPress={handleOrderFood}>
-            <Ionicons name="fast-food-outline" size={24} color="#1E2429" />
-            <ThemedText style={styles.foodButtonText}>Order Food</ThemedText>
-          </TouchableOpacity>
-
-          {/* Done button */}
-          <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
-            <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-          </TouchableOpacity>
         </ScrollView>
+
+        {/* Theme toggle */}
+        <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    color: "#9BA1A6",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+    alignItems: "center",
+  },
+  successContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  successText: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#9BA1A6",
+  },
+  ticketContainer: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: "#262D33",
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 24,
+  },
+  ticketHeader: {
+    backgroundColor: "#B4D335",
+    padding: 16,
+    alignItems: "center",
+  },
+  theaterName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1E2429",
+  },
+  screenName: {
+    fontSize: 14,
+    color: "#1E2429",
+  },
+  ticketBody: {
+    padding: 20,
+    alignItems: "center",
+  },
+  movieTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  showtime: {
+    fontSize: 16,
+    color: "#B4D335",
+    marginBottom: 16,
+  },
+  seatsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  seatsLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  seatsValue: {
+    fontSize: 16,
+  },
+  divider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    marginBottom: 20,
+  },
+  qrContainer: {
+    padding: 10,
+    backgroundColor: "white",
+    borderRadius: 8,
+    marginBottom: 16,
+    height: 220,
+    width: 220,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scanText: {
+    fontSize: 14,
+    color: "#9BA1A6",
+    marginBottom: 16,
+  },
+  transactionId: {
+    fontSize: 12,
+    color: "#666666",
+  },
+  ticketFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0A7EA4",
+    padding: 12,
+    borderRadius: 8,
+  },
+  shareButtonText: {
+    color: "white",
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  actionButtons: {
+    width: "100%",
+  },
+  viewTicketsButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#B4D335",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  viewTicketsText: {
+    color: "#B4D335",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  homeButton: {
+    backgroundColor: "#B4D335",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  homeButtonText: {
+    color: "#1E2429",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

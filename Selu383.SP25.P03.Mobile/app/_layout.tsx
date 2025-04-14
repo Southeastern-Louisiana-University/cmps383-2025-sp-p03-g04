@@ -1,29 +1,102 @@
+// import React from "react";
+// import { Stack } from "expo-router";
+// import { StatusBar } from "expo-status-bar";
+// import { AuthProvider } from "../components/AuthProvider";
+// import { ThemeProvider, useTheme } from "../components/ThemeProvider";
+// import { UIColors } from "../styles/theme/colors";
+// import * as SplashScreen from "expo-splash-screen";
+
+// // Prevent splash screen from auto-hiding
+// SplashScreen.preventAutoHideAsync();
+
+// // Layout component that uses the theme
+// function AppLayout() {
+//   const { colorScheme } = useTheme();
+//   const isDark = colorScheme === "dark";
+
+//   // Get appropriate colors based on theme
+//   const headerBgColor = isDark ? UIColors.dark.navBar : UIColors.light.navBar;
+//   const headerTintColor = isDark ? UIColors.dark.text : UIColors.light.text;
+
+//   return (
+//     <>
+//       <StatusBar style={isDark ? "light" : "dark"} />
+//       <Stack
+//         screenOptions={{
+//           headerStyle: {
+//             backgroundColor: headerBgColor,
+//           },
+//           headerTintColor: headerTintColor,
+//           headerTitleStyle: {
+//             fontWeight: "bold",
+//           },
+//           // Add other global screen options here
+//           contentStyle: {
+//             backgroundColor: isDark
+//               ? UIColors.dark.background
+//               : UIColors.light.background,
+//           },
+//         }}
+//       />
+//     </>
+//   );
+// }
+
+// // Root layout that provides theme and auth contexts
+// export default function RootLayout() {
+//   return (
+//     <ThemeProvider>
+//       <AuthProvider>
+//         <AppLayout />
+//       </AuthProvider>
+//     </ThemeProvider>
+//   );
+// }
+
 import React from "react";
 import { Stack } from "expo-router";
-import { AuthProvider } from "../components/AuthProvider";
-import { ThemeProvider } from "../components/ThemeProvider";
-
-// Import SplashScreen to handle the initial loading
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import { AuthProvider } from "../components/AuthProvider";
+import { ThemeProvider, useTheme } from "../components/ThemeProvider";
 
-// Keep the splash screen visible while we fetch resources
+// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+function AppLayout() {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === "dark";
+
+  return (
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: isDark ? "#1E2429" : "#FFFFFF",
+          },
+          headerTintColor: isDark ? "#FFFFFF" : "#1E2429",
+          contentStyle: {
+            backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          },
+        }}
+      />
+    </>
+  );
+}
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
-  // Prepare the app before rendering anything
   useEffect(() => {
     async function prepare() {
       try {
-
         // Artificial delay for testing
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (e) {
         console.warn(e);
       } finally {
-        // Tell the application to render
         setAppIsReady(true);
         await SplashScreen.hideAsync();
       }
@@ -39,20 +112,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#1E2429", // Dark background for headers
-            },
-            headerTintColor: "#B4D335", // Lion's Den green for text/icons
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-            contentStyle: {
-              backgroundColor: "#121212", // Dark mode background
-            },
-          }}
-        />
+        <AppLayout />
       </AuthProvider>
     </ThemeProvider>
   );
