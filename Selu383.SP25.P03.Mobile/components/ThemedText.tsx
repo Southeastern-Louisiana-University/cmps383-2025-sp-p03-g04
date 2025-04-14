@@ -1,20 +1,40 @@
-import { Text } from "react-native";
-import { useColorScheme } from "react-native";
-import { Colors } from "../styles/theme/colors";
-import { ThemedTextProps } from "../types/components/uiComponents";
+import React from "react";
+import { Text, TextProps } from "react-native";
+import { useTheme } from "./ThemeProvider";
+import { UIColors } from "../styles/theme/colors";
+
+export type ThemedTextType =
+  | "default"
+  | "title"
+  | "defaultSemiBold"
+  | "subtitle"
+  | "link";
+
+export interface ThemedTextProps extends TextProps {
+  type?: ThemedTextType;
+  style?: any;
+  lightColor?: string;
+  darkColor?: string;
+}
 
 export function ThemedText({
   style,
   type = "default",
+  lightColor,
+  darkColor,
   ...rest
 }: ThemedTextProps) {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  const color = isDark ? Colors.dark.text : Colors.light.text;
+  // Default text color based on theme
+  const defaultColor = isDark ? UIColors.dark.text : UIColors.light.text;
 
+  // Use provided colors or default
+  const color = isDark ? darkColor || defaultColor : lightColor || defaultColor;
+
+  // Apply styles based on text type
   let typeStyle = {};
-
   switch (type) {
     case "title":
       typeStyle = {
@@ -40,7 +60,7 @@ export function ThemedText({
       typeStyle = {
         lineHeight: 30,
         fontSize: 16,
-        color: "#0a7ea4",
+        color: UIColors.brandGreen,
       };
       break;
     default:

@@ -42,7 +42,7 @@ export const Colors = {
     border: "#333333",
 
     // Brand colors
-    primary: "#B4D335", // Lion's Den green
+    primary: "#B4D335", // Lion's Den green - keep consistent
     primaryDark: "#93AD2B",
     secondary: "#1E3A55", // Dark blue
     secondaryDark: "#172B40",
@@ -75,24 +75,48 @@ export const Colors = {
   },
 };
 
-// UI-specific colors
+// Named colors for specific UI elements
 export const UIColors = {
-  header: "#B4D335", // Lion's Den green header
-  tabBar: "#1E2429", // Dark background for tabs
-  navBar: "#1E2429", // Dark background for navigation bar
-  seatAvailable: "#1E3A55", // Available seat
-  seatSelected: "#B4D335", // Selected seat
-  seatUnavailable: "#666666", // Unavailable seat
-  movieCard: "#2A2A2A", // Movie card background
-  showtime: "#444444", // Showtime button background
-  bookButton: "#B4D335", // Book button background
-  actionButton: "#1E3A55", // Action button background (tickets, food)
-  foodCategory: "#1E2429", // Food category background
-  foodItem: "#2A2A2A", // Food item background
-  cartBackground: "#1E3A55", // Cart background
+  // Common colors that work in both light and dark
+  brandGreen: "#B4D335", // Lion's Den signature green
+
+  // Light mode colors
+  light: {
+    background: "#FFFFFF",
+    surface: "#F5F5F5",
+    text: "#242424",
+    textSecondary: "#666666",
+    border: "#DDDDDD",
+    buttonText: "#242424",
+    navBar: "#FFFFFF",
+    tabBar: "#FFFFFF",
+    card: "#FFFFFF",
+    shadow: "rgba(0, 0, 0, 0.1)",
+  },
+
+  // Dark mode colors
+  dark: {
+    background: "#121212",
+    surface: "#1E2429",
+    text: "#ECEDEE",
+    textSecondary: "#9BA1A6",
+    border: "#333333",
+    buttonText: "#242424", // Keep dark text on green buttons
+    navBar: "#1E2429",
+    tabBar: "#1E2429",
+    card: "#262D33",
+    shadow: "rgba(0, 0, 0, 0.5)",
+  },
+
+  // UI components - values will be selected based on theme
+  header: "#B4D335",
+  seatAvailable: "#1E3A55",
+  seatSelected: "#B4D335",
+  seatUnavailable: "#666666",
+  bookButton: "#B4D335",
 };
 
-// Theater mode theme
+// Theater mode theme - for when in a movie
 export const TheaterMode = {
   background: "#000000",
   text: "#BBBBBB",

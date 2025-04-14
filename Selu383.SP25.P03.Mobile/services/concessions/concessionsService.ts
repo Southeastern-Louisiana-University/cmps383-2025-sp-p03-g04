@@ -68,3 +68,7 @@ export const cancelFoodOrder = async (id: number): Promise<void> => {
     method: "DELETE",
   });
 };
+
+export function getConcessions() {
+  throw new Error("Function not implemented.");
+}

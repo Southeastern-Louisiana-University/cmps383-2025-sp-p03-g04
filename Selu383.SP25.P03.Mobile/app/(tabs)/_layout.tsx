@@ -1,23 +1,28 @@
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../components/AuthProvider";
+import { useTheme } from "../../components/ThemeProvider";
+import { UIColors } from "../../styles/theme/colors";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const { user } = useAuth();
-
-  // Set color scheme based on user's preference
+  const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Define common colors for consistency
-  const tabBarBgColor = "#1E2429";
+  // Define theme-aware colors
+  const tabBarBgColor = isDark ? UIColors.dark.tabBar : UIColors.light.tabBar;
+  const activeTabColor = UIColors.brandGreen;
+  const inactiveTabColor = isDark
+    ? UIColors.dark.textSecondary
+    : UIColors.light.textSecondary;
+  const headerBgColor = isDark ? UIColors.dark.navBar : UIColors.light.navBar;
+  const headerTextColor = isDark ? UIColors.dark.text : UIColors.light.text;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#B4D335",
-        tabBarInactiveTintColor: "#9BA1A6",
+        tabBarActiveTintColor: activeTabColor,
+        tabBarInactiveTintColor: inactiveTabColor,
         tabBarStyle: {
           backgroundColor: tabBarBgColor,
           borderTopWidth: 0,
@@ -30,15 +35,16 @@ export default function TabLayout() {
           fontSize: 12,
         },
         headerStyle: {
-          backgroundColor: tabBarBgColor,
+          backgroundColor: headerBgColor,
         },
         headerTitleStyle: {
           fontWeight: "bold",
-          color: "#FFFFFF",
+          color: headerTextColor,
         },
+        headerTintColor: headerTextColor,
       }}
     >
-      {/* Home Tab - Always visible */}
+      {/* Home tab - visible to all users */}
       <Tabs.Screen
         name="index"
         options={{
@@ -50,7 +56,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Movies Tab - Always visible */}
+      {/* Movies tab - visible to all users */}
       <Tabs.Screen
         name="movies"
         options={{
@@ -62,7 +68,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Tickets Tab - Always visible, but will show login prompt if not authenticated */}
+      {/* Tickets tab - visible to all users */}
       <Tabs.Screen
         name="tickets"
         options={{
@@ -74,7 +80,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Concessions Tab - Always visible */}
+      {/* Food tab - visible to all users */}
       <Tabs.Screen
         name="concessions"
         options={{
@@ -86,7 +92,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Profile Tab - Always visible, but will show login prompt if not authenticated */}
+      {/* Profile tab - visible to all users */}
       <Tabs.Screen
         name="profile"
         options={{
