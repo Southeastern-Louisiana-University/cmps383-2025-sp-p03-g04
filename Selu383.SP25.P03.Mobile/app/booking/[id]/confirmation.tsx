@@ -224,6 +224,31 @@ export default function ConfirmationScreen() {
                 </ThemedText>
               </View>
 
+              {/* Add this after the seatsContainer view in the ticketBody */}
+              {reservation &&
+                reservation.foodItems &&
+                reservation.foodItems.length > 0 && (
+                  <>
+                    <View style={styles.divider} />
+                    <View style={styles.foodContainer}>
+                      <ThemedText style={styles.foodLabel}>
+                        Food Order:
+                      </ThemedText>
+                      {reservation.foodItems.map((item: any, index: number) => (
+                        <ThemedText key={index} style={styles.foodItem}>
+                          {item.quantity}x{" "}
+                          {item.foodItemName || `Item #${item.foodItemId}`}
+                        </ThemedText>
+                      ))}
+                      <ThemedText style={styles.deliveryType}>
+                        {reservation.foodDeliveryType === "ToSeat"
+                          ? "Delivery to your seat"
+                          : "Pickup at concession counter"}
+                      </ThemedText>
+                    </View>
+                  </>
+                )}
+
               <View style={styles.divider} />
 
               <View style={styles.qrContainer}>
@@ -289,6 +314,26 @@ export default function ConfirmationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  foodContainer: {
+    width: "100%",
+    marginVertical: 16,
+  },
+  foodLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  foodItem: {
+    fontSize: 14,
+    marginBottom: 6,
+    paddingLeft: 8,
+  },
+  deliveryType: {
+    fontSize: 14,
+    color: "#B4D335",
+    marginTop: 8,
+    fontStyle: "italic",
   },
   loadingContainer: {
     flex: 1,

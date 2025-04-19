@@ -15,6 +15,13 @@ export const getFoodCategories = async (): Promise<FoodCategory[]> => {
 };
 
 /**
+ * Get all food items - to replace the broken getConcessions function
+ */
+export const getConcessions = async (): Promise<FoodItem[]> => {
+  return fetchWithCredentials<FoodItemResponse[]>("/api/food-items");
+};
+
+/**
  * Get food items by category
  */
 export const getFoodItemsByCategory = async (
@@ -23,13 +30,6 @@ export const getFoodItemsByCategory = async (
   return fetchWithCredentials<FoodItemResponse[]>(
     `/api/food-items/category/${categoryId}`
   );
-};
-
-/**
- * Get all food items
- */
-export const getAllFoodItems = async (): Promise<FoodItem[]> => {
-  return fetchWithCredentials<FoodItemResponse[]>("/api/food-items");
 };
 
 /**
@@ -68,7 +68,3 @@ export const cancelFoodOrder = async (id: number): Promise<void> => {
     method: "DELETE",
   });
 };
-
-export function getConcessions() {
-  throw new Error("Function not implemented.");
-}
