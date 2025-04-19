@@ -117,6 +117,8 @@ export default function SeatSelectionScreen() {
   };
 
   // Proceed to payment
+  // In app/booking/[id]/seats.tsx, modify the handleContinue function:
+
   const handleContinue = async () => {
     if (selectedSeats.length === 0) {
       Alert.alert(
@@ -155,14 +157,14 @@ export default function SeatSelectionScreen() {
               text: "Sign In",
               onPress: () => {
                 // Navigate to login with return path
-                router.push(`/login?returnTo=/booking/${id}/payment`);
+                router.push(`/login?returnTo=/booking/${id}/food-option`);
               },
             },
             {
               text: "Continue as Guest",
               onPress: () => {
-                // Continue as guest
-                router.push(`/booking/${id}/payment`);
+                // Continue as guest to food options screen
+                router.push(`./booking/${id}/food-option`);
               },
             },
           ]
@@ -186,9 +188,9 @@ export default function SeatSelectionScreen() {
             reservationRequest
           );
 
-          // Continue to payment with reservation ID
+          // Continue to food options with reservation ID
           router.push({
-            pathname: `./booking/${id}/payment`,
+            pathname: `./booking/${id}/food-option`,
             params: { reservationId: reservation.id.toString() },
           });
         } catch (error) {

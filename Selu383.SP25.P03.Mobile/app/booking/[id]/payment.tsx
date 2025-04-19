@@ -19,9 +19,10 @@ import { ThemeToggle } from "../../../components/ThemeToggle";
 
 import * as reservationService from "../../../services/reservations/reservationService";
 import * as movieService from "../../../services/movies/movieService";
+import * as concessionService from "../../../services/concessions/concessionsService";
 
 export default function PaymentScreen() {
-  const { id, reservationId } = useLocalSearchParams();
+  const { id, reservationId, guest } = useLocalSearchParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { colorScheme } = useTheme();
@@ -36,6 +37,9 @@ export default function PaymentScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [showtime, setShowtime] = useState<any>(null);
+  const [foodItems, setFoodItems] = useState<any[]>([]);
+  const [foodTotal, setFoodTotal] = useState(0);
+  const [foodDeliveryType, setFoodDeliveryType] = useState<string>("");
 
   useEffect(() => {
     loadData();
@@ -44,8 +48,23 @@ export default function PaymentScreen() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      if (reservationId) {
-        // Load reservation data for authenticated users
+      // Check if we're loading for a guest
+      if (guest === "true") {
+        // Find the guest ticket in AsyncStorage
+        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+        if (guestTicketsStr) {
+          const guestTickets = JSON.parse(guestTicketsStr);
+          const foundTicket = guestTickets.find(
+            (ticket: any) => ticket.reservationId === Number(reservationId)
+          );
+
+          if (foundTicket) {
+            setReservation(foundTicket);
+            setTotalAmount(foundTicket.totalAmount);
+          }
+        }
+      } else if (reservationId) {
+        // Load authenticated user reservation
         const reservationData = await reservationService.getReservation(
           Number(reservationId)
         );
@@ -73,6 +92,18 @@ export default function PaymentScreen() {
           ]);
         }
       }
+
+      // Check if we have food items to add
+      const foodOrderItemsStr = await AsyncStorage.getItem("foodOrderItems");
+      if (foodOrderItemsStr) {
+        const foodOrderData = JSON.parse(foodOrderItemsStr);
+        setFoodItems(foodOrderData.items);
+        setFoodTotal(foodOrderData.total);
+        setFoodDeliveryType(foodOrderData.deliveryType);
+
+        // Add food total to the overall total
+        setTotalAmount((prevTotal) => prevTotal + foodOrderData.total);
+      }
     } catch (error) {
       console.error("Failed to load payment data:", error);
       Alert.alert("Error", "Failed to load booking details.");
@@ -81,7 +112,6 @@ export default function PaymentScreen() {
     }
   };
 
-  // Simulate payment processing
   const handlePayment = async () => {
     setIsProcessing(true);
 
@@ -92,6 +122,28 @@ export default function PaymentScreen() {
           // For authenticated users with a reservation
           await reservationService.payForReservation(reservation.id);
 
+          // Create food order if items exist
+          if (foodItems && foodItems.length > 0) {
+            try {
+              const validDeliveryTypes: ("Pickup" | "ToSeat")[] = ["Pickup", "ToSeat"];
+              const foodOrderRequest = {
+                orderItems: foodItems,
+                deliveryType: validDeliveryTypes.includes(foodDeliveryType as any)
+                  ? (foodDeliveryType as "Pickup" | "ToSeat")
+                  : "Pickup", // Default to "Pickup" if invalid
+                reservationId: reservation.id,
+              };
+
+              await concessionService.createFoodOrder(foodOrderRequest);
+
+              // Clear food items from storage
+              await AsyncStorage.removeItem("foodOrderItems");
+            } catch (foodError) {
+              console.error("Error creating food order:", foodError);
+              // Continue with payment even if food order fails
+            }
+          }
+
           // Navigate to confirmation
           router.push({
             pathname: `./booking/${id}/confirmation`,
@@ -100,7 +152,21 @@ export default function PaymentScreen() {
         } else if (guestSelection) {
           // For guest users
           // Create a temporary reservation object for the guest
-          const guestReservation = {
+          const guestReservation: {
+            id: number;
+            movieTitle: any;
+            theaterName: any;
+            screenName: any;
+            showtimeStartTime: any;
+            showtimeId: number;
+            totalAmount: any;
+            isPaid: boolean;
+            reservationTime: string;
+            tickets: any;
+            foodItems?: any[];
+            foodTotal?: number;
+            foodDeliveryType?: string;
+          } = {
             id: new Date().getTime(), // Use timestamp as ID
             movieTitle: showtime?.movieTitle || guestSelection.movieTitle,
             theaterName: showtime?.theaterName || guestSelection.theaterName,
@@ -120,6 +186,17 @@ export default function PaymentScreen() {
             })),
           };
 
+          // Add food items to the guest reservation if they exist
+          if (foodItems && foodItems.length > 0) {
+            guestReservation.foodItems = foodItems;
+            guestReservation.foodTotal = foodTotal;
+            guestReservation.foodDeliveryType = foodDeliveryType;
+            guestReservation.totalAmount += foodTotal;
+
+            // Clear food items from storage
+            await AsyncStorage.removeItem("foodOrderItems");
+          }
+
           // Store guest ticket for future reference
           const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
           const guestTickets = existingTicketsStr
@@ -134,6 +211,9 @@ export default function PaymentScreen() {
             showtimeStartTime: guestReservation.showtimeStartTime,
             totalAmount: guestReservation.totalAmount,
             tickets: guestReservation.tickets,
+            foodItems: guestReservation.foodItems,
+            foodTotal: guestReservation.foodTotal,
+            foodDeliveryType: guestReservation.foodDeliveryType,
             purchaseDate: new Date().toISOString(),
           });
 
