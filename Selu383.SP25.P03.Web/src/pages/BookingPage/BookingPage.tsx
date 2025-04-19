@@ -26,11 +26,11 @@ const BookingPage: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
   
-  // Pricing options
+  // Pricing options with fixed multiplier values
   const [ticketOptions] = useState<TicketType[]>([
-    { type: 'Adult', price: 0, count: 0, multiplier: 1 },
-    { type: 'Child', price: 0, count: 0, multiplier: 0.75 },
-    { type: 'Senior', price: 0, count: 0, multiplier: 0.8 }
+    { type: "Adult", price: 0, count: 0, multiplier: 1 },
+    { type: "Child", price: 0, count: 0, multiplier: 0.75 },
+    { type: "Senior", price: 0, count: 0, multiplier: 0.8 }
   ]);
   
   const { addToCart, clearCart } = useCart();
@@ -68,7 +68,7 @@ const BookingPage: React.FC = () => {
   
   // Handle seat selection
   const handleSeatSelect = (seat: Seat) => {
-    if (seat.status === 'Taken') return;
+    if (seat.status === SeatStatus.Taken) return;
     
     // If seat is already selected, remove it
     if (selectedSeats.some(s => s.id === seat.id)) {
@@ -163,15 +163,15 @@ const BookingPage: React.FC = () => {
             
             // Override status if seat is selected
             if (selectedSeats.some(s => s.id === seat.id)) {
-              status = 'Selected';
+              status = SeatStatus.Selected;
             }
             
             return (
               <button
                 key={seat.id}
-                className={`seat ${status.toLowerCase()}`}
+                className={`seat ${status === SeatStatus.Available ? 'available' : status === SeatStatus.Selected ? 'selected' : 'unavailable'}`}
                 onClick={() => handleSeatSelect(seat)}
-                disabled={status === 'Taken'}
+                disabled={status === SeatStatus.Taken}
                 aria-label={`Seat ${seat.row}${seat.number}, ${status}`}
               >
                 {seat.number}

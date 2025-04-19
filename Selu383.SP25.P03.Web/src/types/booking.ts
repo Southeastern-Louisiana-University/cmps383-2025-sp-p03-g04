@@ -29,6 +29,7 @@ export interface TicketType {
   type: "Adult" | "Child" | "Senior";
   price: number;
   count: number;
+  multiplier: number;
 }
 
 // Cart related types
