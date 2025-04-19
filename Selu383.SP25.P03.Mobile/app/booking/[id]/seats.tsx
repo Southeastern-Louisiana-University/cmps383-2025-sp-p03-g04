@@ -9,20 +9,17 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../../components/AuthProvider";
 import { useTheme } from "../../../components/ThemeProvider";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
+import { useBooking } from "../../../components/BookingProvider";
 
-import * as theaterService from "../../../services/theaters/theaterService";
-import * as reservationService from "../../../services/reservations/reservationService";
 import * as movieService from "../../../services/movies/movieService";
+import * as theaterService from "../../../services/theaters/theaterService";
 
-import { Seat, SeatingLayout } from "../../../types/models/theater";
-import { CreateTicketRequest } from "../../../types/api/reservations";
-import { Showtime } from "../../../types/models/movie";
+import { SeatingLayout } from "../../../types/models/theater";
 
 export default function SeatSelectionScreen() {
   const { id } = useLocalSearchParams();
@@ -31,16 +28,9 @@ export default function SeatSelectionScreen() {
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // State variables
-  const [showtime, setShowtime] = useState<Showtime | null>(null);
-  const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(
-    null
-  );
-  const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
-  const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
+  const booking = useBooking();
+  const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -49,18 +39,12 @@ export default function SeatSelectionScreen() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // Load showtime details
       const showtimeData = await movieService.getShowtime(Number(id));
-      setShowtime(showtimeData);
+      booking.setShowtimeInfo(Number(id), showtimeData);
 
-      // Load seating layout
       const showtimeId = Number(id);
-      // If user is logged in, pass their ID to get any selected but unpaid seats
       const userId = user?.id;
-      const layout = await theaterService.getSeatsForShowtime(
-        showtimeId,
-        userId
-      );
+      const layout = await theaterService.getSeatsForShowtime(showtimeId, userId);
       setSeatingLayout(layout);
     } catch (error) {
       console.error("Failed to load seating data:", error);
@@ -70,158 +54,57 @@ export default function SeatSelectionScreen() {
     }
   };
 
-  // Calculate total price when selected seats change
-  useEffect(() => {
-    if (!seatingLayout) return;
-
-    const basePrice = seatingLayout.ticketPrice;
-    const total = selectedSeats.reduce((sum, seatId) => {
-      const ticketType = ticketTypes[seatId] || "Adult";
-
-      // Apply discount based on ticket type
-      switch (ticketType) {
-        case "Child":
-          return sum + basePrice * 0.75; // 25% off for children
-        case "Senior":
-          return sum + basePrice * 0.8; // 20% off for seniors
-        default:
-          return sum + basePrice; // Full price for adults
-      }
-    }, 0);
-
-    setTotalPrice(total);
-  }, [selectedSeats, ticketTypes, seatingLayout]);
-
-  // Handle seat selection
   const handleSeatPress = (seatId: number) => {
-    setSelectedSeats((prevSelected) => {
-      // If seat is already selected, remove it
-      if (prevSelected.includes(seatId)) {
-        // Also remove from ticket types
-        const newTicketTypes = { ...ticketTypes };
-        delete newTicketTypes[seatId];
-        setTicketTypes(newTicketTypes);
-
-        return prevSelected.filter((id) => id !== seatId);
-      }
-
-      // Otherwise, add it and set default ticket type to Adult
-      setTicketTypes({ ...ticketTypes, [seatId]: "Adult" });
-      return [...prevSelected, seatId];
-    });
+    booking.toggleSeatSelection(seatId);
   };
 
-  // Change ticket type for a selected seat
   const handleTicketTypeChange = (seatId: number, type: string) => {
-    setTicketTypes({ ...ticketTypes, [seatId]: type });
+    booking.setTicketType(seatId, type);
   };
-
-  // Proceed to payment
-  // In app/booking/[id]/seats.tsx, modify the handleContinue function:
 
   const handleContinue = async () => {
-    if (selectedSeats.length === 0) {
-      Alert.alert(
-        "Select Seats",
-        "Please select at least one seat to continue."
-      );
+    if (booking.selectedSeats.length === 0) {
+      Alert.alert("Select Seats", "Please select at least one seat to continue.");
       return;
     }
 
-    setIsProcessing(true);
+    await booking.saveBookingProgress();
 
-    try {
-      // If user is not authenticated, save the selection and prompt for login or guest checkout
-      if (!isAuthenticated) {
-        // Store selection in local storage for guest checkout
-        const selection = {
-          showtimeId: Number(id),
-          seats: selectedSeats,
-          ticketTypes,
-          totalPrice,
-          movieTitle: showtime?.movieTitle,
-          startTime: showtime?.startTime,
-          theaterName: showtime?.theaterName,
-          screenName: showtime?.screenName,
-        };
-
-        // Store the selection for the next step
-        await AsyncStorage.setItem("guestSelection", JSON.stringify(selection));
-
-        // Ask if user wants to create account or continue as guest
-        Alert.alert(
-          "Continue Booking",
-          "Would you like to sign in or continue as a guest?",
-          [
-            {
-              text: "Sign In",
-              onPress: () => {
-                // Navigate to login with return path
-                router.push(`/login?returnTo=/booking/${id}/food-option`);
-              },
-            },
-            {
-              text: "Continue as Guest",
-              onPress: () => {
-                // Continue as guest to food options screen
-                router.push(`./booking/${id}/food-option`);
-              },
-            },
-          ]
-        );
-      } else {
-        // User is authenticated, create reservation directly
-        const tickets: CreateTicketRequest[] = selectedSeats.map((seatId) => ({
-          seatId,
-          ticketType: ticketTypes[seatId] || "Adult",
-        }));
-
-        // Initialize reservation (but don't process payment yet)
-        try {
-          const reservationRequest = {
-            showtimeId: Number(id),
-            tickets,
-            processPayment: false,
-          };
-
-          const reservation = await reservationService.createReservation(
-            reservationRequest
-          );
-
-          // Continue to food options with reservation ID
-          router.push({
-            pathname: `./booking/${id}/food-option`,
-            params: { reservationId: reservation.id.toString() },
-          });
-        } catch (error) {
-          console.error("Failed to create reservation:", error);
-          Alert.alert(
-            "Error",
-            "Failed to create reservation. Please try again."
-          );
-        }
+    if (!isAuthenticated) {
+      Alert.alert("Continue Booking", "Would you like to sign in or continue as a guest?", [
+        {
+          text: "Sign In",
+          onPress: () => {
+            router.push(`/login?returnTo=/booking/${id}/food-option`);
+          },
+        },
+        {
+          text: "Continue as Guest",
+          onPress: () => {
+            router.push(`./booking/${id}/food-option`);
+          },
+        },
+      ]);
+    } else {
+      const reservationId = await booking.createReservation();
+      if (reservationId) {
+        router.push({
+          pathname: `./booking/${id}/food-option`,
+          params: { reservationId: reservationId.toString() },
+        });
       }
-    } catch (error) {
-      console.error("Error processing selection:", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  // Render loading state
-  if (isLoading || !seatingLayout || !showtime) {
+  if (isLoading || !seatingLayout || !booking.showtime) {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#B4D335" />
-        <ThemedText style={styles.loadingText}>
-          Loading seating layout...
-        </ThemedText>
+        <ThemedText style={styles.loadingText}>Loading seating layout...</ThemedText>
       </ThemedView>
     );
   }
 
-  // Sort row keys alphabetically
   const sortedRowKeys = Object.keys(seatingLayout.rows).sort();
 
   return (
@@ -241,13 +124,10 @@ export default function SeatSelectionScreen() {
 
       <ThemedView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Movie and showtime info */}
           <View style={styles.movieInfoContainer}>
-            <ThemedText style={styles.movieTitle}>
-              {showtime.movieTitle}
-            </ThemedText>
+            <ThemedText style={styles.movieTitle}>{booking.showtime.movieTitle}</ThemedText>
             <ThemedText style={styles.showtimeInfo}>
-              {new Date(showtime.startTime).toLocaleString(undefined, {
+              {new Date(booking.showtime.startTime).toLocaleString(undefined, {
                 weekday: "short",
                 month: "short",
                 day: "numeric",
@@ -256,59 +136,52 @@ export default function SeatSelectionScreen() {
               })}
             </ThemedText>
             <ThemedText style={styles.theaterInfo}>
-              {showtime.theaterName} • {showtime.screenName}
+              {booking.showtime.theaterName} • {booking.showtime.screenName}
             </ThemedText>
           </View>
 
-          {/* Seat map */}
           <View style={styles.seatMapContainer}>
             <View style={styles.screen}>
               <ThemedText style={styles.screenText}>Screen</ThemedText>
             </View>
 
-            <View style={styles.seatMapContainer}>
-              {sortedRowKeys.map((rowKey) => (
-                <View key={rowKey} style={styles.row}>
-                  <View style={styles.rowLabel}>
-                    <ThemedText style={styles.rowLabelText}>
-                      {rowKey}
-                    </ThemedText>
-                  </View>
-
-                  <View style={styles.seats}>
-                    {seatingLayout.rows[rowKey].map((seat) => {
-                      const isSelected = selectedSeats.includes(seat.id);
-                      const isTaken = seat.status === "Taken";
-
-                      return (
-                        <TouchableOpacity
-                          key={seat.id}
-                          style={[
-                            styles.seat,
-                            isTaken && styles.takenSeat,
-                            isSelected && styles.selectedSeat,
-                          ]}
-                          onPress={() => !isTaken && handleSeatPress(seat.id)}
-                          disabled={isTaken}
-                        >
-                          <ThemedText
-                            style={[
-                              styles.seatText,
-                              isSelected && styles.selectedSeatText,
-                              isTaken && styles.takenSeatText,
-                            ]}
-                          >
-                            {seat.number}
-                          </ThemedText>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
+            {sortedRowKeys.map((rowKey) => (
+              <View key={rowKey} style={styles.row}>
+                <View style={styles.rowLabel}>
+                  <ThemedText style={styles.rowLabelText}>{rowKey}</ThemedText>
                 </View>
-              ))}
-            </View>
+                <View style={styles.seats}>
+                  {seatingLayout.rows[rowKey].map((seat) => {
+                    const isSelected = booking.selectedSeats.includes(seat.id);
+                    const isTaken = seat.status === "Taken";
 
-            {/* Legend */}
+                    return (
+                      <TouchableOpacity
+                        key={seat.id}
+                        style={[
+                          styles.seat,
+                          isTaken && styles.takenSeat,
+                          isSelected && styles.selectedSeat,
+                        ]}
+                        onPress={() => !isTaken && handleSeatPress(seat.id)}
+                        disabled={isTaken}
+                      >
+                        <ThemedText
+                          style={[
+                            styles.seatText,
+                            isSelected && styles.selectedSeatText,
+                            isTaken && styles.takenSeatText,
+                          ]}
+                        >
+                          {seat.number}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            ))}
+
             <View style={styles.legendContainer}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendBox, styles.availableSeat]} />
@@ -325,20 +198,15 @@ export default function SeatSelectionScreen() {
             </View>
           </View>
 
-          {/* Selected seats and ticket types */}
-          {selectedSeats.length > 0 && (
+          {booking.selectedSeats.length > 0 && (
             <View style={styles.ticketSection}>
               <ThemedText style={styles.sectionTitle}>Ticket Types</ThemedText>
-
-              {selectedSeats.map((seatId) => {
-                // Find seat info
+              {booking.selectedSeats.map((seatId) => {
                 let seatRow = "";
                 let seatNumber = 0;
 
                 for (const rowKey in seatingLayout.rows) {
-                  const seat = seatingLayout.rows[rowKey].find(
-                    (s) => s.id === seatId
-                  );
+                  const seat = seatingLayout.rows[rowKey].find((s) => s.id === seatId);
                   if (seat) {
                     seatRow = seat.row;
                     seatNumber = seat.number;
@@ -349,67 +217,28 @@ export default function SeatSelectionScreen() {
                 return (
                   <View key={seatId} style={styles.ticketTypeRow}>
                     <ThemedText style={styles.seatLabel}>
-                      Seat {seatRow}
-                      {seatNumber}:
+                      Seat {seatRow}{seatNumber}:
                     </ThemedText>
-
                     <View style={styles.ticketTypeButtons}>
-                      <TouchableOpacity
-                        style={[
-                          styles.typeButton,
-                          (ticketTypes[seatId] || "Adult") === "Adult" &&
-                            styles.selectedTypeButton,
-                        ]}
-                        onPress={() => handleTicketTypeChange(seatId, "Adult")}
-                      >
-                        <ThemedText
+                      {["Adult", "Child", "Senior"].map((type) => (
+                        <TouchableOpacity
+                          key={type}
                           style={[
-                            styles.typeButtonText,
-                            (ticketTypes[seatId] || "Adult") === "Adult" &&
-                              styles.selectedTypeText,
+                            styles.typeButton,
+                            (booking.ticketTypes[seatId] || "Adult") === type && styles.selectedTypeButton,
                           ]}
+                          onPress={() => handleTicketTypeChange(seatId, type)}
                         >
-                          Adult
-                        </ThemedText>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.typeButton,
-                          (ticketTypes[seatId] || "Adult") === "Child" &&
-                            styles.selectedTypeButton,
-                        ]}
-                        onPress={() => handleTicketTypeChange(seatId, "Child")}
-                      >
-                        <ThemedText
-                          style={[
-                            styles.typeButtonText,
-                            (ticketTypes[seatId] || "Adult") === "Child" &&
-                              styles.selectedTypeText,
-                          ]}
-                        >
-                          Child
-                        </ThemedText>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.typeButton,
-                          (ticketTypes[seatId] || "Adult") === "Senior" &&
-                            styles.selectedTypeButton,
-                        ]}
-                        onPress={() => handleTicketTypeChange(seatId, "Senior")}
-                      >
-                        <ThemedText
-                          style={[
-                            styles.typeButtonText,
-                            (ticketTypes[seatId] || "Adult") === "Senior" &&
-                              styles.selectedTypeText,
-                          ]}
-                        >
-                          Senior
-                        </ThemedText>
-                      </TouchableOpacity>
+                          <ThemedText
+                            style={[
+                              styles.typeButtonText,
+                              (booking.ticketTypes[seatId] || "Adult") === type && styles.selectedTypeText,
+                            ]}
+                          >
+                            {type}
+                          </ThemedText>
+                        </TouchableOpacity>
+                      ))}
                     </View>
                   </View>
                 );
@@ -417,24 +246,16 @@ export default function SeatSelectionScreen() {
             </View>
           )}
 
-          {/* Summary and totals */}
           <View style={styles.summaryContainer}>
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>
-                Selected Seats:
-              </ThemedText>
+              <ThemedText style={styles.summaryLabel}>Selected Seats:</ThemedText>
               <ThemedText style={styles.summaryValue}>
-                {selectedSeats.length > 0
-                  ? selectedSeats
+                {booking.selectedSeats.length > 0
+                  ? booking.selectedSeats
                       .map((seatId) => {
-                        // Find seat info for display
                         for (const rowKey in seatingLayout.rows) {
-                          const seat = seatingLayout.rows[rowKey].find(
-                            (s) => s.id === seatId
-                          );
-                          if (seat) {
-                            return `${seat.row}${seat.number}`;
-                          }
+                          const seat = seatingLayout.rows[rowKey].find((s) => s.id === seatId);
+                          if (seat) return `${seat.row}${seat.number}`;
                         }
                         return "";
                       })
@@ -442,33 +263,31 @@ export default function SeatSelectionScreen() {
                   : "None"}
               </ThemedText>
             </View>
-
             <View style={styles.summaryRow}>
               <ThemedText style={styles.summaryLabel}>Ticket Count:</ThemedText>
-              <ThemedText style={styles.summaryValue}>
-                {selectedSeats.length}
-              </ThemedText>
+              <ThemedText style={styles.summaryValue}>{booking.selectedSeats.length}</ThemedText>
             </View>
-
             <View style={styles.summaryRow}>
               <ThemedText style={styles.summaryLabel}>Total:</ThemedText>
               <ThemedText style={styles.totalPrice}>
-                ${totalPrice.toFixed(2)}
+                ${booking.selectedSeats.reduce((total, seatId) => {
+                  const ticketType = booking.ticketTypes[seatId] || "Adult";
+                  const price = ticketType === "Child" ? 8 : ticketType === "Senior" ? 10 : 12;
+                  return total + price;
+                }, 0).toFixed(2)}
               </ThemedText>
             </View>
           </View>
 
-          {/* Continue button */}
           <TouchableOpacity
             style={[
               styles.continueButton,
-              (selectedSeats.length === 0 || isProcessing) &&
-                styles.disabledButton,
+              (booking.selectedSeats.length === 0 || isLoading) && styles.disabledButton,
             ]}
             onPress={handleContinue}
-            disabled={selectedSeats.length === 0 || isProcessing}
+            disabled={booking.selectedSeats.length === 0 || isLoading}
           >
-            {isProcessing ? (
+            {isLoading ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <ThemedText style={styles.continueButtonText}>
@@ -477,8 +296,6 @@ export default function SeatSelectionScreen() {
             )}
           </TouchableOpacity>
         </ScrollView>
-
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

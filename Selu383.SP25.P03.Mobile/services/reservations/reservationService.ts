@@ -10,12 +10,21 @@ import {
 export const createReservation = async (
   request: CreateReservationRequest
 ): Promise<ReservationResponse> => {
+  // Ensure we're not sending price from client - backend will calculate it
+  const sanitizedRequest = {
+    ...request,
+    tickets: request.tickets.map((ticket) => ({
+      seatId: ticket.seatId,
+      ticketType: ticket.ticketType,
+      // Removing price property as this should be calculated by the server
+    })),
+  };
+
   return fetchWithCredentials<ReservationResponse>("/api/reservations", {
     method: "POST",
-    body: JSON.stringify(request),
+    body: JSON.stringify(sanitizedRequest),
   });
 };
-
 /**
  * Get a reservation by ID
  */
