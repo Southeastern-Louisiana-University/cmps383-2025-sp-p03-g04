@@ -3,6 +3,7 @@ import {
   CreateReservationRequest,
   ReservationResponse,
 } from "../../types/api/reservations";
+import { API_ENDPOINTS } from "../../constants/api-constants";
 
 /**
  * Create a new reservation
@@ -10,17 +11,17 @@ import {
 export const createReservation = async (
   request: CreateReservationRequest
 ): Promise<ReservationResponse> => {
-  // Ensure we're not sending price from client - backend will calculate it
+  // The server expects tickets with seatId and ticketType, and will calculate price itself
   const sanitizedRequest = {
     ...request,
     tickets: request.tickets.map((ticket) => ({
       seatId: ticket.seatId,
       ticketType: ticket.ticketType,
-      // Removing price property as this should be calculated by the server
+      // Note: Price is intentionally omitted as server calculates it
     })),
   };
 
-  return fetchWithCredentials<ReservationResponse>("/api/reservations", {
+  return fetchWithCredentials<ReservationResponse>(API_ENDPOINTS.RESERVATIONS, {
     method: "POST",
     body: JSON.stringify(sanitizedRequest),
   });
