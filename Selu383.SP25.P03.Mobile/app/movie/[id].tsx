@@ -7,6 +7,7 @@ import {
   Linking,
   ActivityIndicator,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,14 +16,12 @@ import { ThemedText } from "../../components/ThemedText";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { useTheme } from "../../components/ThemeProvider";
 import { useAuth } from "../../components/AuthProvider";
+import { useBooking } from "../../components/BookingProvider";
 import { Movie, Showtime } from "../../types/models/movie";
 import { ShowtimesByTheater } from "../../types/models/movie";
 
-import {
-  getMovie,
-  getShowtimesByMovie,
-} from "../../services/movies/movieService";
-import { getMovieDetails } from "../../services/movies/tmdbService";
+import * as movieService from "../../services/movies/movieService";
+import * as tmdbService from "../../services/movies/tmdbService";
 
 interface ShowtimesByDate {
   date: string;
@@ -36,6 +35,7 @@ export default function MovieDetailsScreen() {
   const { colorScheme } = useTheme();
   const { isAuthenticated } = useAuth();
   const isDark = colorScheme === "dark";
+  const booking = useBooking();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [showtimesByDate, setShowtimesByDate] = useState<ShowtimesByDate[]>([]);
@@ -69,11 +69,28 @@ export default function MovieDetailsScreen() {
     setIsLoading(true);
     try {
       // Fetch movie details
-      const movieData = await getMovie(Number(id));
+      const movieData = await movieService.getMovie(Number(id));
       setMovie(movieData);
 
+      // If movie has TMDB ID, get additional details
+      if (movieData.tmdbId) {
+        try {
+          const tmdbDetails = await tmdbService.getMovieDetails(
+            movieData.tmdbId
+          );
+          // Merge TMDB details with movie data
+          setMovie({
+            ...movieData,
+            trailerUrl: tmdbDetails.trailerUrl,
+            genre: tmdbDetails.genres?.map((g) => g.name).join(", "),
+          });
+        } catch (error) {
+          console.error("Failed to load TMDB details:", error);
+        }
+      }
+
       // Fetch showtimes for this movie
-      const showtimesData = await getShowtimesByMovie(Number(id));
+      const showtimesData = await movieService.getShowtimesByMovie(Number(id));
 
       // Group by date and theater
       const grouped: Record<string, Record<number, ShowtimesByTheater>> = {};
@@ -138,11 +155,24 @@ export default function MovieDetailsScreen() {
     }
   };
 
-  const handleBookTickets = (showtimeId: number) => {
-    router.push({
-      pathname: "/booking/[id]/seats",
-      params: { id: showtimeId.toString() },
-    });
+  const handleBookTickets = async (showtimeId: number) => {
+    // Reset any previous booking state
+    booking.resetBooking();
+
+    // Load the showtime data
+    try {
+      // Get full showtime data
+      const showtimeData = await movieService.getShowtime(showtimeId);
+
+      // Navigate to seats screen
+      router.push(`/booking/${showtimeId}/seats`);
+    } catch (error) {
+      console.error("Error loading showtime for booking:", error);
+      Alert.alert(
+        "Error",
+        "Could not load showtime information. Please try again."
+      );
+    }
   };
 
   const formatTime = (timeString: string) => {
