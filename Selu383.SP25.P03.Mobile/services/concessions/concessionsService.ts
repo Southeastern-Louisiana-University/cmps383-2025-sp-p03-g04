@@ -6,19 +6,18 @@ import {
   FoodOrderResponse,
 } from "../../types/api/concessions";
 import { FoodCategory, FoodItem } from "../../types/models/concessions";
+import { API_ENDPOINTS } from "../../constants/api-constants";
 
-/**
- * Get all food categories
- */
+// Get all food categories
 export const getFoodCategories = async (): Promise<FoodCategory[]> => {
-  return fetchWithCredentials<FoodCategoryResponse[]>("/api/food-categories");
+  return fetchWithCredentials<FoodCategoryResponse[]>(
+    API_ENDPOINTS.FOOD_CATEGORIES
+  );
 };
 
-/**
- * Get all food items - to replace the broken getConcessions function
- */
-export const getConcessions = async (): Promise<FoodItem[]> => {
-  return fetchWithCredentials<FoodItemResponse[]>("/api/food-items");
+// Get all food items
+export const getFoodItems = async (): Promise<FoodItem[]> => {
+  return fetchWithCredentials<FoodItemResponse[]>(API_ENDPOINTS.FOOD_ITEMS);
 };
 
 /**
