@@ -13,8 +13,7 @@ export function ThemeToggle({
   size = 40,
   position = "bottomRight",
 }: ThemeToggleProps) {
-  const { colorScheme, toggleTheme } = useTheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, toggleTheme } = useTheme();
 
   // Get position styles
   const positionStyle = getPositionStyle(position);
