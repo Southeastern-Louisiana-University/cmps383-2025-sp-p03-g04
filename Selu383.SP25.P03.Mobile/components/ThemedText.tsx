@@ -1,14 +1,17 @@
 import React from "react";
 import { Text, TextProps } from "react-native";
 import { useTheme } from "./ThemeProvider";
-import { UIColors } from "../styles/theme/colors";
+import { getTextColor, getThemedColor, getUIColor } from "../utils/themeUtils";
+import { Colors } from "../styles/theme/colors";
 
 export type ThemedTextType =
   | "default"
   | "title"
   | "defaultSemiBold"
   | "subtitle"
-  | "link";
+  | "link"
+  | "caption"
+  | "button";
 
 export interface ThemedTextProps extends TextProps {
   type?: ThemedTextType;
@@ -24,21 +27,23 @@ export function ThemedText({
   darkColor,
   ...rest
 }: ThemedTextProps) {
-  const { colorScheme } = useTheme();
-  const isDark = colorScheme === "dark";
+  const { isDark } = useTheme();
 
-  // Default text color based on theme
-  const defaultColor = isDark ? UIColors.dark.text : UIColors.light.text;
+  // Determine the text color
+  const defaultColor = getTextColor(isDark);
 
   // Use provided colors or default
-  const color = isDark ? darkColor || defaultColor : lightColor || defaultColor;
+  const color =
+    lightColor && darkColor
+      ? getThemedColor(isDark, lightColor, darkColor)
+      : defaultColor;
 
   // Apply styles based on text type
   let typeStyle = {};
   switch (type) {
     case "title":
       typeStyle = {
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: "bold",
         lineHeight: 32,
       };
@@ -52,15 +57,31 @@ export function ThemedText({
       break;
     case "subtitle":
       typeStyle = {
-        fontSize: 20,
-        fontWeight: "bold",
+        fontSize: 18,
+        fontWeight: "600",
+        lineHeight: 28,
       };
       break;
     case "link":
       typeStyle = {
-        lineHeight: 30,
         fontSize: 16,
-        color: UIColors.brandGreen,
+        lineHeight: 24,
+        color: Colors.light.primary, // Always use primary color for links
+        textDecorationLine: "underline",
+      };
+      break;
+    case "caption":
+      typeStyle = {
+        fontSize: 12,
+        lineHeight: 16,
+        color: isDark ? Colors.dark.gray5 : Colors.light.gray5,
+      };
+      break;
+    case "button":
+      typeStyle = {
+        fontSize: 16,
+        fontWeight: "bold",
+        lineHeight: 24,
       };
       break;
     default:

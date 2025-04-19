@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// app/booking/[id]/confirmation.tsx
+import React, { useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -16,97 +17,110 @@ import { useTheme } from "../../../components/ThemeProvider";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
+import { useBooking } from "../../../components/BookingProvider";
 
 import * as reservationService from "../../../services/reservations/reservationService";
 
 export default function ConfirmationScreen() {
   const { id, reservationId, guest } = useLocalSearchParams();
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
+  const booking = useBooking();
 
-  // State variables
-  const [reservation, setReservation] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [qrValue, setQrValue] = useState<string>("");
+  // State for QR code
+  const [qrValue, setQrValue] = React.useState<string>("");
+  const [reservationData, setReservationData] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
+  // Load confirmation data
   useEffect(() => {
-    loadData();
-  }, []);
+    const loadConfirmationData = async () => {
+      setIsLoading(true);
+      try {
+        // Check if we're showing a guest booking
+        if (guest === "true") {
+          // Find the guest ticket in AsyncStorage
+          const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+          if (guestTicketsStr) {
+            const guestTickets = JSON.parse(guestTicketsStr);
+            const foundTicket = guestTickets.find(
+              (ticket: any) => ticket.reservationId === Number(reservationId)
+            );
 
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      // Check if we're loading for a guest
-      if (guest === "true") {
-        // Find the guest ticket in AsyncStorage
-        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
-        if (guestTicketsStr) {
-          const guestTickets = JSON.parse(guestTicketsStr);
-          const foundTicket = guestTickets.find(
-            (ticket: any) => ticket.reservationId === Number(reservationId)
-          );
+            if (foundTicket) {
+              setReservationData(foundTicket);
 
-          if (foundTicket) {
-            setReservation(foundTicket);
+              // Generate a QR code value with reservation info
+              const qrData = {
+                type: "ticket",
+                reservationId: foundTicket.reservationId,
+                movieTitle: foundTicket.movieTitle,
+                theaterName: foundTicket.theaterName,
+                showtime: foundTicket.showtimeStartTime,
+                seats: foundTicket.tickets
+                  .map((t: any) => `${t.row}${t.number}`)
+                  .join(","),
+                isGuest: true,
+              };
 
-            // Generate a QR code value with reservation info
-            const qrData = {
-              type: "ticket",
-              reservationId: foundTicket.reservationId,
-              movieTitle: foundTicket.movieTitle,
-              theaterName: foundTicket.theaterName,
-              showtime: foundTicket.showtimeStartTime,
-              seats: foundTicket.tickets
-                .map((t: any) => `${t.row}${t.number}`)
-                .join(","),
-              isGuest: true,
-            };
-
-            setQrValue(JSON.stringify(qrData));
+              setQrValue(JSON.stringify(qrData));
+            }
           }
+        } else if (reservationId) {
+          // For authenticated users, load the reservation
+          const reservation = await reservationService.getReservation(
+            Number(reservationId)
+          );
+          setReservationData(reservation);
+
+          // Generate QR code data
+          const qrData = {
+            type: "ticket",
+            reservationId: reservation.id,
+            movieTitle: reservation.movieTitle,
+            theaterName: reservation.theaterName,
+            showtime: reservation.showtimeStartTime,
+            seats: reservation.tickets
+              .map((t: any) => `${t.row}${t.number}`)
+              .join(","),
+            isGuest: false,
+            userId: user?.id,
+          };
+
+          setQrValue(JSON.stringify(qrData));
+        } else {
+          // No reservation ID provided
+          console.error("No reservation ID found in params");
         }
-      } else {
-        // Load authenticated user reservation
-        const reservationData = await reservationService.getReservation(
-          Number(reservationId)
-        );
-        setReservation(reservationData);
-
-        // Generate a QR code value with reservation info
-        const qrData = {
-          type: "ticket",
-          reservationId: reservationData.id,
-          movieTitle: reservationData.movieTitle,
-          theaterName: reservationData.theaterName,
-          showtime: reservationData.showtimeStartTime,
-          seats: reservationData.tickets
-            .map((t: any) => `${t.row}${t.number}`)
-            .join(","),
-          isGuest: false,
-          userId: user?.id,
-        };
-
-        setQrValue(JSON.stringify(qrData));
+      } catch (error) {
+        console.error("Error loading confirmation data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to load confirmation data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    loadConfirmationData();
+
+    // Clear booking state when showing confirmation
+    return () => {
+      booking.resetBooking();
+    };
+  }, [reservationId, guest, user?.id]);
 
   const handleShareTicket = async () => {
     try {
       // Format the ticket information for sharing
       const message = `
-      🎬 Movie Ticket: ${reservation.movieTitle}
-      🏢 Theater: ${reservation.theaterName} - ${
-        reservation.screenName || "Screen 1"
+      🎬 Movie Ticket: ${reservationData.movieTitle}
+      🏢 Theater: ${reservationData.theaterName} - ${
+        reservationData.screenName || "Screen 1"
       }
-      🕒 Showtime: ${new Date(reservation.showtimeStartTime).toLocaleString()}
-      🎟️ Seats: ${reservation.tickets
+      🕒 Showtime: ${new Date(
+        reservationData.showtimeStartTime
+      ).toLocaleString()}
+      🎟️ Seats: ${reservationData.tickets
         .map((t: any) => `${t.row}${t.number}`)
         .join(", ")}
       
@@ -142,7 +156,7 @@ export default function ConfirmationScreen() {
     );
   }
 
-  if (!reservation) {
+  if (!reservationData) {
     return (
       <ThemedView style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={60} color="#E74C3C" />
@@ -190,20 +204,20 @@ export default function ConfirmationScreen() {
           <View style={styles.ticketContainer}>
             <View style={styles.ticketHeader}>
               <ThemedText style={styles.theaterName}>
-                {reservation.theaterName}
+                {reservationData.theaterName}
               </ThemedText>
               <ThemedText style={styles.screenName}>
-                {reservation.screenName || "Screen 1"}
+                {reservationData.screenName || "Screen 1"}
               </ThemedText>
             </View>
 
             <View style={styles.ticketBody}>
               <ThemedText style={styles.movieTitle}>
-                {reservation.movieTitle}
+                {reservationData.movieTitle}
               </ThemedText>
 
               <ThemedText style={styles.showtime}>
-                {new Date(reservation.showtimeStartTime).toLocaleString(
+                {new Date(reservationData.showtimeStartTime).toLocaleString(
                   undefined,
                   {
                     weekday: "short",
@@ -218,30 +232,32 @@ export default function ConfirmationScreen() {
               <View style={styles.seatsContainer}>
                 <ThemedText style={styles.seatsLabel}>Seats:</ThemedText>
                 <ThemedText style={styles.seatsValue}>
-                  {reservation.tickets
+                  {reservationData.tickets
                     .map((t: any) => `${t.row}${t.number}`)
                     .join(", ")}
                 </ThemedText>
               </View>
 
-              {/* Add this after the seatsContainer view in the ticketBody */}
-              {reservation &&
-                reservation.foodItems &&
-                reservation.foodItems.length > 0 && (
+              {/* Add food items if present */}
+              {reservationData &&
+                reservationData.foodItems &&
+                reservationData.foodItems.length > 0 && (
                   <>
                     <View style={styles.divider} />
                     <View style={styles.foodContainer}>
                       <ThemedText style={styles.foodLabel}>
                         Food Order:
                       </ThemedText>
-                      {reservation.foodItems.map((item: any, index: number) => (
-                        <ThemedText key={index} style={styles.foodItem}>
-                          {item.quantity}x{" "}
-                          {item.foodItemName || `Item #${item.foodItemId}`}
-                        </ThemedText>
-                      ))}
+                      {reservationData.foodItems.map(
+                        (item: any, index: number) => (
+                          <ThemedText key={index} style={styles.foodItem}>
+                            {item.quantity}x{" "}
+                            {item.foodItemName || `Item #${item.foodItemId}`}
+                          </ThemedText>
+                        )
+                      )}
                       <ThemedText style={styles.deliveryType}>
-                        {reservation.foodDeliveryType === "ToSeat"
+                        {reservationData.foodDeliveryType === "ToSeat"
                           ? "Delivery to your seat"
                           : "Pickup at concession counter"}
                       </ThemedText>
@@ -269,7 +285,8 @@ export default function ConfirmationScreen() {
               </ThemedText>
 
               <ThemedText style={styles.transactionId}>
-                Transaction ID: {reservation.id || reservation.reservationId}
+                Transaction ID:{" "}
+                {reservationData.id || reservationData.reservationId}
               </ThemedText>
             </View>
 

@@ -1,3 +1,4 @@
+// app/booking/[id]/food-option.tsx
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -6,30 +7,43 @@ import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
 import { useTheme } from "../../../components/ThemeProvider";
+import { useBooking } from "../../../components/BookingProvider";
 
 export default function FoodOptionScreen() {
-  const { id, reservationId } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
+  const booking = useBooking();
+
+  // Check if booking data is loaded
+  React.useEffect(() => {
+    const checkBookingData = async () => {
+      if (!booking.showtime) {
+        // If no booking data, try to load from progress
+        const loaded = await booking.loadBookingProgress();
+
+        // If still no data, redirect to seat selection
+        if (!loaded) {
+          router.replace(`/booking/${id}/seats`);
+        }
+      }
+    };
+
+    checkBookingData();
+  }, [id]);
 
   const handleSkipFood = () => {
     // Skip food and go directly to payment
-    router.push({
-      pathname: `./booking/${id}/payment`,
-      params: { reservationId: reservationId as string },
-    });
+    router.push(`/booking/${id}/payment`);
   };
 
   const handleOrderFood = (deliveryType: "Pickup" | "ToSeat") => {
-    // Go to concessions screen with delivery option
-    router.push({
-      pathname: `./booking/${id}/concessions`,
-      params: {
-        reservationId: reservationId as string,
-        deliveryType,
-      },
-    });
+    // Set the delivery type in our booking context
+    booking.setFoodDeliveryType(deliveryType);
+
+    // Go to concessions screen
+    router.push(`/booking/${id}/concessions`);
   };
 
   return (

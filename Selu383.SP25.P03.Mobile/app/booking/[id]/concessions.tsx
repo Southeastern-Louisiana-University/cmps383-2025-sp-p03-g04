@@ -10,32 +10,47 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../../../components/ThemeProvider";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
+import { useBooking } from "../../../components/BookingProvider";
 
 import * as concessionService from "../../../services/concessions/concessionsService";
 import { FoodItem } from "../../../types/models/concessions";
 
 export default function BookingConcessionsScreen() {
-  const { id, reservationId, deliveryType } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
+  const booking = useBooking();
 
-  // State variables
+  // Local state
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodCategories, setFoodCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [cart, setCart] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
 
+  // Ensure we have booking data
   useEffect(() => {
-    loadConcessions();
-  }, []);
+    const checkBookingData = async () => {
+      if (!booking.showtime) {
+        // If no booking data, try to load from progress
+        const loaded = await booking.loadBookingProgress();
 
+        // If still no data, redirect to seat selection
+        if (!loaded) {
+          router.replace(`/booking/${id}/seats`);
+        }
+      }
+    };
+
+    checkBookingData();
+    loadConcessions();
+  }, [id]);
+
+  // Load concessions data
   const loadConcessions = async () => {
     setIsLoading(true);
     try {
@@ -58,83 +73,13 @@ export default function BookingConcessionsScreen() {
     }
   };
 
-  const handleAddToCart = (itemId: string) => {
-    setCart((prevCart) => ({
-      ...prevCart,
-      [itemId]: (prevCart[itemId] || 0) + 1,
-    }));
-  };
-
-  const handleRemoveFromCart = (itemId: string) => {
-    setCart((prevCart) => {
-      const updatedCart = { ...prevCart };
-      if (updatedCart[itemId] > 1) {
-        updatedCart[itemId] -= 1;
-      } else {
-        delete updatedCart[itemId];
-      }
-      return updatedCart;
-    });
-  };
-
-  const getCartTotal = () => {
-    return Object.entries(cart).reduce((total, [id, quantity]) => {
-      const item = foodItems.find((c) => c.id === parseInt(id));
-      return total + (item ? item.price * quantity : 0);
-    }, 0);
-  };
-
-  const getCartItemCount = () => {
-    return Object.values(cart).reduce((total, quantity) => total + quantity, 0);
-  };
-
-  const handleProceedToPayment = async () => {
-    if (getCartItemCount() === 0) {
-      // If cart is empty, just proceed to payment without food
-      router.push({
-        pathname: `./booking/${id}/payment`,
-        params: { reservationId: reservationId as string },
-      });
-      return;
-    }
-
-    try {
-      // Create food order items from cart
-      const orderItems = Object.entries(cart).map(([foodItemId, quantity]) => ({
-        foodItemId: parseInt(foodItemId),
-        quantity,
-      }));
-
-      // Store in session for payment
-      await AsyncStorage.setItem(
-        "foodOrderItems",
-        JSON.stringify({
-          items: orderItems,
-          total: getCartTotal(),
-          deliveryType: deliveryType as string,
-        })
-      );
-
-      // Navigate to payment with both reservation and food
-      router.push({
-        pathname: `./booking/${id}/payment`,
-        params: {
-          reservationId: reservationId as string,
-          hasFood: "true",
-        },
-      });
-    } catch (error) {
-      console.error("Error saving food order:", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
-    }
+  const handleProceedToPayment = () => {
+    router.push(`/booking/${id}/payment`);
   };
 
   const handleSkip = () => {
     // Skip food and go directly to payment
-    router.push({
-      pathname: `./booking/${id}/payment`,
-      params: { reservationId: reservationId as string },
-    });
+    router.push(`/booking/${id}/payment`);
   };
 
   // Filter items by selected category
@@ -174,7 +119,7 @@ export default function BookingConcessionsScreen() {
           <ThemedText style={styles.heading}>Add food to your order</ThemedText>
 
           <ThemedText style={styles.deliveryMode}>
-            {deliveryType === "ToSeat"
+            {booking.foodDeliveryType === "ToSeat"
               ? "Delivery to seat"
               : "Pickup at concession counter"}
           </ThemedText>
@@ -229,22 +174,24 @@ export default function BookingConcessionsScreen() {
                 </View>
 
                 <View style={styles.itemControls}>
-                  {cart[item.id.toString()] ? (
+                  {booking.foodItems.some((fi) => fi.foodItemId === item.id) ? (
                     <>
                       <TouchableOpacity
                         style={styles.quantityButton}
-                        onPress={() => handleRemoveFromCart(item.id.toString())}
+                        onPress={() => booking.removeFoodItem(item.id)}
                       >
                         <Ionicons name="remove" size={20} color="#B4D335" />
                       </TouchableOpacity>
 
                       <ThemedText style={styles.quantityText}>
-                        {cart[item.id.toString()]}
+                        {booking.foodItems.find(
+                          (fi) => fi.foodItemId === item.id
+                        )?.quantity || 0}
                       </ThemedText>
 
                       <TouchableOpacity
                         style={styles.quantityButton}
-                        onPress={() => handleAddToCart(item.id.toString())}
+                        onPress={() => booking.addFoodItem(item, 1)}
                       >
                         <Ionicons name="add" size={20} color="#B4D335" />
                       </TouchableOpacity>
@@ -252,7 +199,7 @@ export default function BookingConcessionsScreen() {
                   ) : (
                     <TouchableOpacity
                       style={styles.addButton}
-                      onPress={() => handleAddToCart(item.id.toString())}
+                      onPress={() => booking.addFoodItem(item, 1)}
                     >
                       <ThemedText style={styles.addButtonText}>Add</ThemedText>
                     </TouchableOpacity>
@@ -278,15 +225,22 @@ export default function BookingConcessionsScreen() {
         </ScrollView>
 
         {/* Cart summary at bottom */}
-        {getCartItemCount() > 0 && (
+        {booking.foodItems.length > 0 && (
           <View style={styles.cartContainer}>
             <View style={styles.cartSummary}>
               <View>
                 <ThemedText style={styles.cartItemCount}>
-                  {getCartItemCount()} items
+                  {booking.foodItems.reduce(
+                    (acc, item) => acc + item.quantity,
+                    0
+                  )}{" "}
+                  items
                 </ThemedText>
                 <ThemedText style={styles.cartTotal}>
-                  ${getCartTotal().toFixed(2)}
+                  $
+                  {booking.foodItems
+                    .reduce((acc, item) => acc + item.price * item.quantity, 0)
+                    .toFixed(2)}
                 </ThemedText>
               </View>
 
@@ -310,6 +264,7 @@ export default function BookingConcessionsScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Existing styles remain the same
   container: {
     flex: 1,
   },
@@ -325,7 +280,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 100, // Extra space for fixed cart
+    paddingBottom: 100,
   },
   heading: {
     fontSize: 24,

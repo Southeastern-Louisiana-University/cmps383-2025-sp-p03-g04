@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useThemeToggle, ColorSchemeName } from "../hooks/useThemeToggle";
-import { theme, getTheme, ThemeType } from "../styles/theme/theme";
+import { Colors, UIColors } from "../styles/theme/colors";
 
 // Define the context type
 type ThemeContextType = {
@@ -9,7 +9,7 @@ type ThemeContextType = {
   isLoading: boolean;
   toggleTheme: () => Promise<void>;
   setTheme: (theme: ColorSchemeName) => Promise<void>;
-  theme: ThemeType; // Add the theme object
+  isDark: boolean;
 };
 
 // Create the context
@@ -18,21 +18,18 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 // Provider component
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const themeState = useThemeToggle();
+
+  // Calculate isDark based on the color scheme
   const isDark = themeState.colorScheme === "dark";
 
-  // Get the appropriate theme based on the color scheme
-  const currentTheme = {
-    ...(isDark ? theme.dark : theme.light),
-    shared: theme.shared,
+  // Create the context value
+  const contextValue: ThemeContextType = {
+    ...themeState,
+    isDark,
   };
 
   return (
-    <ThemeContext.Provider
-      value={{
-        ...themeState,
-        theme: currentTheme,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
