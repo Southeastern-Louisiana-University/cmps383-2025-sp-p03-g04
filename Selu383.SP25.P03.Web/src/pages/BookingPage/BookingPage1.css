@@ -5,6 +5,8 @@
   width: 100%;
   color: #f8f9fa;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100vw;
+  max-width: unset;
 }
 
 /* Header section */
