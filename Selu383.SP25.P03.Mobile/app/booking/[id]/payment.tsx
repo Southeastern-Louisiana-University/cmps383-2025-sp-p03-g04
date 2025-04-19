@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -10,252 +10,88 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../../components/AuthProvider";
 import { useTheme } from "../../../components/ThemeProvider";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
-
-import * as reservationService from "../../../services/reservations/reservationService";
-import * as movieService from "../../../services/movies/movieService";
-import * as concessionService from "../../../services/concessions/concessionsService";
+import { useBooking } from "../../../components/BookingProvider";
 
 export default function PaymentScreen() {
-  const { id, reservationId, guest } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
+  const booking = useBooking();
 
-  // State variables
-  const [reservation, setReservation] = useState<any>(null);
-  const [guestSelection, setGuestSelection] = useState<any>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<string>("visa");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [showtime, setShowtime] = useState<any>(null);
-  const [foodItems, setFoodItems] = useState<any[]>([]);
-  const [foodTotal, setFoodTotal] = useState(0);
-  const [foodDeliveryType, setFoodDeliveryType] = useState<string>("");
-
+  // Ensure we have booking data
   useEffect(() => {
-    loadData();
-  }, [reservationId, id]);
+    const checkBookingData = async () => {
+      if (!booking.showtime) {
+        // If no booking data, try to load from progress
+        const loaded = await booking.loadBookingProgress();
 
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      // Check if we're loading for a guest
-      if (guest === "true") {
-        // Find the guest ticket in AsyncStorage
-        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
-        if (guestTicketsStr) {
-          const guestTickets = JSON.parse(guestTicketsStr);
-          const foundTicket = guestTickets.find(
-            (ticket: any) => ticket.reservationId === Number(reservationId)
-          );
-
-          if (foundTicket) {
-            setReservation(foundTicket);
-            setTotalAmount(foundTicket.totalAmount);
-          }
-        }
-      } else if (reservationId) {
-        // Load authenticated user reservation
-        const reservationData = await reservationService.getReservation(
-          Number(reservationId)
-        );
-        setReservation(reservationData);
-        setTotalAmount(reservationData.totalAmount);
-
-        // Load showtime data
-        const showtimeData = await movieService.getShowtime(Number(id));
-        setShowtime(showtimeData);
-      } else {
-        // Load guest selection from local storage
-        const guestSelectionData = await AsyncStorage.getItem("guestSelection");
-        if (guestSelectionData) {
-          const parsedData = JSON.parse(guestSelectionData);
-          setGuestSelection(parsedData);
-          setTotalAmount(parsedData.totalPrice);
-
-          // Load showtime data
-          const showtimeData = await movieService.getShowtime(Number(id));
-          setShowtime(showtimeData);
-        } else {
-          // No selection data
-          Alert.alert("Error", "No booking information found.", [
-            { text: "OK", onPress: () => router.back() },
-          ]);
+        // If still no data, redirect to seat selection
+        if (!loaded) {
+          router.replace(`/booking/${id}/seats`);
         }
       }
 
-      // Check if we have food items to add
-      const foodOrderItemsStr = await AsyncStorage.getItem("foodOrderItems");
-      if (foodOrderItemsStr) {
-        const foodOrderData = JSON.parse(foodOrderItemsStr);
-        setFoodItems(foodOrderData.items);
-        setFoodTotal(foodOrderData.total);
-        setFoodDeliveryType(foodOrderData.deliveryType);
-
-        // Add food total to the overall total
-        setTotalAmount((prevTotal) => prevTotal + foodOrderData.total);
+      // If we have a reservation ID but don't have the reservation data, load it
+      if (booking.reservationId && !booking.reservation) {
+        await booking.loadReservation(booking.reservationId);
       }
-    } catch (error) {
-      console.error("Failed to load payment data:", error);
-      Alert.alert("Error", "Failed to load booking details.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    checkBookingData();
+  }, [id]);
 
   const handlePayment = async () => {
-    setIsProcessing(true);
+    try {
+      // Process payment
+      const success = await booking.processPayment();
 
-    // Simulate payment processing with a delay
-    setTimeout(async () => {
-      try {
-        if (isAuthenticated && reservation) {
-          // For authenticated users with a reservation
-          await reservationService.payForReservation(reservation.id);
-
-          // Create food order if items exist
-          if (foodItems && foodItems.length > 0) {
-            try {
-              const validDeliveryTypes: ("Pickup" | "ToSeat")[] = ["Pickup", "ToSeat"];
-              const foodOrderRequest = {
-                orderItems: foodItems,
-                deliveryType: validDeliveryTypes.includes(foodDeliveryType as any)
-                  ? (foodDeliveryType as "Pickup" | "ToSeat")
-                  : "Pickup", // Default to "Pickup" if invalid
-                reservationId: reservation.id,
-              };
-
-              await concessionService.createFoodOrder(foodOrderRequest);
-
-              // Clear food items from storage
-              await AsyncStorage.removeItem("foodOrderItems");
-            } catch (foodError) {
-              console.error("Error creating food order:", foodError);
-              // Continue with payment even if food order fails
-            }
-          }
-
-          // Navigate to confirmation
-          router.push({
-            pathname: `./booking/${id}/confirmation`,
-            params: { reservationId: reservation.id.toString() },
-          });
-        } else if (guestSelection) {
+      if (success) {
+        if (booking.isGuest) {
           // For guest users
-          // Create a temporary reservation object for the guest
-          const guestReservation: {
-            id: number;
-            movieTitle: any;
-            theaterName: any;
-            screenName: any;
-            showtimeStartTime: any;
-            showtimeId: number;
-            totalAmount: any;
-            isPaid: boolean;
-            reservationTime: string;
-            tickets: any;
-            foodItems?: any[];
-            foodTotal?: number;
-            foodDeliveryType?: string;
-          } = {
-            id: new Date().getTime(), // Use timestamp as ID
-            movieTitle: showtime?.movieTitle || guestSelection.movieTitle,
-            theaterName: showtime?.theaterName || guestSelection.theaterName,
-            screenName: showtime?.screenName || guestSelection.screenName,
-            showtimeStartTime: showtime?.startTime || guestSelection.startTime,
-            showtimeId: Number(id),
-            totalAmount: guestSelection.totalPrice,
-            isPaid: true,
-            reservationTime: new Date().toISOString(),
-            tickets: guestSelection.seats.map((seatId: number) => ({
-              id: seatId,
-              seatId: seatId,
-              row: String.fromCharCode(65 + Math.floor(Math.random() * 8)), // Random row A-H
-              number: Math.floor(Math.random() * 20) + 1, // Random seat number 1-20
-              ticketType: guestSelection.ticketTypes[seatId] || "Adult",
-              price: guestSelection.totalPrice / guestSelection.seats.length,
-            })),
-          };
+          if (booking.showtime) {
+            const result = await booking.completeGuestBooking(booking.showtime);
 
-          // Add food items to the guest reservation if they exist
-          if (foodItems && foodItems.length > 0) {
-            guestReservation.foodItems = foodItems;
-            guestReservation.foodTotal = foodTotal;
-            guestReservation.foodDeliveryType = foodDeliveryType;
-            guestReservation.totalAmount += foodTotal;
-
-            // Clear food items from storage
-            await AsyncStorage.removeItem("foodOrderItems");
+            router.push({
+              pathname: `./booking/${id}/confirmation`,
+              params: {
+                reservationId: result.reservationId.toString(),
+                guest: "true",
+              },
+            });
+          } else {
+            Alert.alert("Error", "Missing showtime information");
           }
-
-          // Store guest ticket for future reference
-          const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
-          const guestTickets = existingTicketsStr
-            ? JSON.parse(existingTicketsStr)
-            : [];
-
-          guestTickets.push({
-            reservationId: guestReservation.id,
-            movieTitle: guestReservation.movieTitle,
-            theaterName: guestReservation.theaterName,
-            screenName: guestReservation.screenName,
-            showtimeStartTime: guestReservation.showtimeStartTime,
-            totalAmount: guestReservation.totalAmount,
-            tickets: guestReservation.tickets,
-            foodItems: guestReservation.foodItems,
-            foodTotal: guestReservation.foodTotal,
-            foodDeliveryType: guestReservation.foodDeliveryType,
-            purchaseDate: new Date().toISOString(),
-          });
-
-          await AsyncStorage.setItem(
-            "guestTickets",
-            JSON.stringify(guestTickets)
-          );
-
-          // Clear the selection
-          await AsyncStorage.removeItem("guestSelection");
-
-          // Navigate to confirmation
+        } else {
+          // For authenticated users
           router.push({
             pathname: `./booking/${id}/confirmation`,
-            params: {
-              reservationId: guestReservation.id.toString(),
-              guest: "true",
-            },
+            params: { reservationId: booking.reservationId!.toString() },
           });
         }
-      } catch (error) {
-        console.error("Payment error:", error);
+
+        // Reset booking state after navigating to confirmation
+        booking.resetBooking();
+      } else {
         Alert.alert(
           "Payment Failed",
-          "There was an error processing your payment."
+          "There was a problem processing your payment. Please try again."
         );
-        setIsProcessing(false);
       }
-    }, 1500); // 1.5 second delay to simulate processing
+    } catch (error) {
+      console.error("Payment error:", error);
+      Alert.alert(
+        "Payment Error",
+        "There was a problem with your payment. Please try again later."
+      );
+    }
   };
-
-  // Render loading state
-  if (isLoading) {
-    return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#B4D335" />
-        <ThemedText style={styles.loadingText}>
-          Loading payment details...
-        </ThemedText>
-      </ThemedView>
-    );
-  }
 
   // Payment methods data
   const paymentMethods = [
@@ -269,6 +105,18 @@ export default function PaymentScreen() {
       icon: "add-circle-outline",
     },
   ];
+
+  // Loading state
+  if (booking.isLoading || !booking.showtime) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#B4D335" />
+        <ThemedText style={styles.loadingText}>
+          Loading payment details...
+        </ThemedText>
+      </ThemedView>
+    );
+  }
 
   return (
     <>
@@ -293,67 +141,83 @@ export default function PaymentScreen() {
 
             <View style={styles.summaryContent}>
               <ThemedText style={styles.movieTitle}>
-                {reservation?.movieTitle ||
-                  showtime?.movieTitle ||
-                  guestSelection?.movieTitle}
+                {booking.showtime.movieTitle}
               </ThemedText>
 
               <ThemedText style={styles.theaterInfo}>
-                {reservation?.theaterName ||
-                  showtime?.theaterName ||
-                  guestSelection?.theaterName}{" "}
-                •{" "}
-                {reservation?.screenName ||
-                  showtime?.screenName ||
-                  guestSelection?.screenName}
+                {booking.showtime.theaterName} • {booking.showtime.screenName}
               </ThemedText>
 
               <ThemedText style={styles.showtime}>
-                {new Date(
-                  reservation?.showtimeStartTime ||
-                    showtime?.startTime ||
-                    guestSelection?.startTime
-                ).toLocaleString(undefined, {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {new Date(booking.showtime.startTime).toLocaleString(
+                  undefined,
+                  {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}
               </ThemedText>
 
               <View style={styles.ticketsContainer}>
                 <ThemedText style={styles.ticketsLabel}>Tickets:</ThemedText>
-                {reservation?.tickets ? (
-                  reservation.tickets.map((ticket: any, index: number) => (
+                {booking.selectedSeats.map((seatId, index) => {
+                  // Get seat details - row and number
+                  let seatRow = "";
+                  let seatNumber = 0;
+
+                  if (booking.seatingLayout) {
+                    for (const rowKey in booking.seatingLayout.rows) {
+                      const seat = booking.seatingLayout.rows[rowKey].find(
+                        (s) => s.id === seatId
+                      );
+                      if (seat) {
+                        seatRow = seat.row;
+                        seatNumber = seat.number;
+                        break;
+                      }
+                    }
+                  }
+
+                  const ticketType = booking.ticketTypes[seatId] || "Adult";
+                  let price = booking.showtime
+                    ? booking.showtime.ticketPrice
+                    : 0;
+
+                  // Apply discount based on ticket type
+                  if (ticketType === "Child") price *= 0.75; // 25% off
+                  if (ticketType === "Senior") price *= 0.8; // 20% off
+
+                  return (
                     <ThemedText key={index} style={styles.ticketItem}>
-                      {ticket.ticketType} - Seat {ticket.row}
-                      {ticket.number} (${ticket.price.toFixed(2)})
+                      {ticketType} - Seat {seatRow}
+                      {seatNumber} (${price.toFixed(2)})
                     </ThemedText>
-                  ))
-                ) : guestSelection?.seats ? (
-                  guestSelection.seats.map((seatId: number, index: number) => {
-                    const ticketType =
-                      guestSelection.ticketTypes[seatId] || "Adult";
-                    const price =
-                      guestSelection.totalPrice / guestSelection.seats.length;
-                    return (
-                      <ThemedText key={index} style={styles.ticketItem}>
-                        {ticketType} - Seat {index + 1} (${price.toFixed(2)})
-                      </ThemedText>
-                    );
-                  })
-                ) : (
-                  <ThemedText style={styles.ticketItem}>
-                    No tickets found
-                  </ThemedText>
-                )}
+                  );
+                })}
               </View>
+
+              {/* Show food items if any */}
+              {booking.foodItems.length > 0 && (
+                <View style={styles.foodContainer}>
+                  <ThemedText style={styles.ticketsLabel}>
+                    Food Items:
+                  </ThemedText>
+                  {booking.foodItems.map((item, index) => (
+                    <ThemedText key={index} style={styles.ticketItem}>
+                      {item.quantity}x {item.foodItemName} ($
+                      {(item.price * item.quantity).toFixed(2)})
+                    </ThemedText>
+                  ))}
+                </View>
+              )}
 
               <View style={styles.totalRow}>
                 <ThemedText style={styles.totalLabel}>Total:</ThemedText>
                 <ThemedText style={styles.totalPrice}>
-                  ${totalAmount.toFixed(2)}
+                  ${booking.totalAmount.toFixed(2)}
                 </ThemedText>
               </View>
             </View>
@@ -368,16 +232,16 @@ export default function PaymentScreen() {
                 key={method.id}
                 style={[
                   styles.paymentMethodItem,
-                  selectedPaymentMethod === method.id &&
+                  booking.paymentMethod === method.id &&
                     styles.selectedPaymentMethod,
                 ]}
-                onPress={() => setSelectedPaymentMethod(method.id)}
+                onPress={() => booking.setPaymentMethod(method.id)}
               >
                 <Ionicons
                   name={method.icon as any}
                   size={24}
                   color={
-                    selectedPaymentMethod === method.id
+                    booking.paymentMethod === method.id
                       ? "#B4D335"
                       : isDark
                       ? "#FFFFFF"
@@ -388,14 +252,14 @@ export default function PaymentScreen() {
                 <ThemedText
                   style={[
                     styles.paymentLabel,
-                    selectedPaymentMethod === method.id &&
+                    booking.paymentMethod === method.id &&
                       styles.selectedPaymentLabel,
                   ]}
                 >
                   {method.label}
                 </ThemedText>
                 <View style={styles.radioButton}>
-                  {selectedPaymentMethod === method.id && (
+                  {booking.paymentMethod === method.id && (
                     <View style={styles.radioButtonInner} />
                   )}
                 </View>
@@ -404,7 +268,7 @@ export default function PaymentScreen() {
           </View>
 
           {/* Add new card form (conditionally rendered) */}
-          {selectedPaymentMethod === "new-card" && (
+          {booking.paymentMethod === "new-card" && (
             <View style={styles.newCardContainer}>
               <View style={styles.inputGroup}>
                 <ThemedText style={styles.inputLabel}>Card Number</ThemedText>
@@ -467,15 +331,18 @@ export default function PaymentScreen() {
 
           {/* Pay button */}
           <TouchableOpacity
-            style={[styles.payButton, isProcessing && styles.disabledButton]}
+            style={[
+              styles.payButton,
+              booking.isLoading && styles.disabledButton,
+            ]}
             onPress={handlePayment}
-            disabled={isProcessing}
+            disabled={booking.isLoading}
           >
-            {isProcessing ? (
+            {booking.isLoading ? (
               <ActivityIndicator size="small" color="#242424" />
             ) : (
               <ThemedText style={styles.payButtonText}>
-                Pay ${totalAmount.toFixed(2)}
+                Pay ${booking.totalAmount.toFixed(2)}
               </ThemedText>
             )}
           </TouchableOpacity>
@@ -653,5 +520,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9BA1A6",
     marginBottom: 20,
+  },
+  foodContainer: {
+    marginBottom: 16,
   },
 });
