@@ -25,11 +25,11 @@ namespace Selu383.SP25.P03.Api.Data
                 // Staff users
                 var staff1 = new User { UserName = "staff1", Email = "staff1@lionsden.com" };
                 await userManager.CreateAsync(staff1, "Password123!");
-                await userManager.AddToRoleAsync(staff1, UserRoleNames.Staff);
+                await userManager.AddToRoleAsync(staff1, UserRoleNames.User);
 
                 var staff2 = new User { UserName = "staff2", Email = "staff2@lionsden.com" };
                 await userManager.CreateAsync(staff2, "Password123!");
-                await userManager.AddToRoleAsync(staff2, UserRoleNames.Staff);
+                await userManager.AddToRoleAsync(staff2, UserRoleNames.User);
 
                 // Customer users
                 var customer1 = new User { UserName = "customer1", Email = "customer1@example.com" };
