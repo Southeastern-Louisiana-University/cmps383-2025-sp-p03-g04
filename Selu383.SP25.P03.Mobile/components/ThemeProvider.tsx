@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useThemeToggle, ColorSchemeName } from "../hooks/useThemeToggle";
-import { Colors, UIColors } from "../styles/theme/colors";
 
 // Define the context type
 type ThemeContextType = {

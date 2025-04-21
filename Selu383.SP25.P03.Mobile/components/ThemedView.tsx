@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ViewProps } from "react-native";
 import { useTheme } from "./ThemeProvider";
-import { getBackgroundColor, getUIColor } from "../utils/themeUtils";
+import { getBackgroundColor, getThemedColor, getUIColor } from "../utils/theme";
 
 export interface ThemedViewProps extends ViewProps {
   lightColor?: string;
@@ -24,7 +24,7 @@ export function ThemedView({
 
   if (lightColor && darkColor) {
     // Use custom colors if provided
-    backgroundColor = isDark ? darkColor : lightColor;
+    backgroundColor = getThemedColor(isDark, lightColor, darkColor);
   } else {
     // Otherwise use variant-based colors
     switch (variant) {
