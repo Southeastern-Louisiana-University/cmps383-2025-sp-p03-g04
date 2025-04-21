@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Selu383.SP25.P03.Api.Data;
 using Selu383.SP25.P03.Api.Features.Users;
+using Selu383.SP25.P03.Api.Services.Payment;
 
 namespace Selu383.SP25.P03.Api
 {
@@ -81,28 +82,40 @@ namespace Selu383.SP25.P03.Api
                     }
                 }
             }
-
-            builder.Services.AddHttpClient<TmdbService>();
-            builder.Services.AddScoped<TmdbService>();
+            
             builder.Services.AddScoped<ShowtimeManagementService>();
+            
+            // Add new services
+            // Add QR Code ticket generation
+            builder.Services.AddScoped<TicketService>();
+
+            // payment processing
+            builder.Services.AddSingleton<IPaymentService, MockPaymentService>();
+
+            // reservation timeout service
+            builder.Services.AddHostedService<ReservationTimeoutService>();
+
+            // guest session management
+            builder.Services.AddDistributedMemoryCache(); // Use in-memory cache for development
+            builder.Services.AddScoped<GuestSessionService>();
 
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    await db.Database.MigrateAsync();
-    
-    SeedTheaters.Initialize(scope.ServiceProvider);
-    await SeedRoles.Initialize(scope.ServiceProvider);
-    await SeedUsers.Initialize(scope.ServiceProvider);
-    SeedMovies.Initialize(scope.ServiceProvider);
-    SeedConcessions.Initialize(scope.ServiceProvider);
-    
-    // Generate showtimes on startup if none exist
-    var showtimeService = scope.ServiceProvider.GetRequiredService<ShowtimeManagementService>();
-    await showtimeService.GenerateShowtimesIfNoneExist();
-}
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+                await db.Database.MigrateAsync();
+                
+                SeedTheaters.Initialize(scope.ServiceProvider);
+                await SeedRoles.Initialize(scope.ServiceProvider);
+                await SeedUsers.Initialize(scope.ServiceProvider);
+                SeedMovies.Initialize(scope.ServiceProvider);
+                SeedConcessions.Initialize(scope.ServiceProvider);
+                
+                // Generate showtimes on startup if none exist
+                var showtimeService = scope.ServiceProvider.GetRequiredService<ShowtimeManagementService>();
+                await showtimeService.GenerateShowtimesIfNoneExist();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

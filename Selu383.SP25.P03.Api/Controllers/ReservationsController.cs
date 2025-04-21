@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Selu383.SP25.P03.Api.Data;
 using Selu383.SP25.P03.Api.Features.Reservations;
 using Selu383.SP25.P03.Api.Features.Users;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using Selu383.SP25.P03.Api.Services;
 
 namespace Selu383.SP25.P03.Api.Controllers
 {
@@ -17,154 +20,225 @@ namespace Selu383.SP25.P03.Api.Controllers
     {
         private readonly DataContext dataContext;
         private readonly DbSet<Reservation> reservations;
+        private readonly UserManager<User> userManager;
 
-        public ReservationsController(DataContext dataContext)
-        {
-            this.dataContext = dataContext;
-            reservations = dataContext.Set<Reservation>();
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservationRequest request)
-        {
-            if (request == null || request.Tickets.Count == 0)
-            {
-                return BadRequest("Reservation data is required and must include at least one ticket");
-            }
-            
-            // Verify showtime exists
-            var showtime = await dataContext.Showtimes
-                .Include(s => s.Movie)
-                .Include("Screen.Theater")
-                .FirstOrDefaultAsync(s => s.Id == request.ShowtimeId);
-
-            if (showtime == null)
-            {
-                return NotFound("Showtime not found");
-            }
-
-            // Get all seat IDs from the tickets
-            var seatIds = request.Tickets.Select(t => t.SeatId).ToList();
-
-            // Verify seats exist and belong to the right screen
-            var seats = await dataContext.Seats
-                .Where(s => seatIds.Contains(s.Id) && s.ScreenId == showtime.ScreenId)
-                .ToListAsync();
-
-            if (seats.Count != seatIds.Count)
-            {
-                return BadRequest("One or more seats are invalid");
-            }
-
-            // Verify seats are available
-            var reservedSeatIds = await dataContext.ReservationSeats
-                .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == request.ShowtimeId && rs.Reservation.IsPaid)
-                .Select(rs => rs.SeatId)
-                .ToListAsync();
-
-            var unavailableSeats = seats.Where(s => reservedSeatIds.Contains(s.Id)).ToList();
-            if (unavailableSeats.Any())
-            {
-                return BadRequest("One or more seats are already reserved");
-            }
-
-            // Get current user
-            // Get current user
-var userName = User.Identity?.Name;
-var user = userName != null 
-    ? await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userName)
-    : null;
-
-if (user == null)
+public ReservationsController(DataContext dataContext, UserManager<User> userManager)
 {
-    return BadRequest("User not found");
+    this.dataContext = dataContext;
+    this.reservations = dataContext.Set<Reservation>();
+    this.userManager = userManager;
 }
 
-            // For each ticket, set the price based on ticket type
-            // In a real application, you'd have a more sophisticated pricing strategy
-            foreach (var ticket in request.Tickets)
-            {
-                switch (ticket.TicketType.ToLower())
-                {
-                    case "child":
-                        ticket.Price = showtime.TicketPrice * 0.75m; // 25% discount for children
-                        break;
-                    case "senior":
-                        ticket.Price = showtime.TicketPrice * 0.8m; // 20% discount for seniors
-                        break;
-                    default: // "adult" or any other type
-                        ticket.Price = showtime.TicketPrice;
-                        break;
-                }
-            }
-
-            // Calculate total amount
-            decimal totalAmount = request.Tickets.Sum(t => t.Price);
-
-            // Create reservation
-            var reservation = new Reservation
-            {
-                ShowtimeId = request.ShowtimeId,
-                UserId = user.Id,
-                ReservationTime = DateTime.UtcNow,
-                TotalAmount = totalAmount,
-                IsPaid = request.ProcessPayment // Set to true if payment is being processed immediately
-            };
-
-            reservations.Add(reservation);
-            await dataContext.SaveChangesAsync();
-
-            // Add seat reservations
-            foreach (var ticket in request.Tickets)
-            {
-                var seat = seats.First(s => s.Id == ticket.SeatId);
+    [HttpPost]
+[Authorize]
+public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservationRequest request)
+{
+    if (request == null || request.Tickets.Count == 0)
+    {
+        return BadRequest("Reservation data is required and must include at least one ticket");
+    }
+    
+    // Check for expired reservations before continuing
+    var cutoffTime = DateTime.UtcNow.AddMinutes(-15);
+    var expiredReservations = await dataContext.ReservationSeats
+        .Where(rs => rs.Reservation != null && 
+                    rs.Reservation.ShowtimeId == request.ShowtimeId && 
+                    !rs.Reservation.IsPaid && 
+                    rs.Reservation.ReservationTime < cutoffTime)
+        .Select(rs => rs.ReservationId)
+        .Distinct()
+        .ToListAsync();
+    
+    // If there are expired reservations, release their seats
+    if (expiredReservations.Any())
+    {
+        foreach (var expiredId in expiredReservations)
+        {
+            var expiredSeats = await dataContext.ReservationSeats
+                .Where(rs => rs.ReservationId == expiredId)
+                .ToListAsync();
                 
-                dataContext.ReservationSeats.Add(new ReservationSeat
-                {
-                    ReservationId = reservation.Id,
-                    SeatId = ticket.SeatId,
-                    TicketType = ticket.TicketType,
-                    Price = ticket.Price
-                });
-            }
-
-            await dataContext.SaveChangesAsync();
-
-            // Map to DTO for response
-            var ticketDtos = new List<TicketDto>();
-            foreach (var reservationSeat in dataContext.ReservationSeats
-                .Where(rs => rs.ReservationId == reservation.Id)
-                .Include(rs => rs.Seat))
-            {
-                ticketDtos.Add(new TicketDto
-                {
-                    Id = reservationSeat.Id,
-                    SeatId = reservationSeat.SeatId,
-                    Row = reservationSeat.Seat?.Row ?? string.Empty,
-                    Number = reservationSeat.Seat?.Number ?? 0,
-                    TicketType = reservationSeat.TicketType,
-                    Price = reservationSeat.Price
-                });
-            }
-
-            var reservationDto = new ReservationDto
-            {
-                Id = reservation.Id,
-                ReservationTime = reservation.ReservationTime,
-                IsPaid = reservation.IsPaid,
-                TotalAmount = reservation.TotalAmount,
-                UserId = reservation.UserId,
-                ShowtimeId = reservation.ShowtimeId,
-                ShowtimeStartTime = showtime.StartTime,
-                MovieTitle = showtime.Movie?.Title ?? string.Empty,
-                TheaterName = showtime.Screen?.Theater?.Name ?? string.Empty,
-                ScreenName = showtime.Screen?.Name ?? string.Empty,
-                Tickets = ticketDtos
-            };
-
-            return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
+            dataContext.ReservationSeats.RemoveRange(expiredSeats);
+            
+            var expiredReservation = await dataContext.Reservations.FindAsync(expiredId);
+            if (expiredReservation != null)
+                dataContext.Reservations.Remove(expiredReservation);
         }
+        
+        await dataContext.SaveChangesAsync();
+    }
+    
+    // Verify showtime exists
+    var showtime = await dataContext.Showtimes
+        .Include(s => s.Movie)
+        .Include("Screen.Theater")
+        .FirstOrDefaultAsync(s => s.Id == request.ShowtimeId);
+
+    if (showtime == null)
+    {
+        return NotFound("Showtime not found");
+    }
+
+    // Get all seat IDs from the tickets
+    var seatIds = request.Tickets.Select(t => t.SeatId).ToList();
+
+    // Verify seats exist and belong to the right screen
+    var seats = await dataContext.Seats
+        .Where(s => seatIds.Contains(s.Id) && s.ScreenId == showtime.ScreenId)
+        .ToListAsync();
+
+    if (seats.Count != seatIds.Count)
+    {
+        return BadRequest("One or more seats are invalid");
+    }
+
+    // Verify seats are available
+    var reservedSeatIds = await dataContext.ReservationSeats
+        .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == request.ShowtimeId && rs.Reservation.IsPaid)
+        .Select(rs => rs.SeatId)
+        .ToListAsync();
+
+    var unavailableSeats = seats.Where(s => reservedSeatIds.Contains(s.Id)).ToList();
+    if (unavailableSeats.Any())
+    {
+        return BadRequest("One or more seats are already reserved");
+    }
+
+    // Get current user
+    var userName = User.Identity?.Name;
+    var user = userName != null 
+        ? await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userName)
+        : null;
+
+    if (user == null)
+    {
+        return BadRequest("User not found");
+    }
+
+    // For each ticket, set the price based on ticket type
+    // In a real application, you'd have a more sophisticated pricing strategy
+    foreach (var ticket in request.Tickets)
+    {
+        switch (ticket.TicketType.ToLower())
+        {
+            case "child":
+                ticket.Price = showtime.TicketPrice * 0.75m; // 25% discount for children
+                break;
+            case "senior":
+                ticket.Price = showtime.TicketPrice * 0.8m; // 20% discount for seniors
+                break;
+            default: // "adult" or any other type
+                ticket.Price = showtime.TicketPrice;
+                break;
+        }
+    }
+
+    // Calculate total amount
+    decimal totalAmount = request.Tickets.Sum(t => t.Price);
+
+    // Create reservation
+    var reservation = new Reservation
+    {
+        ShowtimeId = request.ShowtimeId,
+        UserId = user.Id,
+        ReservationTime = DateTime.UtcNow,
+        TotalAmount = totalAmount,
+        IsPaid = request.ProcessPayment // Set to true if payment is being processed immediately
+    };
+
+    reservations.Add(reservation);
+    await dataContext.SaveChangesAsync();
+
+    // Add seat reservations
+    foreach (var ticket in request.Tickets)
+    {
+        var seat = seats.First(s => s.Id == ticket.SeatId);
+        
+        dataContext.ReservationSeats.Add(new ReservationSeat
+        {
+            ReservationId = reservation.Id,
+            SeatId = ticket.SeatId,
+            TicketType = ticket.TicketType,
+            Price = ticket.Price
+        });
+    }
+
+    await dataContext.SaveChangesAsync();
+
+    // Map to DTO for response
+    var ticketDtos = new List<TicketDto>();
+    foreach (var reservationSeat in dataContext.ReservationSeats
+        .Where(rs => rs.ReservationId == reservation.Id)
+        .Include(rs => rs.Seat))
+    {
+        ticketDtos.Add(new TicketDto
+        {
+            Id = reservationSeat.Id,
+            SeatId = reservationSeat.SeatId,
+            Row = reservationSeat.Seat?.Row ?? string.Empty,
+            Number = reservationSeat.Seat?.Number ?? 0,
+            TicketType = reservationSeat.TicketType,
+            Price = reservationSeat.Price
+        });
+    }
+
+    var reservationDto = new ReservationDto
+    {
+        Id = reservation.Id,
+        ReservationTime = reservation.ReservationTime,
+        IsPaid = reservation.IsPaid,
+        TotalAmount = reservation.TotalAmount,
+        UserId = reservation.UserId,
+        ShowtimeId = reservation.ShowtimeId,
+        ShowtimeStartTime = showtime.StartTime,
+        MovieTitle = showtime.Movie?.Title ?? string.Empty,
+        TheaterName = showtime.Screen?.Theater?.Name ?? string.Empty,
+        ScreenName = showtime.Screen?.Name ?? string.Empty,
+        Tickets = ticketDtos
+    };
+
+    return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservationDto);
+}
+
+   [HttpGet("{id}/ticket")]
+[Authorize]
+public async Task<ActionResult> GetTicket(int id)
+{
+    try
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var reservation = await reservations.FirstOrDefaultAsync(r => r.Id == id);
+        if (reservation == null)
+        {
+            return NotFound();
+        }
+
+        // Only allow users to see their own tickets unless admin
+        if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
+        {
+            return Forbid();
+        }
+
+        // Generate ticket QR code
+        var ticketService = HttpContext.RequestServices.GetRequiredService<TicketService>();
+        var qrCodeImage = await ticketService.GenerateTicketQRCode(id);
+
+        return File(qrCodeImage, "image/png");
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (Exception)
+    {
+        return StatusCode(500, "An error occurred generating the ticket");
+    }
+}
 
         [HttpGet("{id}")]
         [Authorize]

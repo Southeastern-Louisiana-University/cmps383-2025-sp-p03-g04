@@ -84,6 +84,33 @@ namespace Selu383.SP25.P03.Api.Controllers
             };
         }
 
+        // Add these methods to FoodItemsController.cs
+[HttpGet("categories")]
+public IQueryable<FoodCategoryDto> GetAllCategories()
+{
+    return dataContext.FoodCategories
+        .Select(c => new FoodCategoryDto
+        {
+            Id = c.Id,
+            Name = c.Name
+        });
+}
+
+[HttpGet("categories/{id}")]
+public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
+{
+    var category = await dataContext.FoodCategories.FindAsync(id);
+    if (category == null)
+    {
+        return NotFound();
+    }
+    return new FoodCategoryDto
+    {
+        Id = category.Id,
+        Name = category.Name
+    };
+}
+
         [HttpPost]
         [Authorize(Roles = UserRoleNames.Admin)]
         public async Task<ActionResult<FoodItemDto>> CreateFoodItem(FoodItemDto dto)
