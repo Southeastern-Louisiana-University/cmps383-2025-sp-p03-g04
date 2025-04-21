@@ -1,4 +1,5 @@
 import { fetchWithCredentials } from "../api/config";
+import { API_ENDPOINTS } from "../../constants/api-constants";
 import {
   TheaterResponse,
   ScreenResponse,
@@ -6,41 +7,29 @@ import {
 } from "../../types/api/theaters";
 import { Theater, Screen, SeatingLayout } from "../../types/models/theater";
 
-/**
- * Get all theaters
- */
 export const getTheaters = async (): Promise<Theater[]> => {
-  return fetchWithCredentials<TheaterResponse[]>("/api/theaters");
+  return fetchWithCredentials<TheaterResponse[]>(API_ENDPOINTS.THEATERS);
 };
 
-/**
- * Get a theater by ID
- */
 export const getTheater = async (id: number): Promise<Theater> => {
-  return fetchWithCredentials<TheaterResponse>(`/api/theaters/${id}`);
+  return fetchWithCredentials<TheaterResponse>(API_ENDPOINTS.THEATER_BY_ID(id));
 };
 
-/**
- * Get all screens for a theater
- */
 export const getScreensByTheater = async (
   theaterId: number
 ): Promise<Screen[]> => {
   return fetchWithCredentials<ScreenResponse[]>(
-    `/api/theaters/${theaterId}/screens`
+    API_ENDPOINTS.THEATER_SCREENS(theaterId)
   );
 };
 
-/**
- * Get seating layout for a showtime
- */
 export const getSeatsForShowtime = async (
   showtimeId: number,
   userId?: number
 ): Promise<SeatingLayout> => {
   const url = userId
-    ? `/api/seats/showtime/${showtimeId}?userId=${userId}`
-    : `/api/seats/showtime/${showtimeId}`;
+    ? `${API_ENDPOINTS.SEATS_BY_SHOWTIME(showtimeId)}?userId=${userId}`
+    : API_ENDPOINTS.SEATS_BY_SHOWTIME(showtimeId);
 
   return fetchWithCredentials<SeatingLayoutResponse>(url);
 };
