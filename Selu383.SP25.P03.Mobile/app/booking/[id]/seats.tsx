@@ -56,10 +56,13 @@ export default function SeatSelectionScreen() {
       return;
     }
 
+    // Save current progress
     await booking.saveBookingProgress();
 
     if (!isAuthenticated) {
+      // Set guest mode flag
       booking.setIsGuest(true);
+      console.log("Setting guest mode and presenting options");
 
       Alert.alert(
         "Continue Booking",
@@ -68,25 +71,38 @@ export default function SeatSelectionScreen() {
           {
             text: "Sign In",
             onPress: () => {
+              console.log("User chose to sign in");
               router.push(`/login?returnTo=/booking/${id}/food-option`);
             },
           },
           {
             text: "Continue as Guest",
             onPress: () => {
-              router.push({ pathname: `./booking/${id}/food-option` });
+              console.log("User chose to continue as guest");
+              // Proceed to food options page
+              router.push(`/booking/${id}/food-option`);
             },
           },
-        ]
+        ],
+        { cancelable: false }
       );
     } else {
-      const reservationId = await booking.createReservation();
+      try {
+        console.log("Creating reservation for authenticated user");
+        // For authenticated users, create a reservation first
+        const reservationId = await booking.createReservation();
 
-      if (reservationId) {
-        router.push({
-          pathname: `./booking/${id}/food-option`,
-          params: { reservationId: reservationId.toString() },
-        });
+        if (reservationId) {
+          console.log("Reservation created:", reservationId);
+          // Proceed to food options
+          router.push({
+            pathname: `./booking/${id}/food-option`,
+            params: { reservationId: reservationId.toString() },
+          });
+        }
+      } catch (error) {
+        console.error("Failed to create reservation:", error);
+        Alert.alert("Error", "Failed to create reservation. Please try again.");
       }
     }
   };
