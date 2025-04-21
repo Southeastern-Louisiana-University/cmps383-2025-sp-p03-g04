@@ -23,6 +23,45 @@ namespace Selu383.SP25.P03.Api.Controllers
             users = dataContext.Set<User>();
         }
 
+[HttpPost]
+[Route("register")]
+[Authorize]
+public async Task<ActionResult<UserDto>> Register([FromBody] CreateUserDto dto)
+{
+    if (dto.Roles == null || !dto.Roles.Any())
+    {
+        return BadRequest("User roles cannot be empty");
+    }
+
+    var roles = await dataContext.Roles.ToListAsync();
+    if (!dto.Roles.All(roleName => roles.Any(dbRole => roleName == dbRole.Name)))
+    {
+        return BadRequest("One or more roles are invalid");
+    }
+
+    var result = await userManager.CreateAsync(new User { UserName = dto.Username }, dto.Password);
+    
+    if (result.Succeeded)
+    {
+        var user = await userManager.FindByNameAsync(dto.Username);
+        if (user == null)
+        {
+            return BadRequest("User could not be created");
+        }
+        
+        await userManager.AddToRolesAsync(user, dto.Roles);
+
+        return new UserDto
+        {
+            Id = user.Id,
+            UserName = dto.Username,
+            Roles = dto.Roles
+        };
+    }
+    
+    return BadRequest(result.Errors);
+}
+        
         [HttpPost]
         [Route("login")]
         public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto dto)

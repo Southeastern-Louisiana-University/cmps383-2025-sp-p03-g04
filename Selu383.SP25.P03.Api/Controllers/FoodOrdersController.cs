@@ -50,6 +50,38 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetAllOrders()
     return result;
 }
 
+[HttpGet("reservation/{reservationId}")]
+[Authorize]
+public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetOrdersByReservation(int reservationId)
+{
+    var user = await userManager.GetUserAsync(User);
+    if (user == null)
+    {
+        return Unauthorized();
+    }
+
+    // Check if reservation exists
+    var reservation = await dataContext.Reservations.FindAsync(reservationId);
+    if (reservation == null)
+    {
+        return NotFound("Reservation not found");
+    }
+
+    // Verify the user owns the reservation or is admin
+    if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
+    {
+        return Forbid();
+    }
+
+    var orders = await foodOrders
+        .Include(o => o.OrderItems)
+        .ThenInclude(oi => oi.FoodItem)
+        .Where(o => o.ReservationId == reservationId)
+        .ToListAsync();
+
+    return orders.Select(o => MapOrderToDto(o)).ToList();
+}
+
 [HttpGet("my-orders")]
 public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetMyOrders()
 {
@@ -257,6 +289,52 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
 
             return orderDto;
         }
+
+        [HttpPut("{orderId}/link-reservation/{reservationId}")]
+[Authorize]
+public async Task<ActionResult<FoodOrderDto>> LinkOrderToReservation(int orderId, int reservationId)
+{
+    var user = await userManager.GetUserAsync(User);
+    if (user == null)
+    {
+        return Unauthorized();
+    }
+
+    var order = await foodOrders
+        .Include(o => o.OrderItems)
+        .ThenInclude(oi => oi.FoodItem)
+        .FirstOrDefaultAsync(o => o.Id == orderId);
+
+    if (order == null)
+    {
+        return NotFound("Order not found");
+    }
+
+    // Verify the user owns the order or is admin
+    if (order.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
+    {
+        return Forbid();
+    }
+
+    // Check if reservation exists
+    var reservation = await dataContext.Reservations.FindAsync(reservationId);
+    if (reservation == null)
+    {
+        return NotFound("Reservation not found");
+    }
+
+    // Verify the user owns the reservation or is admin
+    if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
+    {
+        return Forbid();
+    }
+
+    // Link the order to the reservation
+    order.ReservationId = reservationId;
+    await dataContext.SaveChangesAsync();
+
+    return MapOrderToDto(order);
+}
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> CancelOrder(int id)
