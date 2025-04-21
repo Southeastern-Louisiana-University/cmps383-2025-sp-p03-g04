@@ -281,6 +281,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Complete guest booking
+  // In components/BookingProvider.tsx
+  // Update the completeGuestBooking method:
+
   const completeGuestBooking = async (
     showtime: Showtime
   ): Promise<{ reservationId: number }> => {
@@ -288,17 +291,25 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
+      console.log(
+        "Starting guest booking completion with showtime:",
+        showtime.id
+      );
+      console.log("Selected seats:", selectedSeats);
+      console.log("Food items:", foodItems);
+
       // Create a unique ID for the guest reservation
       const guestReservationId = new Date().getTime();
 
-      // Create a guest reservation object
+      // Create a guest reservation object with all necessary data
       const guestReservation = {
         id: guestReservationId,
+        reservationId: guestReservationId, // Add this for consistency with backend objects
         movieTitle: showtime.movieTitle,
         theaterName: showtime.theaterName,
         screenName: showtime.screenName,
         showtimeStartTime: showtime.startTime,
-        showtimeId: showtimeId!,
+        showtimeId: showtimeId,
         totalAmount: calculateTotal(),
         isPaid: true,
         reservationTime: new Date().toISOString(),
@@ -318,24 +329,30 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
                 break;
               }
             }
-          } else {
-            // If seating layout is not available, use placeholder values
-            seatRow = String.fromCharCode(65 + Math.floor(Math.random() * 8)); // A-H
-            seatNumber = Math.floor(Math.random() * 20) + 1; // 1-20
           }
+
+          // Calculate price based on ticket type
+          const ticketType = ticketTypes[seatId] || "Adult";
+          let price = showtime.ticketPrice;
+
+          // Apply discount based on ticket type
+          if (ticketType === "Child") price *= 0.75; // 25% off
+          if (ticketType === "Senior") price *= 0.8; // 20% off
 
           return {
             id: seatId,
             seatId,
             row: seatRow,
             number: seatNumber,
-            ticketType: ticketTypes[seatId] || "Adult",
-            price: calculateTotal() / selectedSeats.length,
+            ticketType: ticketType,
+            price: price,
           };
         }),
         foodItems: foodItems.length > 0 ? foodItems : undefined,
         foodDeliveryType: foodItems.length > 0 ? foodDeliveryType : undefined,
       };
+
+      console.log("Created guest reservation:", guestReservationId);
 
       // Store in AsyncStorage for guest users
       const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
@@ -357,10 +374,11 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       });
 
       await AsyncStorage.setItem("guestTickets", JSON.stringify(guestTickets));
+      console.log("Saved guest tickets to storage");
 
       // Clean up temporary storage
-      await AsyncStorage.removeItem("guestSelection");
-      await AsyncStorage.removeItem("foodOrderItems");
+      await AsyncStorage.removeItem("bookingProgress");
+      console.log("Cleared booking progress");
 
       return { reservationId: guestReservationId };
     } catch (error) {

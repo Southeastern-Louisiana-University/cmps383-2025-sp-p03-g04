@@ -1,23 +1,23 @@
-// app/booking/[id]/confirmation.tsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   ScrollView,
   TouchableOpacity,
   Share,
   ActivityIndicator,
+  Alert,
   StyleSheet,
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import QRCode from "react-native-qrcode-svg";
 import { useAuth } from "../../../components/AuthProvider";
 import { useTheme } from "../../../components/ThemeProvider";
 import { ThemedView } from "../../../components/ThemedView";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemeToggle } from "../../../components/ThemeToggle";
 import { useBooking } from "../../../components/BookingProvider";
+import { QRCode } from "../../../components/QRCode";
 
 import * as reservationService from "../../../services/reservations/reservationService";
 
@@ -29,18 +29,22 @@ export default function ConfirmationScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // State for QR code
-  const [qrValue, setQrValue] = React.useState<string>("");
-  const [reservationData, setReservationData] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  // State for reservation data
+  const [qrValue, setQrValue] = useState<string>("");
+  const [reservationData, setReservationData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Load confirmation data
   useEffect(() => {
     const loadConfirmationData = async () => {
+      console.log("Loading confirmation data");
+      console.log("Parameters:", { id, reservationId, guest });
+
       setIsLoading(true);
       try {
         // Check if we're showing a guest booking
         if (guest === "true") {
+          console.log("Loading guest booking confirmation");
           // Find the guest ticket in AsyncStorage
           const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
           if (guestTicketsStr) {
@@ -50,6 +54,7 @@ export default function ConfirmationScreen() {
             );
 
             if (foundTicket) {
+              console.log("Found guest ticket:", foundTicket.reservationId);
               setReservationData(foundTicket);
 
               // Generate a QR code value with reservation info
@@ -66,9 +71,12 @@ export default function ConfirmationScreen() {
               };
 
               setQrValue(JSON.stringify(qrData));
+            } else {
+              console.error("Guest ticket not found:", reservationId);
             }
           }
         } else if (reservationId) {
+          console.log("Loading authenticated user reservation:", reservationId);
           // For authenticated users, load the reservation
           const reservation = await reservationService.getReservation(
             Number(reservationId)
@@ -203,12 +211,17 @@ export default function ConfirmationScreen() {
 
           <View style={styles.ticketContainer}>
             <View style={styles.ticketHeader}>
-              <ThemedText style={styles.theaterName}>
-                {reservationData.theaterName}
-              </ThemedText>
-              <ThemedText style={styles.screenName}>
-                {reservationData.screenName || "Screen 1"}
-              </ThemedText>
+              <View style={styles.theaterInfo}>
+                <ThemedText style={styles.theaterName}>
+                  {reservationData.theaterName}
+                </ThemedText>
+                <ThemedText style={styles.screenName}>
+                  {reservationData.screenName || "Screen 1"}
+                </ThemedText>
+              </View>
+              <View style={styles.logoContainer}>
+                <Ionicons name="film-outline" size={24} color="#B4D335" />
+              </View>
             </View>
 
             <View style={styles.ticketBody}>
@@ -216,13 +229,21 @@ export default function ConfirmationScreen() {
                 {reservationData.movieTitle}
               </ThemedText>
 
-              <ThemedText style={styles.showtime}>
-                {new Date(reservationData.showtimeStartTime).toLocaleString(
+              <ThemedText style={styles.showtimeDate}>
+                {new Date(reservationData.showtimeStartTime).toLocaleDateString(
                   undefined,
                   {
                     weekday: "short",
                     month: "short",
                     day: "numeric",
+                  }
+                )}
+              </ThemedText>
+
+              <ThemedText style={styles.showtimeTime}>
+                {new Date(reservationData.showtimeStartTime).toLocaleTimeString(
+                  undefined,
+                  {
                     hour: "2-digit",
                     minute: "2-digit",
                   }
@@ -239,8 +260,7 @@ export default function ConfirmationScreen() {
               </View>
 
               {/* Add food items if present */}
-              {reservationData &&
-                reservationData.foodItems &&
+              {reservationData.foodItems &&
                 reservationData.foodItems.length > 0 && (
                   <>
                     <View style={styles.divider} />
@@ -401,9 +421,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   ticketHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: "#B4D335",
     padding: 16,
-    alignItems: "center",
+  },
+  theaterInfo: {
+    flex: 1,
   },
   theaterName: {
     fontSize: 18,
@@ -414,6 +439,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#1E2429",
   },
+  logoContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#1E2429",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   ticketBody: {
     padding: 20,
     alignItems: "center",
@@ -422,17 +455,23 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  showtime: {
+  showtimeDate: {
     fontSize: 16,
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  showtimeTime: {
+    fontSize: 18,
+    fontWeight: "bold",
     color: "#B4D335",
     marginBottom: 16,
   },
   seatsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 8,
   },
   seatsLabel: {
     fontSize: 16,
@@ -446,13 +485,13 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 1,
     backgroundColor: "rgba(255,255,255,0.1)",
-    marginBottom: 20,
+    marginVertical: 16,
   },
   qrContainer: {
     padding: 10,
     backgroundColor: "white",
     borderRadius: 8,
-    marginBottom: 16,
+    marginVertical: 16,
     height: 220,
     width: 220,
     alignItems: "center",

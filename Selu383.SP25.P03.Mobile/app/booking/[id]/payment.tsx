@@ -28,18 +28,24 @@ export default function PaymentScreen() {
   // Ensure we have booking data
   useEffect(() => {
     const checkBookingData = async () => {
+      console.log("Checking booking data in payment page");
       if (!booking.showtime) {
+        console.log("No showtime data, trying to load from progress");
         // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
         // If still no data, redirect to seat selection
         if (!loaded) {
+          console.log("Failed to load progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
+        } else {
+          console.log("Successfully loaded booking progress");
         }
       }
 
       // If we have a reservation ID but don't have the reservation data, load it
-      if (booking.reservationId && !booking.reservation) {
+      if (booking.reservationId && !booking.reservation && !booking.isGuest) {
+        console.log("Loading reservation data for ID:", booking.reservationId);
         await booking.loadReservation(booking.reservationId);
       }
     };
@@ -48,15 +54,20 @@ export default function PaymentScreen() {
   }, [id]);
 
   const handlePayment = async () => {
+    console.log("Processing payment");
     try {
       // Process payment
       const success = await booking.processPayment();
 
       if (success) {
+        console.log("Payment successful");
+
         if (booking.isGuest) {
+          console.log("Completing guest booking");
           // For guest users
           if (booking.showtime) {
             const result = await booking.completeGuestBooking(booking.showtime);
+            console.log("Guest booking completed:", result);
 
             router.push({
               pathname: `./booking/${id}/confirmation`,
@@ -69,6 +80,7 @@ export default function PaymentScreen() {
             Alert.alert("Error", "Missing showtime information");
           }
         } else {
+          console.log("Navigating to confirmation for authenticated user");
           // For authenticated users
           router.push({
             pathname: `./booking/${id}/confirmation`,

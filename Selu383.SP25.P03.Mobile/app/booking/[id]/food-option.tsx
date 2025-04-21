@@ -1,6 +1,8 @@
 // app/booking/[id]/food-option.tsx
-import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+// This file handles the initial food option choice
+
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedView } from "../../../components/ThemedView";
@@ -17,16 +19,24 @@ export default function FoodOptionScreen() {
   const booking = useBooking();
 
   // Check if booking data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     const checkBookingData = async () => {
+      console.log("Checking for booking data on food-option page");
+      
       if (!booking.showtime) {
+        console.log("No showtime in booking context, attempting to load from progress");
         // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
         // If still no data, redirect to seat selection
         if (!loaded) {
+          console.log("Could not load booking progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
+        } else {
+          console.log("Successfully loaded booking progress");
         }
+      } else {
+        console.log("Booking data already loaded:", booking.showtime.id);
       }
     };
 
@@ -34,11 +44,13 @@ export default function FoodOptionScreen() {
   }, [id]);
 
   const handleSkipFood = () => {
+    console.log("User chose to skip food");
     // Skip food and go directly to payment
     router.push(`/booking/${id}/payment`);
   };
 
   const handleOrderFood = (deliveryType: "Pickup" | "ToSeat") => {
+    console.log("User chose to order food with delivery type:", deliveryType);
     // Set the delivery type in our booking context
     booking.setFoodDeliveryType(deliveryType);
 
@@ -78,20 +90,9 @@ export default function FoodOptionScreen() {
           <View style={styles.optionsContainer}>
             <TouchableOpacity
               style={styles.optionButton}
-              onPress={() => handleOrderFood("ToSeat")}
-            >
-              <Ionicons name="person" size={30} color="#B4D335" />
-              <ThemedText style={styles.optionText}>Deliver to Seat</ThemedText>
-              <ThemedText style={styles.optionDescription}>
-                Have your food delivered directly to your seat during the movie
-              </ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.optionButton}
               onPress={() => handleOrderFood("Pickup")}
             >
-              <Ionicons name="restaurant" size={30} color="#B4D335" />
+              <Ionicons name="restaurant-outline" size={30} color="#B4D335" />
               <ThemedText style={styles.optionText}>
                 Pickup at Counter
               </ThemedText>
@@ -173,3 +174,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => handleOrderFood("ToSeat")}
+            >
+              <Ionicons name="person-outline" size={30} color="#B4D335" />
+              <ThemedText style={styles.optionText}>Deliver to Seat</ThemedText>
+              <ThemedText style={styles.optionDescription}>
+                Have your food delivered directly to your seat during the movie
+              </ThemedText>
+            </TouchableOpacity>
+
+function handleOrderFood(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+

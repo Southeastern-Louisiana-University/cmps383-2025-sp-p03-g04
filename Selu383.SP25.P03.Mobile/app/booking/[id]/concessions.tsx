@@ -35,14 +35,21 @@ export default function BookingConcessionsScreen() {
   // Ensure we have booking data
   useEffect(() => {
     const checkBookingData = async () => {
+      console.log("Checking booking data in concessions page");
       if (!booking.showtime) {
+        console.log("No showtime data, trying to load from progress");
         // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
         // If still no data, redirect to seat selection
         if (!loaded) {
+          console.log("Failed to load progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
+        } else {
+          console.log("Successfully loaded booking progress");
         }
+      } else {
+        console.log("Booking data already loaded:", booking.showtime.id);
       }
     };
 
@@ -54,6 +61,7 @@ export default function BookingConcessionsScreen() {
   const loadConcessions = async () => {
     setIsLoading(true);
     try {
+      console.log("Loading food categories");
       // Load categories
       const categories = await concessionService.getFoodCategories();
       setFoodCategories(categories);
@@ -62,8 +70,9 @@ export default function BookingConcessionsScreen() {
         setSelectedCategory(categories[0].id);
       }
 
+      console.log("Loading food items");
       // Load all food items
-      const items = await concessionService.getConcessions();
+      const items = await concessionService.getFoodItems();
       setFoodItems(items);
     } catch (error) {
       console.error("Failed to load concessions:", error);
@@ -74,10 +83,15 @@ export default function BookingConcessionsScreen() {
   };
 
   const handleProceedToPayment = () => {
+    console.log(
+      "Proceeding to payment with food items:",
+      booking.foodItems.length
+    );
     router.push(`/booking/${id}/payment`);
   };
 
   const handleSkip = () => {
+    console.log("Skipping food selection");
     // Skip food and go directly to payment
     router.push(`/booking/${id}/payment`);
   };
@@ -264,7 +278,6 @@ export default function BookingConcessionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Existing styles remain the same
   container: {
     flex: 1,
   },
