@@ -1,23 +1,18 @@
 import { fetchWithCredentials } from "../api/config";
+import { API_ENDPOINTS } from "../../constants/api-constants";
 import {
   CreateReservationRequest,
   ReservationResponse,
 } from "../../types/api/reservations";
-import { API_ENDPOINTS } from "../../constants/api-constants";
 
-/**
- * Create a new reservation
- */
 export const createReservation = async (
   request: CreateReservationRequest
 ): Promise<ReservationResponse> => {
-  // The server expects tickets with seatId and ticketType, and will calculate price itself
   const sanitizedRequest = {
     ...request,
     tickets: request.tickets.map((ticket) => ({
       seatId: ticket.seatId,
       ticketType: ticket.ticketType,
-      // Note: Price is intentionally omitted as server calculates it
     })),
   };
 
@@ -26,45 +21,36 @@ export const createReservation = async (
     body: JSON.stringify(sanitizedRequest),
   });
 };
-/**
- * Get a reservation by ID
- */
+
 export const getReservation = async (
   id: number
 ): Promise<ReservationResponse> => {
-  return fetchWithCredentials<ReservationResponse>(`/api/reservations/${id}`);
+  return fetchWithCredentials<ReservationResponse>(
+    API_ENDPOINTS.RESERVATION_BY_ID(id)
+  );
 };
 
-/**
- * Get all reservations for a user
- */
 export const getUserReservations = async (
   userId: number
 ): Promise<ReservationResponse[]> => {
   return fetchWithCredentials<ReservationResponse[]>(
-    `/api/reservations/user/${userId}`
+    API_ENDPOINTS.USER_RESERVATIONS(userId)
   );
 };
 
-/**
- * Mark a reservation as paid
- */
 export const payForReservation = async (
   id: number
 ): Promise<ReservationResponse> => {
   return fetchWithCredentials<ReservationResponse>(
-    `/api/reservations/${id}/pay`,
+    API_ENDPOINTS.PAY_RESERVATION(id),
     {
       method: "PUT",
     }
   );
 };
 
-/**
- * Cancel a reservation
- */
 export const cancelReservation = async (id: number): Promise<void> => {
-  return fetchWithCredentials<void>(`/api/reservations/${id}`, {
+  return fetchWithCredentials<void>(API_ENDPOINTS.RESERVATION_BY_ID(id), {
     method: "DELETE",
   });
 };
