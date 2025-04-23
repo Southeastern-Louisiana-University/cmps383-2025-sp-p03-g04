@@ -5,6 +5,7 @@ import Footer from "../../components/Footer/Footer";
 import TheaterSelector from "../../components/TheaterSelector/TheaterSelector";
 import MovieCarousel from "../../components/MovieCarousel/MovieCarousel";
 import TypewriterBanner from "../../components/TypewriterBanner/TypewriterBanner";
+import ThemeToggle from "../../components/ThemeToggle/themetoggle";
 import { Movie } from "../../types/Movie";
 import { Theater } from "../../types/Theater";
 import { Showtime } from "../../types/Showtime";
@@ -17,7 +18,6 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { selectedTheater, setSelectedTheater } = useTheater();
   
-  // State variables
   const [movies, setMovies] = useState<Movie[]>([]);
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
@@ -25,21 +25,16 @@ const HomePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("today");
   
-  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // Fetch movies
         const moviesData = await getMovies();
         setMovies(moviesData);
 
-        // Fetch theaters
         const theatersData = await getTheaters();
         setTheaters(theatersData);
         
-        // Set first theater as selected if none is selected
         if (!selectedTheater && theatersData.length > 0) {
           setSelectedTheater(theatersData[0]);
         }
@@ -55,7 +50,6 @@ const HomePage: React.FC = () => {
     fetchData();
   }, [selectedTheater, setSelectedTheater]);
 
-  // Load showtimes when selected theater changes
   useEffect(() => {
     const fetchShowtimes = async () => {
       if (!selectedTheater) return;
@@ -63,13 +57,11 @@ const HomePage: React.FC = () => {
       try {
         const allShowtimes = await getShowtimesByTheater(selectedTheater.id);
         
-        // Organize showtimes by date
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+        const today = new Date().toISOString().split("T")[0];
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
-        // Filter showtimes based on selected date
         if (selectedDate === "today") {
           const todaysShowtimes = allShowtimes.filter(showtime => {
             const showtimeDate = new Date(showtime.startTime).toISOString().split("T")[0];
@@ -91,43 +83,35 @@ const HomePage: React.FC = () => {
     fetchShowtimes();
   }, [selectedTheater, selectedDate]);
 
-  // Handle movie click
   const handleMovieClick = (movieId: number) => {
     navigate(`/movies/${movieId}${selectedTheater ? `?theaterId=${selectedTheater.id}` : ''}`);
   };
 
-  // Handle showtime click
   const handleShowtimeClick = (showtimeId: number) => {
     navigate(`/booking/${showtimeId}`);
   };
 
-  // Handle theater selection
   const handleTheaterSelect = (theater: Theater) => {
     setSelectedTheater(theater);
   };
 
-  // Group showtimes by movie
   const showtimesByMovie = showtimes.reduce<Record<number, Showtime[]>>((acc, showtime) => {
     if (!acc[showtime.movieId]) {
       acc[showtime.movieId] = [];
     }
-    
     acc[showtime.movieId].push(showtime);
     return acc;
   }, {});
 
-  // Format time for display
   const formatTime = (timeStr: string) => {
     const date = new Date(timeStr);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Loading state
   if (loading) {
     return <div className="loading-container">Loading...</div>;
   }
 
-  // Error state
   if (error) {
     return <div className="error-container">{error}</div>;
   }
@@ -194,7 +178,6 @@ const HomePage: React.FC = () => {
         <div className="showtimes-container">
           {Object.keys(showtimesByMovie).length > 0 ? (
             Object.entries(showtimesByMovie).map(([movieId, movieShowtimes]) => {
-              // Find movie details
               const movie = movies.find(m => m.id === parseInt(movieId));
               if (!movie) return null;
 
@@ -235,6 +218,7 @@ const HomePage: React.FC = () => {
       </section>
 
       <Footer />
+      <ThemeToggle size={40} position="bottomRight" />
     </div>
   );
 };

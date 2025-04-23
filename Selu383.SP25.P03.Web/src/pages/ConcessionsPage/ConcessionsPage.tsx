@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./ConcessionsPage.css";
 import Footer from "../../components/Footer/Footer";
+import ThemeToggle from "../../components/ThemeToggle/themetoggle";
 import { FoodItem, FoodCategory } from "../../types/Concessions";
+
 
 const ConcessionsPage: React.FC = () => {
   
@@ -122,6 +124,9 @@ const ConcessionsPage: React.FC = () => {
         <div className="hero-content">
           <h1>Concessions</h1>
           <p>Enhance your movie experience with our delicious food and drinks</p>
+          <div className="theme-toggle-wrapper">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 

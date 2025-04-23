@@ -69,9 +69,11 @@ export default function PaymentScreen() {
             const result = await booking.completeGuestBooking(booking.showtime);
             console.log("Guest booking completed:", result);
 
+            // Use relative path format with "../" to navigate up one level and then down to confirmation
             router.push({
-              pathname: `./booking/${id}/confirmation`,
+              pathname: "../confirmation",
               params: {
+                id: id,
                 reservationId: result.reservationId.toString(),
                 guest: "true",
               },
@@ -81,10 +83,13 @@ export default function PaymentScreen() {
           }
         } else {
           console.log("Navigating to confirmation for authenticated user");
-          // For authenticated users
+          // For authenticated users - also use relative path
           router.push({
-            pathname: `./booking/${id}/confirmation`,
-            params: { reservationId: booking.reservationId!.toString() },
+            pathname: "../confirmation",
+            params: {
+              id: id,
+              reservationId: booking.reservationId!.toString(),
+            },
           });
         }
 

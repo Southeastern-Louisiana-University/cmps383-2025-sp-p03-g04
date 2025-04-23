@@ -1,8 +1,5 @@
-// app/booking/[id]/food-option.tsx
-// This file handles the initial food option choice
-
 import React, { useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedView } from "../../../components/ThemedView";
@@ -22,9 +19,11 @@ export default function FoodOptionScreen() {
   useEffect(() => {
     const checkBookingData = async () => {
       console.log("Checking for booking data on food-option page");
-      
+
       if (!booking.showtime) {
-        console.log("No showtime in booking context, attempting to load from progress");
+        console.log(
+          "No showtime in booking context, attempting to load from progress"
+        );
         // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
@@ -102,6 +101,17 @@ export default function FoodOptionScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => handleOrderFood("ToSeat")}
+            >
+              <Ionicons name="person-outline" size={30} color="#B4D335" />
+              <ThemedText style={styles.optionText}>Deliver to Seat</ThemedText>
+              <ThemedText style={styles.optionDescription}>
+                Have your food delivered directly to your seat during the movie
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={styles.skipButton}
               onPress={handleSkipFood}
             >
@@ -174,18 +184,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={() => handleOrderFood("ToSeat")}
-            >
-              <Ionicons name="person-outline" size={30} color="#B4D335" />
-              <ThemedText style={styles.optionText}>Deliver to Seat</ThemedText>
-              <ThemedText style={styles.optionDescription}>
-                Have your food delivered directly to your seat during the movie
-              </ThemedText>
-            </TouchableOpacity>
-
-function handleOrderFood(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
