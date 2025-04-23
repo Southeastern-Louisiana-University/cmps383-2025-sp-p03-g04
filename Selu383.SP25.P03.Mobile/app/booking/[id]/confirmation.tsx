@@ -22,6 +22,8 @@ import { QRCode } from "../../../components/QRCode";
 import * as reservationService from "../../../services/reservations/reservationService";
 
 export default function ConfirmationScreen() {
+  // Note that we're now getting the id from useLocalSearchParams
+  // along with reservationId and guest
   const { id, reservationId, guest } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -33,6 +35,8 @@ export default function ConfirmationScreen() {
   const [qrValue, setQrValue] = useState<string>("");
   const [reservationData, setReservationData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  console.log("Confirmation screen params:", { id, reservationId, guest });
 
   // Load confirmation data
   useEffect(() => {
@@ -73,6 +77,10 @@ export default function ConfirmationScreen() {
               setQrValue(JSON.stringify(qrData));
             } else {
               console.error("Guest ticket not found:", reservationId);
+              Alert.alert(
+                "Ticket Not Found",
+                "The requested ticket information could not be found."
+              );
             }
           }
         } else if (reservationId) {
@@ -101,9 +109,17 @@ export default function ConfirmationScreen() {
         } else {
           // No reservation ID provided
           console.error("No reservation ID found in params");
+          Alert.alert(
+            "Missing Information",
+            "Ticket information is incomplete. Please try again."
+          );
         }
       } catch (error) {
         console.error("Error loading confirmation data:", error);
+        Alert.alert(
+          "Error",
+          "Failed to load ticket information. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
