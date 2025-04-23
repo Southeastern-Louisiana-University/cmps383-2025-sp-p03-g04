@@ -64,19 +64,35 @@ export default function BookingConcessionsScreen() {
       console.log("Loading food categories");
       // Load categories
       const categories = await concessionService.getFoodCategories();
-      setFoodCategories(categories);
 
-      if (categories.length > 0) {
-        setSelectedCategory(categories[0].id);
+      // Ensure categories is an array before setting state
+      if (Array.isArray(categories)) {
+        setFoodCategories(categories);
+
+        if (categories.length > 0) {
+          setSelectedCategory(categories[0].id);
+        }
+      } else {
+        console.error("Categories data is not an array:", categories);
+        // Initialize with empty array to prevent mapping errors
+        setFoodCategories([]);
       }
 
       console.log("Loading food items");
       // Load all food items
       const items = await concessionService.getFoodItems();
-      setFoodItems(items);
+      if (Array.isArray(items)) {
+        setFoodItems(items);
+      } else {
+        console.error("Food items data is not an array:", items);
+        setFoodItems([]);
+      }
     } catch (error) {
       console.error("Failed to load concessions:", error);
       Alert.alert("Error", "Failed to load menu items. Please try again.");
+      // Initialize with empty arrays to prevent mapping errors
+      setFoodCategories([]);
+      setFoodItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -138,33 +154,42 @@ export default function BookingConcessionsScreen() {
               : "Pickup at concession counter"}
           </ThemedText>
 
-          {/* Category selection */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContainer}
-          >
-            {foodCategories.map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.selectedCategory,
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
-              >
-                <ThemedText
+          {/* Category selection - only render if we have categories */}
+          {foodCategories && foodCategories.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesContainer}
+            >
+              {foodCategories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
                   style={[
-                    styles.categoryText,
-                    selectedCategory === category.id &&
-                      styles.selectedCategoryText,
+                    styles.categoryButton,
+                    selectedCategory === category.id && styles.selectedCategory,
                   ]}
+                  onPress={() => setSelectedCategory(category.id)}
                 >
-                  {category.name}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                  <ThemedText
+                    style={[
+                      styles.categoryText,
+                      selectedCategory === category.id &&
+                        styles.selectedCategoryText,
+                    ]}
+                  >
+                    {category.name}
+                  </ThemedText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <Ionicons name="fast-food-outline" size={60} color="#666" />
+              <ThemedText style={styles.emptyStateText}>
+                No food categories available
+              </ThemedText>
+            </View>
+          )}
 
           {/* Food items */}
           {filteredItems.length > 0 ? (
