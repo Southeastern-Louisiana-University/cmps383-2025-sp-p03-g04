@@ -5,7 +5,7 @@ import Footer from "../../components/Footer/Footer";
 import TheaterSelector from "../../components/TheaterSelector/TheaterSelector";
 import MovieCarousel from "../../components/MovieCarousel/MovieCarousel";
 import TypewriterBanner from "../../components/TypewriterBanner/TypewriterBanner";
-import ThemeToggle from "../../components/ThemeToggle/themetoggle";
+import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import { Movie } from "../../types/Movie";
 import { Theater } from "../../types/Theater";
 import { Showtime } from "../../types/Showtime";

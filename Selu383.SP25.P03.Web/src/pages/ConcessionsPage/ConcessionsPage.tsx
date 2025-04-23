@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ConcessionsPage.css";
 import Footer from "../../components/Footer/Footer";
-import ThemeToggle from "../../components/ThemeToggle/themetoggle";
+import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import { FoodItem, FoodCategory } from "../../types/Concessions";
 
 

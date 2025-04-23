@@ -6,7 +6,7 @@ import { getMovies } from '../../services/movieService';
 import { getShowtimesByTheater } from '../../services/showtimeService';
 import { useTheater } from '../../contexts/TheaterContext';
 import Footer from '../../components/Footer/Footer';
-import ThemeToggle from '../../components/ThemeToggle/themetoggle'; 
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle'; 
 import './MoviesPage.css';
 
 // Define common movie genres
