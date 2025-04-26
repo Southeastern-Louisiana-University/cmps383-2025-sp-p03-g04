@@ -71,20 +71,17 @@ export const updateMovie = async (id: number, movieData: Partial<Movie>): Promis
 /**
  * Fetches movie videos by ID (trailers)
  */
-export const getMovieVideos = async (id: number): Promise<any> => {
+export async function getMovieTrailerFromYouTube(movieTitle: string): Promise<string | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/tmdb/videos/${id}`, {
-      method: 'GET',
-      headers: DEFAULT_HEADERS
-    });
+    // Construct a simple URL for the movie trailer
+    // This assumes that you have the movie title from your MovieDetailsPage
+    const searchQuery = encodeURIComponent(`${movieTitle} official trailer`);
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch movie videos: ${response.status}`);
-    }
-    
-    return await response.json();
+    // Instead of actually making an API call to YouTube (which would require API key),
+    // we'll construct a direct search URL that can be used in an iframe
+    return `https://www.youtube.com/embed?listType=search&list=${searchQuery}`;
   } catch (error) {
-    console.error(`Error fetching videos for movie with ID ${id}:`, error);
-    throw error;
+    console.error('Error constructing YouTube trailer URL:', error);
+    return null;
   }
-};
+}
