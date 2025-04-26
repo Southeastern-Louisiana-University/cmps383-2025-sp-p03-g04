@@ -59,6 +59,35 @@ export const generateHash = async (text: string): Promise<string> => {
   return hash;
 };
 
+export const cleanupExpiredGuestTickets = async (): Promise<void> => {
+  try {
+    // Get guest tickets
+    const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+    if (!guestTicketsStr) return;
+
+    const guestTickets = JSON.parse(guestTicketsStr);
+    const now = new Date().getTime();
+
+    // Filter out expired tickets
+    const validTickets = guestTickets.filter((ticket: any) => {
+      // If no expiration, consider it expired
+      if (!ticket.expiresAt) return false;
+
+      const expiryTime = new Date(ticket.expiresAt).getTime();
+      return expiryTime > now;
+    });
+
+    // Save valid tickets back to storage or remove if none
+    if (validTickets.length > 0) {
+      await AsyncStorage.setItem("guestTickets", JSON.stringify(validTickets));
+    } else {
+      await AsyncStorage.removeItem("guestTickets");
+    }
+  } catch (error) {
+    console.error("Failed to clean up expired guest tickets:", error);
+  }
+};
+
 /**
  * Clean up old booking data
  */
