@@ -1,7 +1,8 @@
+// src/pages/BookingPage/BookingModal/BookingModal.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import { BookingModalProps } from '../../../types/BookingModalProps';
 import './BookingModal.css';
-
 
 const BookingModal: React.FC<BookingModalProps> = ({
   isOpen,
@@ -10,7 +11,22 @@ const BookingModal: React.FC<BookingModalProps> = ({
   onOrderConcessions,
   total
 }) => {
+  const navigate = useNavigate(); // Add navigate hook
+
   if (!isOpen) return null;
+
+  // Update handler to use navigate for more reliable routing
+  const handleOrderConcessions = () => {
+    // Call the original handler if provided
+    if (onOrderConcessions) {
+      onOrderConcessions();
+    } else {
+      // Get showtime ID from URL if needed
+      const showtimeId = window.location.pathname.split('/').pop();
+      navigate(`/concessions/${showtimeId}`);
+    }
+    onClose(); // Close the modal
+  };
 
   return (
     <>
@@ -26,7 +42,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             <p className="modal-subtitle">Your tickets total: ${total.toFixed(2)}</p>
             
             <div className="modal-options">
-              <div className="option-card" onClick={onOrderConcessions}>
+              <div className="option-card" onClick={handleOrderConcessions}>
                 <div className="option-icon">🍿</div>
                 <h3>Add Concessions</h3>
                 <p>Order snacks and drinks for your movie</p>

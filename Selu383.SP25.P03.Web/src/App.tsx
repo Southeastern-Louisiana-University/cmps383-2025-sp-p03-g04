@@ -1,3 +1,4 @@
+// App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/HomePage/HomePage";
@@ -9,13 +10,13 @@ import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import ConfirmationPage from "./pages/ConfirmationPage/ConfirmationPage";
 import { CartProvider } from "./contexts/CartContext";
 import { TheaterProvider } from "./contexts/TheaterContext";
-import { BookingProvider } from "./contexts/BookingContext";
+import { AuthProvider } from "./contexts/AuthContext"; // Add import
 import "./App.css";
 
 function App() {
   return (
-    <TheaterProvider>
-      <BookingProvider>
+    <AuthProvider> {/* Add AuthProvider */}
+      <TheaterProvider>
         <CartProvider>
           <Router>
             <div className="app">
@@ -28,15 +29,15 @@ function App() {
                 <Route path="/payment/:id" element={<PaymentPage />} />
                 <Route path="/confirmation" element={<ConfirmationPage />} />
                 <Route path="/concessions" element={<ConcessionsPage />} />
+                <Route path="/concessions/:id" element={<ConcessionsPage />} /> {/* Add route for concessions with ID */}
                 <Route path="*" element={<div className="not-found">Page not found</div>} />
               </Routes>
             </div>
           </Router>
         </CartProvider>
-      </BookingProvider>
-    </TheaterProvider>
+      </TheaterProvider>
+    </AuthProvider>
   );
 }
 
 export default App;
-
