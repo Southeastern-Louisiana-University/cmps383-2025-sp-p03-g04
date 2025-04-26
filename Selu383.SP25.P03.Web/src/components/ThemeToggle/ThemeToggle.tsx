@@ -210,7 +210,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
 .dark-theme .movie-hero-content span {
   color: #f0f0f0 !important;
 }
-/* ✅ Showtimes section text color fix */
+/* Showtimes section text color fix */
 .light-theme .showtimes-section,
 .light-theme .showtimes-section h2,
 .light-theme .showtimes-section h3,
@@ -228,7 +228,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
 .dark-theme .showtimes-section span {
   color: #f0f0f0 !important;
 }
-/* ✅ HomePage No Showtimes Message Fix */
+/*  HomePage No Showtimes Message Fix */
 .light-theme .home-page .no-showtimes p {
   color: #000000 !important;
 }
