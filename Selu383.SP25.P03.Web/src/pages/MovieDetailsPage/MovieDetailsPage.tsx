@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Movie } from "../../types/Movie";
 import { Showtime } from "../../types/Showtime";
@@ -8,6 +8,7 @@ import { getShowtimesByMovie } from "../../services/showtimeService";
 import { getTheater } from "../../services/theaterService";
 import { useTheater } from "../../contexts/TheaterContext";
 import Footer from "../../components/Footer/Footer";
+import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import "./MovieDetailsPage1.css";
 
 const MovieDetailsPage: React.FC = () => {
@@ -26,8 +27,7 @@ const MovieDetailsPage: React.FC = () => {
   const [showTrailerModal, setShowTrailerModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("today");
   
-  // Reference for the trailer modal
-  const trailerModalRef = useRef<HTMLDivElement>(null);
+
 
   // Helper function to open YouTube trailer in a new tab
   const openYouTubeTrailer = () => {
@@ -352,6 +352,9 @@ const MovieDetailsPage: React.FC = () => {
         )}
       </section>
 
+
+  {/* ThemeToggle */}
+  <ThemeToggle position="bottomRight" />
       {/* Footer */}
       <Footer />
     </div>
