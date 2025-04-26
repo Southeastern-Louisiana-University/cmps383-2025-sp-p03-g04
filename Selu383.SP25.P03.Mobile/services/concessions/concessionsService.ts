@@ -8,6 +8,10 @@ import {
 } from "../../types/api/concessions";
 import { FoodCategory, FoodItem } from "../../types/models/concessions";
 
+export const getConcessions = async (): Promise<FoodItem[]> => {
+  return fetchWithCredentials<FoodItemResponse[]>(API_ENDPOINTS.FOOD_ITEMS);
+};
+
 export const getFoodCategories = async (): Promise<FoodCategory[]> => {
   return fetchWithCredentials<FoodCategoryResponse[]>(
     API_ENDPOINTS.FOOD_CATEGORIES

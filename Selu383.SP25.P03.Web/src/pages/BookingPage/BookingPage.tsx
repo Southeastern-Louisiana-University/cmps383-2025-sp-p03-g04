@@ -9,6 +9,7 @@ import { SeatingLayout, Seat, SeatStatus, TicketType } from '../../types/booking
 import { useCart } from '../../contexts/CartContext';
 import { CartItem } from '../../types/booking';
 import Footer from '../../components/Footer/Footer';
+import BookingModal from './BookingModal/BookingModal';
 import './BookingPage1.css';
 
 const BookingPage: React.FC = () => {
@@ -25,6 +26,9 @@ const BookingPage: React.FC = () => {
   // State for selections
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
+  
+  // State for modal
+  const [showModal, setShowModal] = useState(false);
   
   // Pricing options with fixed multiplier values
   const [ticketOptions] = useState<TicketType[]>([
@@ -112,7 +116,7 @@ const BookingPage: React.FC = () => {
     }, 0);
   };
 
-  // Proceed to checkout
+  // Handle continue button click
   const handleContinue = () => {
     if (selectedSeats.length === 0) {
       alert('Please select at least one seat to continue.');
@@ -124,8 +128,13 @@ const BookingPage: React.FC = () => {
       return;
     }
     
-    // In a real implementation, you'd make an API call to create a reservation
-    // For now, we'll just add the selected seats to the cart
+    // Show the modal instead of going directly to payment
+    setShowModal(true);
+  };
+
+  // Handle modal options
+  const handleContinueToPayment = () => {
+    if (!showtime || !movie) return;
     
     // Clear existing cart items first
     clearCart();
@@ -151,6 +160,33 @@ const BookingPage: React.FC = () => {
     navigate(`/payment/${id}`);
   };
 
+  const handleOrderConcessions = () => {
+    if (!showtime || !movie) return;
+    
+    // Clear existing cart items first
+    clearCart();
+    
+    // Add selected seats to cart
+    selectedSeats.forEach(seat => {
+      const ticketType = ticketTypes[seat.id] || 'Adult';
+      const option = ticketOptions.find(opt => opt.type === ticketType);
+      
+      const cartItem: CartItem = {
+        seatId: seat.id,
+        seatLabel: `${seat.row}${seat.number}`,
+        ticketType,
+        price: showtime.ticketPrice * (option?.multiplier || 1),
+        showtimeId: showtime.id,
+        movieTitle: movie.title
+      };
+      
+      addToCart(cartItem);
+    });
+    
+    // Navigate to concessions page
+    navigate(`/concessions/${id}`);
+  };
+
   // Format a row of seats
   const renderSeatRow = (rowKey: string, seats: Seat[]) => {
     return (
@@ -158,21 +194,24 @@ const BookingPage: React.FC = () => {
         <div className="row-label">{rowKey}</div>
         <div className="seats">
           {seats.map(seat => {
-            // Determine seat status
-            let status: SeatStatus = seat.status;
+            // Determine seat class based on status or selection
+            let seatClass = 'seat';
             
-            // Override status if seat is selected
             if (selectedSeats.some(s => s.id === seat.id)) {
-              status = SeatStatus.Selected;
+              seatClass += ' selected';
+            } else if (seat.status === SeatStatus.Taken) {
+              seatClass += ' unavailable';
+            } else {
+              seatClass += ' available';
             }
             
             return (
               <button
                 key={seat.id}
-                className={`seat ${status === SeatStatus.Available ? 'available' : status === SeatStatus.Selected ? 'selected' : 'unavailable'}`}
+                className={seatClass}
                 onClick={() => handleSeatSelect(seat)}
-                disabled={status === SeatStatus.Taken}
-                aria-label={`Seat ${seat.row}${seat.number}, ${status}`}
+                disabled={seat.status === SeatStatus.Taken}
+                aria-label={`Seat ${seat.row}${seat.number}, ${selectedSeats.some(s => s.id === seat.id) ? 'selected' : seat.status}`}
               >
                 {seat.number}
               </button>
@@ -318,13 +357,22 @@ const BookingPage: React.FC = () => {
                   onClick={handleContinue}
                   disabled={selectedSeats.length === 0}
                 >
-                  Continue to Payment
+                  Continue
                 </button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Modal for payment decision */}
+      <BookingModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onContinueToPayment={handleContinueToPayment}
+        onOrderConcessions={handleOrderConcessions}
+        total={calculateTotal()}
+      />
 
       {/* Footer */}
       <Footer />
