@@ -11,7 +11,6 @@ import "./App.css";
 
 function App() {
   return (
-
     <TheaterProvider>
       <CartProvider>
         <Router>
@@ -23,13 +22,15 @@ function App() {
               <Route path="/movies/:id" element={<MovieDetailsPage />} />
               <Route path="/booking/:id" element={<BookingPage />} />
               <Route path="/concessions" element={<ConcessionsPage />} />
-              <Route path="*" element={<div className="not-found">Page not found</div>} />
+              <Route
+                path="*"
+                element={<div className="not-found">Page not found</div>}
+              />
             </Routes>
           </div>
         </Router>
       </CartProvider>
     </TheaterProvider>
-
   );
 }
 
