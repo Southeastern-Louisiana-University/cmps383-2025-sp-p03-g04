@@ -9,30 +9,34 @@ import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import ConfirmationPage from "./pages/ConfirmationPage/ConfirmationPage";
 import { CartProvider } from "./contexts/CartContext";
 import { TheaterProvider } from "./contexts/TheaterContext";
+import { BookingProvider } from "./contexts/BookingContext";
 import "./App.css";
 
 function App() {
   return (
     <TheaterProvider>
-      <CartProvider>
-        <Router>
-          <div className="app">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/movies" element={<MoviesPage />} />
-              <Route path="/movies/:id" element={<MovieDetailsPage />} />
-              <Route path="/booking/:id" element={<BookingPage />} />
-              <Route path="/payment/:id" element={<PaymentPage />} />
-              <Route path="/confirmation" element={<ConfirmationPage />} />
-              <Route path="/concessions" element={<ConcessionsPage />} />
-              <Route path="*" element={<div className="not-found">Page not found</div>} />
-            </Routes>
-          </div>
-        </Router>
-      </CartProvider>
+      <BookingProvider>
+        <CartProvider>
+          <Router>
+            <div className="app">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/movies" element={<MoviesPage />} />
+                <Route path="/movies/:id" element={<MovieDetailsPage />} />
+                <Route path="/booking/:id" element={<BookingPage />} />
+                <Route path="/payment/:id" element={<PaymentPage />} />
+                <Route path="/confirmation" element={<ConfirmationPage />} />
+                <Route path="/concessions" element={<ConcessionsPage />} />
+                <Route path="*" element={<div className="not-found">Page not found</div>} />
+              </Routes>
+            </div>
+          </Router>
+        </CartProvider>
+      </BookingProvider>
     </TheaterProvider>
   );
 }
 
 export default App;
+
