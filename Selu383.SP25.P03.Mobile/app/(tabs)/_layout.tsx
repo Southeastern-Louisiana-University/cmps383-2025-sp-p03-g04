@@ -42,14 +42,17 @@ export default function TabLayout() {
           color: headerTextColor,
         },
         headerTintColor: headerTextColor,
+        // Add this to hide the header title or customize it
+        headerTitle: "", // This removes the default route name title
       }}
     >
       {/* Home tab - visible to all users */}
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Home", // This is the tab label
           tabBarLabel: "Home",
+          headerTitle: "Lion's Den Cinemas", // This is the header title
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -60,8 +63,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="movies"
         options={{
-          title: "Movies",
+          title: "Movies", // Tab label
           tabBarLabel: "Movies",
+          headerTitle: "Movies", // Header title
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="film" size={size} color={color} />
           ),
@@ -72,8 +76,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tickets"
         options={{
-          title: "My Tickets",
+          title: "My Tickets", // Tab label
           tabBarLabel: "Tickets",
+          headerTitle: "My Tickets", // Header title
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ticket" size={size} color={color} />
           ),
@@ -84,8 +89,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="concessions"
         options={{
-          title: "Order Food",
+          title: "Order Food", // Tab label
           tabBarLabel: "Food",
+          headerTitle: "Order Food", // Header title
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="fast-food" size={size} color={color} />
           ),
@@ -96,8 +102,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Profile", // Tab label
           tabBarLabel: "Profile",
+          headerTitle: "Profile", // Header title
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),

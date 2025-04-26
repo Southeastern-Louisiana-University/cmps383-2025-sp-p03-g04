@@ -313,6 +313,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         totalAmount: calculateTotal(),
         isPaid: true,
         reservationTime: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         tickets: selectedSeats.map((seatId) => {
           // Find seat information in the seating layout
           let seatRow = "";
