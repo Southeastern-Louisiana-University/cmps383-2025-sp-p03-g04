@@ -15,7 +15,9 @@ import "./App.css";
 
 function App() {
   return (
-    <AuthProvider> {/* Add AuthProvider */}
+    <AuthProvider>
+      {" "}
+      {/* Add AuthProvider */}
       <TheaterProvider>
         <CartProvider>
           <Router>
@@ -29,8 +31,15 @@ function App() {
                 <Route path="/payment/:id" element={<PaymentPage />} />
                 <Route path="/confirmation" element={<ConfirmationPage />} />
                 <Route path="/concessions" element={<ConcessionsPage />} />
-                <Route path="/concessions/:id" element={<ConcessionsPage />} /> {/* Add route for concessions with ID */}
-                <Route path="*" element={<div className="not-found">Page not found</div>} />
+                <Route
+                  path="/concessions/:id"
+                  element={<ConcessionsPage />}
+                />{" "}
+                {/* Add route for concessions with ID */}
+                <Route
+                  path="*"
+                  element={<div className="not-found">Page not found</div>}
+                />
               </Routes>
             </div>
           </Router>
