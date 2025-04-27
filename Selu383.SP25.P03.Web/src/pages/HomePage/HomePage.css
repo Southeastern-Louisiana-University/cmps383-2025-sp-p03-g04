@@ -295,10 +295,11 @@ body {
 
 .theater-selector-inner {
   padding: 2rem;
-  background-color: #000000;
+  background-color: var(--theater-selector-bg);
   border-radius: 8px;
   border: 1px solid #65a30d;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
 }
 
 .theater-options {
