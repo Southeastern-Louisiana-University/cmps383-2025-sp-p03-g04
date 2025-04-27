@@ -14,14 +14,14 @@ import "./PaymentPage.css";
 const PaymentPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cartItems, total, clearCart } = useCart();
+  const { cartItems, total } = useCart();
   const { isAuthenticated } = useAuth();
 
   const [showtime, setShowtime] = useState<Showtime | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentSuccess] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
@@ -89,85 +89,150 @@ const PaymentPage: React.FC = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting payment submission...");
 
     if (showtime) {
       setProcessingPayment(true);
+      console.log("Processing payment for showtime:", showtime.id);
+      console.log("Cart items:", cartItems);
+      console.log("Total amount:", total);
+      console.log("Is user authenticated:", isAuthenticated);
+      console.log("Guest session ID:", guestSessionId);
 
       try {
-        // Prepare checkout request with demo card data
-        const checkoutRequest = {
-          reservationRequest: {
-            showtimeId: showtime.id,
-            tickets: cartItems.map((item) => ({
-              seatId: item.seatId,
-              ticketType: item.ticketType,
-              price: item.price,
-            })),
-            processPayment: false,
-          },
-          foodOrders: [],
+        // Separate food items and seat items
+        const seatItems = cartItems.filter((item) => item.type !== "food");
+        const foodItems = cartItems.filter((item) => item.type === "food");
+
+        // Group food items by ID
+        const foodItemGroups: {
+          [key: number]: { quantity: number; name: string };
+        } = {};
+        foodItems.forEach((item) => {
+          if (!foodItemGroups[item.id]) {
+            foodItemGroups[item.id] = {
+              quantity: 0,
+              name: String(item.name) || "Unknown Item",
+            };
+          }
+          foodItemGroups[item.id].quantity++;
+        });
+
+        // Create food order request if there are food items
+        let foodOrders: {
+          deliveryType: string;
+          orderItems: {
+            foodItemId: number;
+            foodItemName: string;
+            quantity: number;
+            specialInstructions?: string;
+          }[];
+        }[] = [];
+
+        if (foodItems.length > 0) {
+          foodOrders = [
+            {
+              deliveryType: "Pickup",
+              orderItems: Object.entries(foodItemGroups).map(
+                ([id, details]) => {
+                  return {
+                    foodItemId: parseInt(id),
+                    foodItemName: details.name, // Include the foodItemName
+                    quantity: details.quantity,
+                    specialInstructions: "",
+                  };
+                }
+              ),
+            },
+          ];
+        }
+
+        // Create the full request object that matches the API expectation
+        // FIXED: Removed the 'request' wrapper to match API expectations
+        const paymentRequest = {
+          reservationRequest:
+            seatItems.length > 0
+              ? {
+                  showtimeId: showtime.id,
+                  tickets: seatItems.map((item) => ({
+                    seatId: item.seatId,
+                    ticketType: item.ticketType,
+                    price: item.price,
+                  })),
+                  processPayment: false,
+                }
+              : null,
+          foodOrders: foodOrders,
           paymentInfo: {
             amount: total,
             cardNumber: "4242424242424242", // Demo card number
             expiryDate: "12/25",
             cvv: "123",
-            cardholderName: "Demo User",
+            cardholderName: selectedCard.type + " User",
             paymentMethod: "CreditCard",
           },
         };
 
-        const checkoutResponse = await fetch("/api/checkout", {
+        console.log("Payment request:", paymentRequest);
+
+        // Send the payment request to the API
+        const response = await fetch("/api/checkout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify(checkoutRequest),
+          body: JSON.stringify(paymentRequest),
         });
 
-        if (!checkoutResponse.ok) {
-          const errorText = await checkoutResponse.text();
-          throw new Error(errorText || "Checkout failed");
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Payment failed with status:", response.status);
+          console.error("Error details:", errorText);
+          throw new Error(errorText || "Payment failed");
         }
 
-        const result = await checkoutResponse.json();
+        const result = await response.json();
+        console.log("Payment result:", result);
 
-        if (result.paymentResult?.success) {
-          // If guest, add the reservation to the guest session
-          if (!isAuthenticated && guestSessionId && result.reservation?.id) {
-            try {
-              await guestSessionService.addReservationToGuestSession(
-                guestSessionId,
-                result.reservation.id
-              );
-            } catch (error) {
-              console.error(
-                "Failed to add reservation to guest session:",
-                error
-              );
-            }
+        // If guest, add the reservation to the guest session
+        if (!isAuthenticated && guestSessionId && result.reservation?.id) {
+          try {
+            await guestSessionService.addReservationToGuestSession(
+              guestSessionId,
+              result.reservation.id
+            );
+            console.log("Added reservation to guest session successfully");
+          } catch (error) {
+            console.error("Failed to add reservation to guest session:", error);
+            // Continue anyway as the reservation was created successfully
           }
-
-          setPaymentSuccess(true);
-          clearCart();
-
-          setTimeout(() => {
-            navigate("/confirmation", {
-              state: {
-                reservationId: result.reservation.id,
-                isGuest: !isAuthenticated,
-                guestSessionId: guestSessionId,
-                paymentId: result.paymentResult.paymentId,
-                totalAmount: result.totalAmount,
-              },
-              replace: true,
-            });
-          }, 2000);
-        } else {
-          throw new Error(result.paymentResult?.message || "Payment failed");
         }
+
+        // Navigate to confirmation page with all necessary data
+        navigate("/confirmation", {
+          state: {
+            reservationId: result.reservation?.id,
+            isGuest: !isAuthenticated,
+            guestSessionId: guestSessionId,
+            totalAmount: result.totalAmount || total,
+            paymentResult: result, // Pass the entire result for fallback
+            // Also pass individual fields in case needed
+            movieTitle: movie?.title,
+            theaterName: showtime?.theaterName,
+            showtimeStartTime: showtime?.startTime,
+            screenName: showtime?.screenName,
+            tickets: cartItems.map((item) => ({
+              row: item.seatLabel ? item.seatLabel[0] : "A",
+              number: item.seatLabel ? parseInt(item.seatLabel.slice(1)) : 1,
+              ticketType: item.ticketType,
+              price: item.price,
+            })),
+          },
+          replace: true,
+        });
       } catch (err) {
-        console.error("Payment error:", err);
+        console.error("Payment processing error:", err);
         setError(
           err instanceof Error
             ? err.message
@@ -175,6 +240,9 @@ const PaymentPage: React.FC = () => {
         );
         setProcessingPayment(false);
       }
+    } else {
+      console.error("No showtime available for payment");
+      setError("No showtime selected. Please go back and select a showtime.");
     }
   };
 
