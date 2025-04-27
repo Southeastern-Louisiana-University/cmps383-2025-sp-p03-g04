@@ -17,14 +17,14 @@ import "./HomePage1.css";
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { selectedTheater, setSelectedTheater } = useTheater();
-  
+
   const [movies, setMovies] = useState<Movie[]>([]);
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("today");
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,11 +34,10 @@ const HomePage: React.FC = () => {
 
         const theatersData = await getTheaters();
         setTheaters(theatersData);
-        
+
         if (!selectedTheater && theatersData.length > 0) {
           setSelectedTheater(theatersData[0]);
         }
-
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to fetch data. Please try again later.");
@@ -53,24 +52,28 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchShowtimes = async () => {
       if (!selectedTheater) return;
-      
+
       try {
         const allShowtimes = await getShowtimesByTheater(selectedTheater.id);
-        
+
         const today = new Date().toISOString().split("T")[0];
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
         if (selectedDate === "today") {
-          const todaysShowtimes = allShowtimes.filter(showtime => {
-            const showtimeDate = new Date(showtime.startTime).toISOString().split("T")[0];
+          const todaysShowtimes = allShowtimes.filter((showtime) => {
+            const showtimeDate = new Date(showtime.startTime)
+              .toISOString()
+              .split("T")[0];
             return showtimeDate === today;
           });
           setShowtimes(todaysShowtimes);
         } else {
-          const tomorrowsShowtimes = allShowtimes.filter(showtime => {
-            const showtimeDate = new Date(showtime.startTime).toISOString().split("T")[0];
+          const tomorrowsShowtimes = allShowtimes.filter((showtime) => {
+            const showtimeDate = new Date(showtime.startTime)
+              .toISOString()
+              .split("T")[0];
             return showtimeDate === tomorrowStr;
           });
           setShowtimes(tomorrowsShowtimes);
@@ -84,7 +87,11 @@ const HomePage: React.FC = () => {
   }, [selectedTheater, selectedDate]);
 
   const handleMovieClick = (movieId: number) => {
-    navigate(`/movies/${movieId}${selectedTheater ? `?theaterId=${selectedTheater.id}` : ''}`);
+    navigate(
+      `/movies/${movieId}${
+        selectedTheater ? `?theaterId=${selectedTheater.id}` : ""
+      }`
+    );
   };
 
   const handleShowtimeClick = (showtimeId: number) => {
@@ -95,17 +102,20 @@ const HomePage: React.FC = () => {
     setSelectedTheater(theater);
   };
 
-  const showtimesByMovie = showtimes.reduce<Record<number, Showtime[]>>((acc, showtime) => {
-    if (!acc[showtime.movieId]) {
-      acc[showtime.movieId] = [];
-    }
-    acc[showtime.movieId].push(showtime);
-    return acc;
-  }, {});
+  const showtimesByMovie = showtimes.reduce<Record<number, Showtime[]>>(
+    (acc, showtime) => {
+      if (!acc[showtime.movieId]) {
+        acc[showtime.movieId] = [];
+      }
+      acc[showtime.movieId].push(showtime);
+      return acc;
+    },
+    {}
+  );
 
   const formatTime = (timeStr: string) => {
     const date = new Date(timeStr);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   if (loading) {
@@ -123,23 +133,8 @@ const HomePage: React.FC = () => {
           <div className="welcome-banner">
             <TypewriterBanner />
           </div>
-          
+
           <h1 className="welcome-heading">Welcome to Lion's Den Cinemas</h1>
-          
-          <div className="action-buttons">
-            <button className="action-btn" onClick={() => navigate('/movies')}>
-              <i className="action-icon">🎬</i>
-              Browse Movies
-            </button>
-            <button className="action-btn" onClick={() => navigate('/tickets')}>
-              <i className="action-icon">🎟️</i>
-              My Tickets
-            </button>
-            <button className="action-btn" onClick={() => navigate('/concessions')}>
-              <i className="action-icon">🍿</i>
-              Order Food
-            </button>
-          </div>
         </div>
       </section>
 
@@ -159,58 +154,63 @@ const HomePage: React.FC = () => {
 
       <section className="section">
         <h2 className="section-title">Showtimes</h2>
-        
+
         <div className="date-tabs">
-          <button 
-            className={`date-tab ${selectedDate === 'today' ? 'active' : ''}`}
-            onClick={() => setSelectedDate('today')}
-          >
+          <button
+            className={`date-tab ${selectedDate === "today" ? "active" : ""}`}
+            onClick={() => setSelectedDate("today")}>
             Today
           </button>
-          <button 
-            className={`date-tab ${selectedDate === 'tomorrow' ? 'active' : ''}`}
-            onClick={() => setSelectedDate('tomorrow')}
-          >
+          <button
+            className={`date-tab ${
+              selectedDate === "tomorrow" ? "active" : ""
+            }`}
+            onClick={() => setSelectedDate("tomorrow")}>
             Tomorrow
           </button>
         </div>
 
         <div className="showtimes-container">
           {Object.keys(showtimesByMovie).length > 0 ? (
-            Object.entries(showtimesByMovie).map(([movieId, movieShowtimes]) => {
-              const movie = movies.find(m => m.id === parseInt(movieId));
-              if (!movie) return null;
+            Object.entries(showtimesByMovie).map(
+              ([movieId, movieShowtimes]) => {
+                const movie = movies.find((m) => m.id === parseInt(movieId));
+                if (!movie) return null;
 
-              return (
-                <div className="movie-showtimes" key={movieId}>
-                  <div className="movie-showtime-info">
-                    <h3 className="movie-title">{movie.title}</h3>
-                    <div className="movie-meta">
-                      <span className="runtime">
-                        {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
-                      </span>
-                      <span className="separator">•</span>
-                      <span className="rating">{movie.rating}</span>
+                return (
+                  <div className="movie-showtimes" key={movieId}>
+                    <div className="movie-showtime-info">
+                      <h3 className="movie-title">{movie.title}</h3>
+                      <div className="movie-meta">
+                        <span className="runtime">
+                          {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}
+                          m
+                        </span>
+                        <span className="separator">•</span>
+                        <span className="rating">{movie.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="showtime-buttons">
+                      {movieShowtimes.map((showtime) => (
+                        <button
+                          key={showtime.id}
+                          className="showtime-btn"
+                          onClick={() => handleShowtimeClick(showtime.id)}>
+                          {formatTime(showtime.startTime)}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  
-                  <div className="showtime-buttons">
-                    {movieShowtimes.map(showtime => (
-                      <button 
-                        key={showtime.id} 
-                        className="showtime-btn"
-                        onClick={() => handleShowtimeClick(showtime.id)}
-                      >
-                        {formatTime(showtime.startTime)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })
+                );
+              }
+            )
           ) : (
             <div className="no-showtimes">
-              <p>No showtimes available for {selectedDate === 'today' ? 'today' : 'tomorrow'}</p>
+              <p>
+                No showtimes available for{" "}
+                {selectedDate === "today" ? "today" : "tomorrow"}
+              </p>
               <p>Please select another date or theater</p>
             </div>
           )}

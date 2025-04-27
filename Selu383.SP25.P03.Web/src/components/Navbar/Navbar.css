@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   background-color: #000000;
-  /* --- MODIFIED: Reduced top/bottom padding --- */
+  height: 11%;
   padding: 0.11rem 2rem;
   border-bottom: 1px solid #65a30d;
   position: sticky;
@@ -15,7 +15,6 @@
 }
 
 .navbar.scrolled {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.4rem 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -39,6 +38,18 @@
   transform: scale(1.02);
 }
 
+.cart-container {
+  grid-column: 2 / 3;
+  background-color: rgba(30, 41, 59, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem;
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
+  /* overflow-y: auto; */
+  border: 1px solid rgba(101, 163, 13, 0.3);
+}
+
 .primary-menu {
   display: flex;
   justify-content: center;
@@ -49,7 +60,7 @@
 .primary-menu a {
   color: #f8f9fa;
   text-decoration: none;
-  /* --- MODIFIED: Reduced top/bottom padding --- */
+
   padding: 0.25rem 1rem;
   margin: 0 0.5rem;
   border-radius: 4px;
@@ -99,7 +110,6 @@
 }
 
 .theater-mode {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.25rem 1rem;
   background-color: transparent;
   border: 1px solid #65a30d;
@@ -128,7 +138,6 @@
 }
 
 .sign-in {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.25rem 1.5rem;
   background-color: #65a30d;
   color: #ffffff;

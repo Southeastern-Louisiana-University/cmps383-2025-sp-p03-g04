@@ -6,9 +6,15 @@
   min-height: 100vh;
   background-color: #000000;
   color: #f8f9fa;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  margin-top: 6rem;
+  font-weight: 700;
+}
 /* Container for sections */
 .container {
   width: 100%;
@@ -41,7 +47,17 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+  margin-left: 35%;
 }
 
 .error-container {
@@ -81,7 +97,7 @@
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -0.75rem;
   left: 50%;
@@ -273,8 +289,8 @@
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7)), 
-              url('/images/popcorn-background.jpg');
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7)),
+    url("/images/popcorn-background.jpg");
   background-size: cover;
   background-position: center;
   padding: 6rem 0;
@@ -322,11 +338,11 @@
   .section {
     padding: 3rem 0;
   }
-  
+
   .section-title {
     font-size: 2rem;
   }
-  
+
   .cta-content h2 {
     font-size: 2.25rem;
   }
@@ -336,32 +352,32 @@
   .section {
     padding: 2.5rem 0;
   }
-  
+
   .section-title {
     font-size: 1.75rem;
   }
-  
+
   .movie-showtime-info {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .movie-poster-small {
     width: 100px;
     height: 150px;
   }
-  
+
   .date-tab {
     min-width: unset;
     flex: 1;
     padding: 0.75rem 0.5rem;
   }
-  
+
   .cta-content h2 {
     font-size: 2rem;
   }
-  
+
   .cta-content p {
     font-size: 1.125rem;
   }
@@ -371,40 +387,40 @@
   .container {
     padding: 0 1rem;
   }
-  
+
   .section {
     padding: 2rem 0;
   }
-  
+
   .section-title {
     font-size: 1.5rem;
   }
-  
+
   .movie-info-container .movie-title {
     font-size: 1.25rem;
   }
-  
+
   .showtime-buttons {
     justify-content: center;
   }
-  
+
   .showtime-btn {
     min-width: 80px;
     padding: 0.5rem 0.75rem;
   }
-  
+
   .no-showtimes p {
     font-size: 1rem;
   }
-  
+
   .cta-content h2 {
     font-size: 1.75rem;
   }
-  
+
   .cta-content p {
     font-size: 1rem;
   }
-  
+
   .cta-button {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
