@@ -121,6 +121,7 @@ const PaymentPage: React.FC = () => {
         // Create food order request if there are food items
         let foodOrders: {
           deliveryType: string;
+          status: string; // Add this line to the type definition
           orderItems: {
             foodItemId: number;
             foodItemName: string;
@@ -133,6 +134,7 @@ const PaymentPage: React.FC = () => {
           foodOrders = [
             {
               deliveryType: "Pickup",
+              status: "Pending", // Now TypeScript will recognize this field
               orderItems: Object.entries(foodItemGroups).map(
                 ([id, details]) => {
                   return {
