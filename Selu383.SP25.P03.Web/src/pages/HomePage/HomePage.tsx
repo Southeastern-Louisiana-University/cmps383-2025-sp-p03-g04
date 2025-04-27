@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheater } from "../../contexts/TheaterContext";
+import { useTheme } from "../../contexts/Themecontext"; // <-- ADD THIS
 import Footer from "../../components/Footer/Footer";
 import TheaterSelector from "../../components/TheaterSelector/TheaterSelector";
 import MovieCarousel from "../../components/MovieCarousel/MovieCarousel";
@@ -17,6 +18,7 @@ import "./HomePage1.css";
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { selectedTheater, setSelectedTheater } = useTheater();
+  useTheme(); // <-- ADD THIS
 
   const [movies, setMovies] = useState<Movie[]>([]);
   const [theaters, setTheaters] = useState<Theater[]>([]);
@@ -88,9 +90,7 @@ const HomePage: React.FC = () => {
 
   const handleMovieClick = (movieId: number) => {
     navigate(
-      `/movies/${movieId}${
-        selectedTheater ? `?theaterId=${selectedTheater.id}` : ""
-      }`
+      `/movies/${movieId}${selectedTheater ? `?theaterId=${selectedTheater.id}` : ""}`
     );
   };
 
@@ -99,7 +99,10 @@ const HomePage: React.FC = () => {
   };
 
   const handleTheaterSelect = (theater: Theater) => {
-    setSelectedTheater(theater);
+    // Optional: Only change if it's a different theater
+    if (!selectedTheater || selectedTheater.id !== theater.id) {
+      setSelectedTheater(theater);
+    }
   };
 
   const showtimesByMovie = showtimes.reduce<Record<number, Showtime[]>>(
@@ -133,7 +136,6 @@ const HomePage: React.FC = () => {
           <div className="welcome-banner">
             <TypewriterBanner />
           </div>
-
           <h1 className="welcome-heading">Welcome to Lion's Den Cinemas</h1>
         </div>
       </section>
@@ -158,59 +160,54 @@ const HomePage: React.FC = () => {
         <div className="date-tabs">
           <button
             className={`date-tab ${selectedDate === "today" ? "active" : ""}`}
-            onClick={() => setSelectedDate("today")}>
+            onClick={() => setSelectedDate("today")}
+          >
             Today
           </button>
           <button
-            className={`date-tab ${
-              selectedDate === "tomorrow" ? "active" : ""
-            }`}
-            onClick={() => setSelectedDate("tomorrow")}>
+            className={`date-tab ${selectedDate === "tomorrow" ? "active" : ""}`}
+            onClick={() => setSelectedDate("tomorrow")}
+          >
             Tomorrow
           </button>
         </div>
 
         <div className="showtimes-container">
           {Object.keys(showtimesByMovie).length > 0 ? (
-            Object.entries(showtimesByMovie).map(
-              ([movieId, movieShowtimes]) => {
-                const movie = movies.find((m) => m.id === parseInt(movieId));
-                if (!movie) return null;
+            Object.entries(showtimesByMovie).map(([movieId, movieShowtimes]) => {
+              const movie = movies.find((m) => m.id === parseInt(movieId));
+              if (!movie) return null;
 
-                return (
-                  <div className="movie-showtimes" key={movieId}>
-                    <div className="movie-showtime-info">
-                      <h3 className="movie-title">{movie.title}</h3>
-                      <div className="movie-meta">
-                        <span className="runtime">
-                          {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}
-                          m
-                        </span>
-                        <span className="separator">•</span>
-                        <span className="rating">{movie.rating}</span>
-                      </div>
-                    </div>
-
-                    <div className="showtime-buttons">
-                      {movieShowtimes.map((showtime) => (
-                        <button
-                          key={showtime.id}
-                          className="showtime-btn"
-                          onClick={() => handleShowtimeClick(showtime.id)}>
-                          {formatTime(showtime.startTime)}
-                        </button>
-                      ))}
+              return (
+                <div className="movie-showtimes" key={movieId}>
+                  <div className="movie-showtime-info">
+                    <h3 className="movie-title">{movie.title}</h3>
+                    <div className="movie-meta">
+                      <span className="runtime">
+                        {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
+                      </span>
+                      <span className="separator">•</span>
+                      <span className="rating">{movie.rating}</span>
                     </div>
                   </div>
-                );
-              }
-            )
+
+                  <div className="showtime-buttons">
+                    {movieShowtimes.map((showtime) => (
+                      <button
+                        key={showtime.id}
+                        className="showtime-btn"
+                        onClick={() => handleShowtimeClick(showtime.id)}
+                      >
+                        {formatTime(showtime.startTime)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
           ) : (
             <div className="no-showtimes">
-              <p>
-                No showtimes available for{" "}
-                {selectedDate === "today" ? "today" : "tomorrow"}
-              </p>
+              <p>No showtimes available for {selectedDate === "today" ? "today" : "tomorrow"}</p>
               <p>Please select another date or theater</p>
             </div>
           )}
@@ -218,9 +215,11 @@ const HomePage: React.FC = () => {
       </section>
 
       <Footer />
-      <ThemeToggle size={40} position="bottomRight" />
+      {/* Theme toggle button */}
+      <ThemeToggle size={40} />
     </div>
   );
 };
 
 export default HomePage;
+

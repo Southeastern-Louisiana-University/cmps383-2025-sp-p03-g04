@@ -10,39 +10,40 @@ import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import ConfirmationPage from "./pages/ConfirmationPage/ConfirmationPage";
 import { CartProvider } from "./contexts/CartContext";
 import { TheaterProvider } from "./contexts/TheaterContext";
-import { AuthProvider } from "./contexts/AuthContext"; // Add import
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/Themecontext"; // Add the ThemeProvider import
 import "./App.css";
 
 function App() {
   return (
     <AuthProvider>
-      {" "}
-      {/* Add AuthProvider */}
       <TheaterProvider>
         <CartProvider>
-          <Router>
-            <div className="app">
-              <Navbar />
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/movies" element={<MoviesPage />} />
-                <Route path="/movies/:id" element={<MovieDetailsPage />} />
-                <Route path="/booking/:id" element={<BookingPage />} />
-                <Route path="/payment/:id" element={<PaymentPage />} />
-                <Route path="/confirmation" element={<ConfirmationPage />} />
-                <Route path="/concessions" element={<ConcessionsPage />} />
-                <Route
-                  path="/concessions/:id"
-                  element={<ConcessionsPage />}
-                />{" "}
-                {/* Add route for concessions with ID */}
-                <Route
-                  path="*"
-                  element={<div className="not-found">Page not found</div>}
-                />
-              </Routes>
-            </div>
-          </Router>
+          <ThemeProvider> {/* Add ThemeProvider here */}
+            <Router>
+              <div className="app">
+                <Navbar />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/movies" element={<MoviesPage />} />
+                  <Route path="/movies/:id" element={<MovieDetailsPage />} />
+                  <Route path="/booking/:id" element={<BookingPage />} />
+                  <Route path="/payment/:id" element={<PaymentPage />} />
+                  <Route path="/confirmation" element={<ConfirmationPage />} />
+                  <Route path="/concessions" element={<ConcessionsPage />} />
+                  <Route
+                    path="/concessions/:id"
+                    element={<ConcessionsPage />}
+                  />{" "}
+                  {/* Add route for concessions with ID */}
+                  <Route
+                    path="*"
+                    element={<div className="not-found">Page not found</div>}
+                  />
+                </Routes>
+              </div>
+            </Router>
+          </ThemeProvider>
         </CartProvider>
       </TheaterProvider>
     </AuthProvider>
