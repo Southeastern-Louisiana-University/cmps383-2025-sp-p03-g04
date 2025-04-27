@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import * as authService from "../../services/auth/authService";
 import { useAuth } from "../../contexts/AuthContext";
 
 const LoginPage: React.FC = () => {
-  // const { signIn, signUp, isLoading } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
+
+  const toggleLoginMode = () => {
+    setIsLogin((prev) => !prev);
+  };
+
   const [error, setError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -41,29 +45,65 @@ const LoginPage: React.FC = () => {
       }
     }
 
-    // try (isLogin) {
-    //   await signIn(username, password);
-    //   if (rememberMe){
-    //     localStorage.setItem("savedUsername", username);
-    //   }
-    //   else{
-    //     localStorage.removeItem("savedUsername");
-    //   }
-    //   navigate( )
-    // }
+    try {
+      if (isLogin) {
+        await signIn(username, password);
+        if (rememberMe) {
+          localStorage.setItem("savedUsername", username);
+        } else {
+          localStorage.removeItem("savedUsername");
+        }
+        navigate(location.state?.from || "/");
+      } else {
+        await signUp(username, password);
+        navigate("/");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred");
+    }
   };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div>
-        <input type="text" id="username" name="username" required />
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
         <label htmlFor="username">Username:</label>
       </div>
-      <div>
-        <input type="text" id="password" name="password" required />
-        <label htmlFor="password">Password:</label>
-      </div>
-      <button type="submit">Login</button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <button type="submit">{isLogin ? "Login" : "Sign Up"}</button>
+      <button type="button" onClick={toggleLoginMode}>
+        {isLogin ? "Switch to Sign Up" : "Switch to Login"}
+      </button>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <label htmlFor="password">Password:</label>
+      {!isLogin && (
+        <div>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <label htmlFor="confirmPassword">Confirm Password:</label>
+        </div>
+      )}
     </form>
   );
 };
+export default LoginPage;
