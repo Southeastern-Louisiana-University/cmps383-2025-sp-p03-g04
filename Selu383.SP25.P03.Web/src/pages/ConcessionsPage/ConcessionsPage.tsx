@@ -1,25 +1,24 @@
-// Creating a new version of ConcessionsPage.tsx
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Add useParams and useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import "./ConcessionsPage.css";
 import Footer from "../../components/Footer/Footer";
 import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 import { FoodItem, FoodCategory } from "../../types/Concessions";
-
+import { useCart } from "../../contexts/CartContext";
 
 const ConcessionsPage: React.FC = () => {
-  const params = useParams(); // Get URL parameters
-  const navigate = useNavigate(); // For navigation
-  const showtimeId = params.id; // Get ID from URL if it exists
-  
-  
+  const params = useParams();
+  const navigate = useNavigate();
+  const { addToCart, cartItems, removeFromCart, total } = useCart();
+  const showtimeId = params.id;
+
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [cartFoodItems, setCartFoodItems] = useState<{item: FoodItem, quantity: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0); // Add retry counter
+  const [retryCount, setRetryCount] = useState(0);
+  const [addedToCart, setAddedToCart] = useState<{ [key: number]: number }>({});
 
   // Fetch food items and categories
   useEffect(() => {
@@ -27,188 +26,140 @@ const ConcessionsPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch categories
-        const categoriesResponse = await fetch('/api/food-items/categories');
+        const categoriesResponse = await fetch("/api/food-items/categories");
         if (!categoriesResponse.ok) {
-          throw new Error(`Failed to fetch categories: ${categoriesResponse.status}`);
+          throw new Error(
+            `Failed to fetch categories: ${categoriesResponse.status}`
+          );
         }
         const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData);
-        
+
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0].id);
         }
-        
+
         // Fetch all food items
-        const itemsResponse = await fetch('/api/food-items');
+        const itemsResponse = await fetch("/api/food-items");
         if (!itemsResponse.ok) {
-          throw new Error(`Failed to fetch food items: ${itemsResponse.status}`);
+          throw new Error(
+            `Failed to fetch food items: ${itemsResponse.status}`
+          );
         }
         const itemsData = await itemsResponse.json();
         setFoodItems(itemsData);
-        
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load concessions data. Please try again later.");
-        
+
         // Retry logic if server error (500)
-        if (retryCount < 3 && err instanceof Error && err.message.includes("500")) {
+        if (
+          retryCount < 3 &&
+          err instanceof Error &&
+          err.message.includes("500")
+        ) {
           setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-          }, 2000); // Retry after 2 seconds
+            setRetryCount((prev) => prev + 1);
+          }, 2000);
         }
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchData();
-  }, [retryCount]); // Add retryCount to dependencies
 
-  // When coming from booking page, handle any showtimeId
-  useEffect(() => {
-    if (showtimeId) {
-      // Here we could load reservation data if needed
-      console.log(`Concessions page opened with showtime ID: ${showtimeId}`);
-      
-      // We could also redirect to the normal concessions page if preferred
-      // navigate('/concessions', { replace: true });
-    }
-  }, [showtimeId, navigate]);
+    fetchData();
+  }, [retryCount]);
 
   // Filter items by selected category
   const filteredItems = selectedCategory
-    ? foodItems.filter(item => item.categoryId === selectedCategory && item.isAvailable)
-    : foodItems.filter(item => item.isAvailable);
+    ? foodItems.filter(
+        (item) => item.categoryId === selectedCategory && item.isAvailable
+      )
+    : foodItems.filter((item) => item.isAvailable);
+
+  // Get food items in cart with count
+  const getFoodItemsInCart = () => {
+    const foodItemCounts: { [key: number]: number } = {};
+
+    cartItems.forEach((item) => {
+      if (item.type === "food") {
+        if (!foodItemCounts[item.id]) {
+          foodItemCounts[item.id] = 0;
+        }
+        foodItemCounts[item.id]++;
+      }
+    });
+
+    return foodItemCounts;
+  };
+
+  const foodItemsInCart = getFoodItemsInCart();
+
+  // Count total food items in cart
+  const foodItemsCount = Object.values(foodItemsInCart).reduce(
+    (sum, count) => sum + count,
+    0
+  );
 
   // Add item to cart
   const handleAddToCart = (item: FoodItem) => {
-    setCartFoodItems(prevItems => {
-      const existingItem = prevItems.find(cartItem => cartItem.item.id === item.id);
-      
-      if (existingItem) {
-        // Item already in cart, increase quantity
-        return prevItems.map(cartItem => 
-          cartItem.item.id === item.id 
-            ? { ...cartItem, quantity: cartItem.quantity + 1 } 
-            : cartItem
-        );
-      } else {
-        // Add new item to cart
-        return [...prevItems, { item, quantity: 1 }];
-      }
-    });
-    
-    // If we have a showtimeId, we could associate this concession with a booking
-    if (showtimeId) {
-      // Logic to associate with booking
-      console.log(`Adding concession item for showtime: ${showtimeId}`);
-    }
-  };
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+      type: "food",
+      showtimeId: showtimeId ? parseInt(showtimeId) : 0,
+      seatId: item.id, // Using food ID as the seat ID for uniqueness
+      seatLabel: item.name, // Using item name as the seat label
+      ticketType: "food", // Marking as food item
+    };
 
-  // Remove item from cart
-  const removeFromCart = (itemId: number) => {
-    setCartFoodItems(prevItems => {
-      const existingItem = prevItems.find(cartItem => cartItem.item.id === itemId);
-      
-      if (existingItem && existingItem.quantity > 1) {
-        // Decrease quantity if more than 1
-        return prevItems.map(cartItem => 
-          cartItem.item.id === itemId 
-            ? { ...cartItem, quantity: cartItem.quantity - 1 } 
-            : cartItem
-        );
-      } else {
-        // Remove item entirely if quantity is 1
-        return prevItems.filter(cartItem => cartItem.item.id !== itemId);
-      }
-    });
-  };
+    addToCart(cartItem);
 
-  // Calculate total cost
-  const calculateTotal = () => {
-    return cartFoodItems.reduce((total, cartItem) => 
-      total + (cartItem.item.price * cartItem.quantity), 0
-    ).toFixed(2);
-  };
+    // Visual feedback for adding to cart
+    setAddedToCart((prev) => ({
+      ...prev,
+      [item.id]: (prev[item.id] || 0) + 1,
+    }));
 
-  // Mock data to use if API fails
-  const getMockData = () => {
-    const mockCategories: FoodCategory[] = [
-      { id: 1, name: "Popcorn" },
-      { id: 2, name: "Drinks" },
-      { id: 3, name: "Candy" },
-      { id: 4, name: "Combos" }
-    ];
-    
-    const mockItems: FoodItem[] = [
-      {
-        id: 1,
-        name: "Small Popcorn",
-        description: "Freshly popped corn, perfect for one",
-        price: 5.99,
-        imageUrl: "/images/placeholder-food.jpg",
-        isAvailable: true,
-        categoryId: 1,
-        categoryName: "Popcorn"
-      },
-      {
-        id: 2,
-        name: "Medium Soda",
-        description: "Refreshing soda of your choice",
-        price: 4.99,
-        imageUrl: "/images/placeholder-food.jpg",
-        isAvailable: true,
-        categoryId: 2,
-        categoryName: "Drinks"
-      },
-      {
-        id: 3,
-        name: "Chocolate Bar",
-        description: "Delicious milk chocolate",
-        price: 3.99,
-        imageUrl: "/images/placeholder-food.jpg",
-        isAvailable: true,
-        categoryId: 3,
-        categoryName: "Candy"
-      }
-    ];
-    
-    return { categories: mockCategories, items: mockItems };
-  };
-
-  // If API fails, use mock data after 3 retries
-  useEffect(() => {
-    if (retryCount >= 3 && (categories.length === 0 || foodItems.length === 0)) {
-      const { categories: mockCategories, items: mockItems } = getMockData();
-      setCategories(mockCategories);
-      setFoodItems(mockItems);
-      setSelectedCategory(mockCategories[0].id);
-      setError("Using demo data. The server is currently unavailable.");
-    }
-  }, [retryCount, categories.length, foodItems.length]);
-
-  // Checkout handler
-  const handleCheckout = () => {
-    // Here we would integrate with the payment system
-    if (showtimeId) {
-      navigate(`/payment/${showtimeId}`, { 
-        state: { concessions: cartFoodItems }
+    setTimeout(() => {
+      setAddedToCart((prev) => {
+        const newState = { ...prev };
+        delete newState[item.id];
+        return newState;
       });
-    } else {
-      // Regular concessions checkout
-      alert("Concessions checkout would be implemented here!");
+    }, 2000);
+  };
+
+  // Remove food item from cart
+  const handleRemoveFromCart = (foodId: number) => {
+    // Find index of a food item with this ID
+    const index = cartItems.findIndex(
+      (item) => item.type === "food" && item.id === foodId
+    );
+
+    if (index !== -1) {
+      removeFromCart(index);
     }
   };
 
-  // Function to retry loading
+  // Navigate to payment
+  const handleCheckout = () => {
+    if (showtimeId) {
+      navigate(`/payment/${showtimeId}`);
+    } else {
+      navigate("/checkout");
+    }
+  };
+
   const handleRetry = () => {
     setRetryCount(0);
     setError(null);
   };
 
-  // Loading state
   if (loading && retryCount < 3) {
     return (
       <div className="concessions-page">
@@ -226,7 +177,9 @@ const ConcessionsPage: React.FC = () => {
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1>Concessions</h1>
-          <p>Enhance your movie experience with our delicious food and drinks</p>
+          <p>
+            Enhance your movie experience with our delicious food and drinks
+          </p>
           <div className="theme-toggle-wrapper">
             <ThemeToggle />
           </div>
@@ -244,14 +197,16 @@ const ConcessionsPage: React.FC = () => {
         </div>
       )}
 
-      <div className="content-container">
+      <div className="concessions-content">
         <div className="categories-menu">
           <h2>Menu</h2>
           <div className="category-tabs">
-            {categories.map(category => (
+            {categories.map((category) => (
               <button
                 key={category.id}
-                className={`category-tab ${selectedCategory === category.id ? 'active' : ''}`}
+                className={`category-tab ${
+                  selectedCategory === category.id ? "active" : ""
+                }`}
                 onClick={() => setSelectedCategory(category.id)}
               >
                 {category.name}
@@ -264,26 +219,49 @@ const ConcessionsPage: React.FC = () => {
           {filteredItems.length === 0 ? (
             <div className="no-items">No items available in this category</div>
           ) : (
-            filteredItems.map(item => (
+            filteredItems.map((item) => (
               <div key={item.id} className="food-item-card">
                 <div className="food-image">
-                  <img 
-                    src={item.imageUrl || "/images/placeholder-food.jpg"} 
+                  <img
+                    src={item.imageUrl || "/images/placeholder-food.jpg"}
                     alt={item.name}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = "/images/placeholder-food.jpg";
                     }}
                   />
+                  {/* Show quantity badge if this item is in cart */}
+                  {foodItemsInCart[item.id] > 0 && (
+                    <div className="quantity-badge">
+                      {foodItemsInCart[item.id]}
+                    </div>
+                  )}
                 </div>
                 <div className="food-info">
                   <h3 className="food-name">{item.name}</h3>
-                  <p className="food-description">{item.description || "No description available"}</p>
+                  <p className="food-description">
+                    {item.description || "No description available"}
+                  </p>
                   <div className="food-price-action">
                     <span className="food-price">${item.price.toFixed(2)}</span>
-                    <button className="add-to-cart" onClick={() => handleAddToCart(item)}>
-                      Add to Cart
-                    </button>
+                    <div className="quantity-controls">
+                      {foodItemsInCart[item.id] > 0 && (
+                        <button
+                          className="remove-btn"
+                          onClick={() => handleRemoveFromCart(item.id)}
+                        >
+                          -
+                        </button>
+                      )}
+                      <button
+                        className={`add-to-cart ${
+                          addedToCart[item.id] ? "added" : ""
+                        }`}
+                        onClick={() => handleAddToCart(item)}
+                      >
+                        {foodItemsInCart[item.id] > 0 ? "+" : "Add"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -291,54 +269,20 @@ const ConcessionsPage: React.FC = () => {
           )}
         </div>
 
-        <div className={`cart-container ${cartFoodItems.length > 0 ? 'has-items' : ''}`}>
-          <h2>Your Order</h2>
-          
-          {cartFoodItems.length === 0 ? (
-            <div className="empty-cart">
-              <p>Your cart is empty</p>
-              <p>Add items from the menu to get started</p>
+        {/* Sticky checkout button */}
+        {foodItemsCount > 0 && (
+          <div className="checkout-bar">
+            <div className="checkout-summary">
+              <span className="items-count">
+                {foodItemsCount} item{foodItemsCount !== 1 ? "s" : ""} in cart
+              </span>
+              <span className="total-amount">Total: ${total.toFixed(2)}</span>
             </div>
-          ) : (
-            <>
-              <div className="cart-items">
-                {cartFoodItems.map(cartItem => (
-                  <div key={cartItem.item.id} className="cart-item">
-                    <div className="cart-item-info">
-                      <span className="cart-item-name">{cartItem.item.name}</span>
-                      <span className="cart-item-price">${(cartItem.item.price * cartItem.quantity).toFixed(2)}</span>
-                    </div>
-                    <div className="quantity-control">
-                      <button 
-                        className="quantity-btn minus" 
-                        onClick={() => removeFromCart(cartItem.item.id)}
-                      >
-                        -
-                      </button>
-                      <span className="quantity">{cartItem.quantity}</span>
-                      <button 
-                        className="quantity-btn plus" 
-                        onClick={() => handleAddToCart(cartItem.item)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="cart-summary">
-                <div className="cart-total">
-                  <span>Total</span>
-                  <span>${calculateTotal()}</span>
-                </div>
-                <button className="checkout-btn" onClick={handleCheckout}>
-                  {showtimeId ? "Continue to Payment" : "Checkout"}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+            <button className="checkout-btn" onClick={handleCheckout}>
+              {showtimeId ? "Continue to Payment" : "Checkout"}
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer />

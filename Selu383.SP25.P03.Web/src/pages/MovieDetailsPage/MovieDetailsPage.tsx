@@ -9,16 +9,16 @@ import { getTheater } from "../../services/theaterService";
 import { useTheater } from "../../contexts/TheaterContext";
 import Footer from "../../components/Footer/Footer";
 import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
-import "./MovieDetailsPage1.css";
+import "./MovieDetailsPage.css";
 
 const MovieDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const theaterId = queryParams.get('theaterId');
+  const theaterId = queryParams.get("theaterId");
   const { selectedTheater } = useTheater();
-  
+
   const [movie, setMovie] = useState<Movie | null>(null);
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [displayTheater, setDisplayTheater] = useState<Theater | null>(null);
@@ -26,18 +26,23 @@ const MovieDetailsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showTrailerModal, setShowTrailerModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("today");
-  
-
 
   // Helper function to open YouTube trailer in a new tab
   const openYouTubeTrailer = () => {
     if (movie && movie.title) {
-      const searchQuery = movie.releaseDate 
-        ? `${movie.title} ${new Date(movie.releaseDate).getFullYear()} official trailer`
+      const searchQuery = movie.releaseDate
+        ? `${movie.title} ${new Date(
+            movie.releaseDate
+          ).getFullYear()} official trailer`
         : `${movie.title} official trailer`;
-      
+
       // Open YouTube search results in a new tab
-      window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+      window.open(
+        `https://www.youtube.com/results?search_query=${encodeURIComponent(
+          searchQuery
+        )}`,
+        "_blank"
+      );
     }
   };
 
@@ -55,7 +60,7 @@ const MovieDetailsPage: React.FC = () => {
 
         // Determine which theater to use
         let theaterToUse = selectedTheater;
-        
+
         // If theaterId is specified in the URL, use that instead
         if (theaterId) {
           try {
@@ -80,11 +85,10 @@ const MovieDetailsPage: React.FC = () => {
           const showtimesData = await getShowtimesByMovie(movieId);
           // Filter by the theater we're using
           const filteredShowtimes = showtimesData.filter(
-            st => st.theaterId === theaterToUse?.id
+            (st) => st.theaterId === theaterToUse?.id
           );
           setShowtimes(filteredShowtimes);
         }
-
       } catch (err) {
         console.error("Error fetching movie data:", err);
         setError("Failed to fetch movie data. Please try again later.");
@@ -95,30 +99,30 @@ const MovieDetailsPage: React.FC = () => {
 
     fetchMovieData();
   }, [id, theaterId, selectedTheater]);
-  
+
   // Handle body scrolling when modal is open
   useEffect(() => {
     if (showTrailerModal) {
       // Disable body scrolling
-      document.body.style.overflow = 'hidden';
-      
+      document.body.style.overflow = "hidden";
+
       // Add event listener for escape key
       const handleEscKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
+        if (e.key === "Escape") {
           closeTrailerModal();
         }
       };
-      
-      window.addEventListener('keydown', handleEscKey);
-      
+
+      window.addEventListener("keydown", handleEscKey);
+
       // Cleanup
       return () => {
-        document.body.style.overflow = '';
-        window.removeEventListener('keydown', handleEscKey);
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleEscKey);
       };
     } else {
       // Re-enable body scrolling
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
   }, [showTrailerModal]);
 
@@ -151,32 +155,39 @@ const MovieDetailsPage: React.FC = () => {
 
       acc[date].push(showtime);
       return acc;
-    }, {}
+    },
+    {}
   );
 
   // Get dates array for date selector
-  const dateOptions = Object.keys(groupedShowtimesByDate).map(dateString => {
-    const date = new Date(dateString);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const isToday = date.getTime() === today.getTime();
-    const isTomorrow = date.getTime() === tomorrow.getTime();
-    
-    let display;
-    if (isToday) {
-      display = "Today";
-    } else if (isTomorrow) {
-      display = "Tomorrow";
-    } else {
-      display = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-    }
-    
-    return { date: dateString, display };
-  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const dateOptions = Object.keys(groupedShowtimesByDate)
+    .map((dateString) => {
+      const date = new Date(dateString);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const isToday = date.getTime() === today.getTime();
+      const isTomorrow = date.getTime() === tomorrow.getTime();
+
+      let display;
+      if (isToday) {
+        display = "Today";
+      } else if (isTomorrow) {
+        display = "Tomorrow";
+      } else {
+        display = date.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      return { date: dateString, display };
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Format showtime
   const formatShowtime = (datetime: string) => {
@@ -199,7 +210,7 @@ const MovieDetailsPage: React.FC = () => {
 
   // Handle returning to home page
   const handleReturnHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   // Loading state
@@ -285,7 +296,7 @@ const MovieDetailsPage: React.FC = () => {
       {/* Showtimes section */}
       <section id="showtimes" className="showtimes-section">
         <h2 className="section-title">Showtimes</h2>
-        
+
         {/* Show selected theater heading */}
         {displayTheater && (
           <div className="selected-theater-info">
@@ -300,7 +311,9 @@ const MovieDetailsPage: React.FC = () => {
             {dateOptions.map((dateOption) => (
               <button
                 key={dateOption.date}
-                className={`date-tab ${selectedDate === dateOption.date ? 'active' : ''}`}
+                className={`date-tab ${
+                  selectedDate === dateOption.date ? "active" : ""
+                }`}
                 onClick={() => setSelectedDate(dateOption.date)}
               >
                 {dateOption.display}
@@ -312,7 +325,10 @@ const MovieDetailsPage: React.FC = () => {
         {/* Showtimes display */}
         {dateOptions.length === 0 ? (
           <div className="no-showtimes">
-            <p>No showtimes available for this movie at {displayTheater?.name || 'the selected theater'}.</p>
+            <p>
+              No showtimes available for this movie at{" "}
+              {displayTheater?.name || "the selected theater"}.
+            </p>
             <button className="btn return-home" onClick={handleReturnHome}>
               Return to Home Page
             </button>
@@ -344,7 +360,14 @@ const MovieDetailsPage: React.FC = () => {
               </div>
             ) : (
               <div className="no-showtimes">
-                <p>No showtimes available for {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                <p>
+                  No showtimes available for{" "}
+                  {new Date(selectedDate).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
                 <p>Please select another date</p>
               </div>
             )}
@@ -352,9 +375,8 @@ const MovieDetailsPage: React.FC = () => {
         )}
       </section>
 
-
-  {/* ThemeToggle */}
-  <ThemeToggle position="bottomRight" />
+      {/* ThemeToggle */}
+      <ThemeToggle position="bottomRight" />
       {/* Footer */}
       <Footer />
     </div>
