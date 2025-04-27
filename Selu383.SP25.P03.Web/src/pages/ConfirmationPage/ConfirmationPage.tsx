@@ -303,25 +303,6 @@ const ConfirmationPage: React.FC = () => {
           </div>
         </div>
 
-        {isGuest && guestSessionId && (
-          <div className="guest-options">
-            <p>
-              Create an account now to save your tickets and get exclusive
-              offers!
-            </p>
-            <button
-              className="create-account-button"
-              onClick={() =>
-                navigate("/signup", {
-                  state: { guestSessionId, fromCheckout: true },
-                })
-              }
-            >
-              Create Account
-            </button>
-          </div>
-        )}
-
         <div className="action-buttons">
           <button
             className="tickets-button"
