@@ -5,21 +5,18 @@ import "./Cart.css";
 
 const Cart: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
   const { cartItems, removeFromCart, total } = useCart();
   const navigate = useNavigate(); // Add this line to initialize navigate
 
   // Scroll detection for banner visibility
+  // Scroll detection for banner visibility
   useEffect(() => {
-    const handleScroll = () => {
-      setShowBanner(window.scrollY > 0);
-    };
+    const handleScroll = () => {};
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   // Handle clicks outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,24 +55,12 @@ const Cart: React.FC = () => {
     setIsOpen(false);
   };
 
-  const handleViewCart = () => {
-    // To be implemented in future
-    setIsOpen(false);
-  };
-
   // Count food items separately to show correct total item types
   const foodItems = cartItems.filter((item) => item.type === "food");
   const seatItems = cartItems.filter((item) => item.type !== "food");
 
   return (
     <>
-      {showBanner && (
-        <div className="cart-scroll-banner">
-          🛒 You have {cartItems.length} item{cartItems.length !== 1 && "s"} in
-          your cart
-        </div>
-      )}
-
       <div className="cart-container" ref={cartRef}>
         <button
           className="cart-button"
