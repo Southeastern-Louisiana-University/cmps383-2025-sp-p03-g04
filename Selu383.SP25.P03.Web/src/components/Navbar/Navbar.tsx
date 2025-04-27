@@ -105,6 +105,7 @@ const Navbar: React.FC = () => {
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
+    </nav>
       {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? 'active' : ''}`}>
         <NavLink to="/" end>Home</NavLink>
