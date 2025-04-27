@@ -1,4 +1,3 @@
-// src/pages/PaymentPage/PaymentPage.tsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
@@ -24,28 +23,20 @@ const PaymentPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
-
-  // Set isGuest based on auth status
-  const [isGuest, setIsGuest] = useState(!isAuthenticated);
   const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
-  // Form state
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [email, setEmail] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  // Update isGuest when auth status changes
-  useEffect(() => {
-    setIsGuest(!isAuthenticated);
-  }, [isAuthenticated]);
+  // Demo card data
+  const demoCards = [
+    { type: "Visa", last4: "4242", brand: "visa" },
+    { type: "Mastercard", last4: "5555", brand: "mastercard" },
+    { type: "American Express", last4: "8888", brand: "amex" },
+  ];
+  const [selectedCard, setSelectedCard] = useState(demoCards[0]);
 
   // Initialize guest session if needed
   useEffect(() => {
     const initializeGuestSession = async () => {
-      if (isGuest) {
+      if (!isAuthenticated) {
         try {
           let sessionId = guestSessionService.getGuestSessionId();
           if (!sessionId) {
@@ -59,7 +50,7 @@ const PaymentPage: React.FC = () => {
     };
 
     initializeGuestSession();
-  }, [isGuest]);
+  }, [isAuthenticated]);
 
   // Fetch showtime and movie data
   useEffect(() => {
@@ -95,89 +86,15 @@ const PaymentPage: React.FC = () => {
     }
   }, [loading, cartItems, id, navigate, processingPayment, paymentSuccess]);
 
-  // Handle card number formatting
-  const formatCardNumber = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-    let formatted = "";
-    for (let i = 0; i < digits.length; i += 4) {
-      formatted += digits.slice(i, i + 4) + " ";
-    }
-    return formatted.trim().slice(0, 19);
-  };
-
-  // Handle expiry date formatting (MM/YY)
-  const formatExpiryDate = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length > 2) {
-      return digits.slice(0, 2) + "/" + digits.slice(2, 4);
-    }
-    return digits;
-  };
-
-  // Validate form before submission
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-
-    // Validate card number
-    if (!cardNumber.trim()) {
-      errors.cardNumber = "Card number is required";
-    } else if (cardNumber.replace(/\s/g, "").length !== 16) {
-      errors.cardNumber = "Card number must be 16 digits";
-    }
-
-    // Validate card name
-    if (!cardName.trim()) {
-      errors.cardName = "Cardholder name is required";
-    }
-
-    // Validate expiry date
-    if (!expiryDate.trim()) {
-      errors.expiryDate = "Expiry date is required";
-    } else if (!/^\d{2}\/\d{2}$/.test(expiryDate)) {
-      errors.expiryDate = "Invalid format (MM/YY)";
-    } else {
-      const [month, year] = expiryDate.split("/").map(Number);
-      const now = new Date();
-      const currentYear = now.getFullYear() % 100;
-      const currentMonth = now.getMonth() + 1;
-
-      if (month < 1 || month > 12) {
-        errors.expiryDate = "Invalid month";
-      } else if (
-        year < currentYear ||
-        (year === currentYear && month < currentMonth)
-      ) {
-        errors.expiryDate = "Card has expired";
-      }
-    }
-
-    // Validate CVV
-    if (!cvv.trim()) {
-      errors.cvv = "CVV is required";
-    } else if (!/^\d{3,4}$/.test(cvv)) {
-      errors.cvv = "CVV must be 3 or 4 digits";
-    }
-
-    // Validate email (only for guests)
-    if (isGuest && !email.trim()) {
-      errors.email = "Email is required";
-    } else if (isGuest && !/\S+@\S+\.\S+/.test(email)) {
-      errors.email = "Invalid email format";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm() && showtime) {
+    if (showtime) {
       setProcessingPayment(true);
 
       try {
-        // Prepare checkout request
+        // Prepare checkout request with demo card data
         const checkoutRequest = {
           reservationRequest: {
             showtimeId: showtime.id,
@@ -191,17 +108,14 @@ const PaymentPage: React.FC = () => {
           foodOrders: [],
           paymentInfo: {
             amount: total,
-            cardNumber: cardNumber.replace(/\s/g, ""),
-            expiryDate: expiryDate,
-            cvv: cvv,
-            cardholderName: cardName,
+            cardNumber: "4242424242424242", // Demo card number
+            expiryDate: "12/25",
+            cvv: "123",
+            cardholderName: "Demo User",
             paymentMethod: "CreditCard",
           },
         };
 
-        console.log("Processing checkout with data:", checkoutRequest);
-
-        // Attempt checkout
         const checkoutResponse = await fetch("/api/checkout", {
           method: "POST",
           headers: {
@@ -213,20 +127,14 @@ const PaymentPage: React.FC = () => {
 
         if (!checkoutResponse.ok) {
           const errorText = await checkoutResponse.text();
-          console.error(
-            "Checkout failed with status:",
-            checkoutResponse.status
-          );
-          console.error("Error details:", errorText);
           throw new Error(errorText || "Checkout failed");
         }
 
         const result = await checkoutResponse.json();
-        console.log("Checkout result:", result);
 
         if (result.paymentResult?.success) {
           // If guest, add the reservation to the guest session
-          if (isGuest && guestSessionId && result.reservation?.id) {
+          if (!isAuthenticated && guestSessionId && result.reservation?.id) {
             try {
               await guestSessionService.addReservationToGuestSession(
                 guestSessionId,
@@ -237,22 +145,17 @@ const PaymentPage: React.FC = () => {
                 "Failed to add reservation to guest session:",
                 error
               );
-              // Continue anyway - the booking succeeded
             }
           }
 
           setPaymentSuccess(true);
           clearCart();
 
-          if (isGuest) {
-            sessionStorage.setItem("guestEmail", email);
-          }
-
           setTimeout(() => {
             navigate("/confirmation", {
               state: {
                 reservationId: result.reservation.id,
-                isGuest: isGuest,
+                isGuest: !isAuthenticated,
                 guestSessionId: guestSessionId,
                 paymentId: result.paymentResult.paymentId,
                 totalAmount: result.totalAmount,
@@ -275,7 +178,7 @@ const PaymentPage: React.FC = () => {
     }
   };
 
-  // Format date for display
+  // Format date and time
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
       weekday: "long",
@@ -285,7 +188,6 @@ const PaymentPage: React.FC = () => {
     });
   };
 
-  // Format time for display
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString(undefined, {
       hour: "numeric",
@@ -293,19 +195,19 @@ const PaymentPage: React.FC = () => {
     });
   };
 
-  // If loading
+  // Loading state
   if (loading) {
     return (
-      <div className="payment-page">
+      <div className="booking-page">
         <div className="loading-container">
           <div className="loader"></div>
-          <p>Loading payment information...</p>
+          <p className="loading-text">Loading payment information...</p>
         </div>
       </div>
     );
   }
 
-  // If error
+  // Error state
   if (
     error ||
     !showtime ||
@@ -313,7 +215,7 @@ const PaymentPage: React.FC = () => {
     (cartItems.length === 0 && !processingPayment && !paymentSuccess)
   ) {
     return (
-      <div className="payment-page">
+      <div className="booking-page">
         <div className="error-container">
           <h2>Something went wrong</h2>
           <p>
@@ -328,214 +230,227 @@ const PaymentPage: React.FC = () => {
     );
   }
 
-  // If payment success
+  // Success state
   if (paymentSuccess) {
     return (
-      <div className="payment-page">
-        <div className="payment-success">
-          <div className="success-icon">✓</div>
-          <h2>Payment Successful!</h2>
-          <p>Your tickets have been booked successfully.</p>
-          <p>A confirmation email will be sent to {email}.</p>
-          <p>You will be redirected to the confirmation page shortly...</p>
+      <div className="booking-page">
+        <div className="loading-container">
+          <div
+            className="success-icon"
+            style={{ color: "#65a30d", fontSize: "3rem", marginBottom: "1rem" }}
+          >
+            ✓
+          </div>
+          <h2 style={{ color: "#ffffff", marginBottom: "1rem" }}>
+            Payment Successful!
+          </h2>
+          <p style={{ color: "#cbd5e1" }}>
+            Your tickets have been booked successfully.
+          </p>
+          <p style={{ color: "#cbd5e1" }}>
+            Redirecting to confirmation page...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="payment-page">
-      <div className="payment-container">
+    <div className="booking-page">
+      {/* Header */}
+      <div className="booking-header">
         <h1>Complete Your Payment</h1>
-
-        {/* Guest checkout notice */}
-        {isGuest && (
-          <div className="guest-notice">
+        <div className="booking-details">
+          <div className="movie-poster">
+            <img
+              src={movie.posterUrl}
+              alt={`${movie.title} poster`}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/images/placeholder-poster.jpg";
+              }}
+            />
+          </div>
+          <div className="booking-movie-info">
+            <h2>{movie.title}</h2>
             <p>
-              Checking out as a guest? Your tickets will be sent to the email
-              address you provide.
+              <strong>Date:</strong> {formatDate(showtime.startTime)}
             </p>
             <p>
-              Already have an account?{" "}
-              <button
-                onClick={() =>
-                  navigate("/login", { state: { from: `/payment/${id}` } })
-                }
-                className="link-button"
+              <strong>Time:</strong> {formatTime(showtime.startTime)}
+            </p>
+            <p>
+              <strong>Theater:</strong> {showtime.theaterName}
+            </p>
+            <p>
+              <strong>Screen:</strong> {showtime.screenName}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="booking-content">
+        {/* Left column - Order Summary */}
+        <div className="seating-container">
+          <h3
+            style={{
+              fontSize: "1.25rem",
+              marginBottom: "1.5rem",
+              color: "#ffffff",
+            }}
+          >
+            Order Summary
+          </h3>
+
+          <div className="seat-list">
+            {cartItems.map((item: CartItem, index) => (
+              <div key={index} className="selected-seat-item">
+                <div className="seat-info">
+                  <span className="seat-label">Seat {item.seatLabel}</span>
+                  <span className="ticket-type" style={{ color: "#cbd5e1" }}>
+                    {item.ticketType}
+                  </span>
+                </div>
+                <span className="ticket-price" style={{ color: "#65a30d" }}>
+                  ${item.price.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="price-summary">
+            <div className="summary-item">
+              <span>Subtotal</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+            <div className="summary-item">
+              <span>Service Fee</span>
+              <span>$0.00</span>
+            </div>
+            <div className="summary-item total">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column - Payment Form */}
+        <div className="booking-sidebar">
+          <div className="selected-seats">
+            <h3>Payment Details</h3>
+
+            <div
+              style={{
+                marginBottom: "1.5rem",
+                padding: "1rem",
+                background: "rgba(101, 163, 13, 0.1)",
+                borderRadius: "8px",
+                textAlign: "center",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  padding: "0.25rem 0.75rem",
+                  background: "#65a30d",
+                  color: "#000",
+                  borderRadius: "20px",
+                  fontSize: "0.875rem",
+                  fontWeight: "600",
+                  marginBottom: "0.5rem",
+                }}
               >
-                Sign in here
-              </button>
-            </p>
-          </div>
-        )}
-
-        <div className="payment-content">
-          {/* Order summary section */}
-          <div className="order-summary">
-            <h2>Order Summary</h2>
-
-            <div className="movie-info">
-              <div className="movie-details">
-                <h3>{movie.title}</h3>
-                <p>
-                  <strong>Date:</strong> {formatDate(showtime.startTime)}
-                </p>
-                <p>
-                  <strong>Time:</strong> {formatTime(showtime.startTime)}
-                </p>
-                <p>
-                  <strong>Theater:</strong> {showtime.theaterName}
-                </p>
-                <p>
-                  <strong>Screen:</strong> {showtime.screenName}
-                </p>
-              </div>
-            </div>
-
-            <div className="tickets-summary">
-              <h3>Tickets</h3>
-
-              <div className="tickets-list">
-                {cartItems.map((item: CartItem, index) => (
-                  <div key={index} className="ticket-item">
-                    <div className="ticket-info">
-                      <span className="seat-label">Seat {item.seatLabel}</span>
-                      <span className="ticket-type">{item.ticketType}</span>
-                    </div>
-                    <span className="ticket-price">
-                      ${item.price.toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="order-total">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment form section */}
-          <div className="payment-form-container">
-            <h2>Payment Details</h2>
-
-            <form className="payment-form" onSubmit={handleSubmit}>
-              {isGuest && (
-                <div className="form-group">
-                  <label htmlFor="email">Email (For ticket delivery)</label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="example@email.com"
-                    className={formErrors.email ? "error" : ""}
-                  />
-                  {formErrors.email && (
-                    <span className="error-message">{formErrors.email}</span>
-                  )}
-                </div>
-              )}
-
-              <div className="form-group">
-                <label htmlFor="cardNumber">Card Number</label>
-                <input
-                  id="cardNumber"
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) =>
-                    setCardNumber(formatCardNumber(e.target.value))
-                  }
-                  placeholder="XXXX XXXX XXXX XXXX"
-                  className={formErrors.cardNumber ? "error" : ""}
-                  maxLength={19}
-                />
-                {formErrors.cardNumber && (
-                  <span className="error-message">{formErrors.cardNumber}</span>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="cardName">Cardholder Name</label>
-                <input
-                  id="cardName"
-                  type="text"
-                  value={cardName}
-                  onChange={(e) => setCardName(e.target.value)}
-                  placeholder="Name on card"
-                  className={formErrors.cardName ? "error" : ""}
-                />
-                {formErrors.cardName && (
-                  <span className="error-message">{formErrors.cardName}</span>
-                )}
-              </div>
-
-              <div className="form-row">
-                <div className="form-group half">
-                  <label htmlFor="expiryDate">Expiry Date</label>
-                  <input
-                    id="expiryDate"
-                    type="text"
-                    value={expiryDate}
-                    onChange={(e) =>
-                      setExpiryDate(formatExpiryDate(e.target.value))
-                    }
-                    placeholder="MM/YY"
-                    className={formErrors.expiryDate ? "error" : ""}
-                    maxLength={5}
-                  />
-                  {formErrors.expiryDate && (
-                    <span className="error-message">
-                      {formErrors.expiryDate}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-group half">
-                  <label htmlFor="cvv">CVV</label>
-                  <input
-                    id="cvv"
-                    type="text"
-                    value={cvv}
-                    onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
-                    placeholder="XXX"
-                    className={formErrors.cvv ? "error" : ""}
-                    maxLength={4}
-                  />
-                  {formErrors.cvv && (
-                    <span className="error-message">{formErrors.cvv}</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="payment-actions">
-                <button
-                  type="button"
-                  className="btn cancel-button"
-                  onClick={() => navigate(`/booking/${id}`)}
-                  disabled={processingPayment}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn pay-button"
-                  disabled={processingPayment}
-                >
-                  {processingPayment
-                    ? "Processing..."
-                    : `Pay $${total.toFixed(2)}`}
-                </button>
-              </div>
-            </form>
-
-            <div className="payment-security">
-              <p>
-                <i className="lock-icon">🔒</i>
-                Your payment information is securely processed.
+                DEMO MODE
+              </span>
+              <p style={{ color: "#65a30d", fontSize: "0.875rem", margin: 0 }}>
+                Payment is simulated for demonstration
               </p>
             </div>
+
+            <div
+              style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}
+            >
+              {demoCards.map((card, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedCard(card)}
+                  style={{
+                    flex: 1,
+                    padding: "1rem",
+                    background:
+                      selectedCard === card
+                        ? "rgba(101, 163, 13, 0.1)"
+                        : "rgba(255, 255, 255, 0.05)",
+                    border:
+                      selectedCard === card
+                        ? "2px solid #65a30d"
+                        : "2px solid transparent",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "600",
+                      marginBottom: "0.5rem",
+                      color: "#ffffff",
+                    }}
+                  >
+                    {card.type}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "monospace",
+                      color: "#cbd5e1",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    •••• {card.last4}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="checkout-button"
+              onClick={handleSubmit}
+              disabled={processingPayment}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+              }}
+            >
+              {processingPayment ? (
+                <>
+                  <div
+                    className="loader"
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      borderWidth: "2px",
+                    }}
+                  ></div>
+                  Processing...
+                </>
+              ) : (
+                `Pay $${total.toFixed(2)}`
+              )}
+            </button>
+
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: "0.875rem",
+                color: "#cbd5e1",
+                marginTop: "1rem",
+              }}
+            >
+              This is a demo. No actual payment will be processed.
+            </p>
           </div>
         </div>
       </div>
