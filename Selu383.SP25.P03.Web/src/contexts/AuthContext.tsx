@@ -6,11 +6,11 @@ import { AuthContextType } from "../types/api/auth";
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
-  signIn: async (username: string, password: string) => {
+  signIn: async () => {
     return "customer";
   },
   signOut: async () => {},
-  signUp: async (username: string, password: string, email?: string) => {
+  signUp: async () => {
     return "customer";
   },
   isAuthenticated: false,
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (username: string, password: string, email?: string) => {
     try {
-      const response = await authService.register({
+      await authService.register({
         username,
         password,
         email: email || "",
@@ -129,7 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         signUp,
         isAuthenticated,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
