@@ -92,26 +92,6 @@ const Navbar: React.FC = () => {
         <NavLink to="/movies">Movies</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
       </div>
-      <div className="navbar-right">
-        {/* Theater Dropdown */}
-        <div className="theater-dropdown">
-          <select 
-            className="theater-mode"
-            value={selectedTheater?.id || ''}
-            onChange={(e) => {
-              const theater = theaters.find(t => t.id === parseInt(e.target.value));
-              if (theater) {
-                handleTheaterSelect(theater);
-              }
-            }}
-          >
-            {theaters.map(theater => (
-              <option key={theater.id} value={theater.id}>
-                {theater.name}
-              </option>
-            ))}
-          </select>
-        </div>
 
         {/* Cart component */}
         <Cart />
