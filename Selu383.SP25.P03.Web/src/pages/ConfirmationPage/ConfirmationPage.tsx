@@ -1,3 +1,312 @@
+// // src/pages/ConfirmationPage/ConfirmationPage.tsx
+// import React, { useEffect, useState } from "react";
+// import { useLocation, useNavigate } from "react-router-dom";
+// import QRCode from "../../components/QrCode/QrCode";
+// import { useAuth } from "../../contexts/AuthContext";
+// import * as reservationService from "../../services/reservationService";
+// import * as guestSessionService from "../../services/guestSessionsService";
+// import "./ConfirmationPage.css";
+
+// interface Ticket {
+//   row: string;
+//   number: number;
+// }
+
+// interface FoodItem {
+//   quantity: number;
+//   foodItemName: string;
+// }
+
+// interface Reservation {
+//   id: number;
+//   movieTitle: string;
+//   theaterName: string;
+//   showtimeStartTime: string;
+//   screenName: string;
+//   tickets: Ticket[];
+//   totalAmount: number;
+//   foodItems?: FoodItem[];
+//   foodDeliveryType?: string;
+// }
+
+// const ConfirmationPage: React.FC = () => {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+//   const { user } = useAuth();
+
+//   // Get reservation details from location state
+//   const { reservationId, isGuest, guestSessionId } = location.state || {};
+
+//   const [reservation, setReservation] = useState<Reservation | null>(null);
+//   const [qrCodeValue, setQrCodeValue] = useState<string>("");
+//   const [isLoading, setIsLoading] = useState<boolean>(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     const loadReservationData = async () => {
+//       if (!reservationId) {
+//         setError("Reservation ID not found");
+//         setIsLoading(false);
+//         return;
+//       }
+
+//       try {
+//         setIsLoading(true);
+
+//         if (isGuest && guestSessionId) {
+//           // For guest users, try to get reservation directly
+//           try {
+//             const reservationData = await reservationService.getReservation(
+//               reservationId
+//             );
+//             setReservation(reservationData);
+
+//             // Create QR code data for guest
+//             const qrData = {
+//               type: "ticket",
+//               reservationId: reservationData.id,
+//               movieTitle: reservationData.movieTitle,
+//               theaterName: reservationData.theaterName,
+//               showtime: reservationData.showtimeStartTime,
+//               seats: reservationData.tickets
+//                 .map((t: Ticket) => `${t.row}${t.number}`)
+//                 .join(","),
+//               isGuest: true,
+//               guestSessionId: guestSessionId,
+//             };
+
+//             setQrCodeValue(JSON.stringify(qrData));
+//           } catch (error) {
+//             console.error("Direct reservation access failed:", error);
+//             // If we can't get the reservation via API, use demo data
+//             const demoReservation: Reservation = {
+//               id: reservationId,
+//               movieTitle: "Movie Title",
+//               theaterName: "Lion's Den Cinema",
+//               showtimeStartTime: new Date().toISOString(),
+//               screenName: "Screen 1",
+//               tickets: [{ row: "A", number: 1 }],
+//               totalAmount: location.state?.totalAmount || 0,
+//             };
+
+//             setReservation(demoReservation);
+//             setQrCodeValue(
+//               JSON.stringify({
+//                 type: "ticket",
+//                 reservationId: reservationId,
+//                 isGuest: true,
+//                 guestSessionId: guestSessionId,
+//               })
+//             );
+//           }
+//         } else {
+//           // For authenticated users, fetch from API
+//           const reservationData = await reservationService.getReservation(
+//             reservationId
+//           );
+//           setReservation(reservationData);
+
+//           // Create QR code data
+//           const qrData = {
+//             type: "ticket",
+//             reservationId: reservationData.id,
+//             movieTitle: reservationData.movieTitle,
+//             theaterName: reservationData.theaterName,
+//             showtime: reservationData.showtimeStartTime,
+//             seats: reservationData.tickets
+//               .map((t: Ticket) => `${t.row}${t.number}`)
+//               .join(","),
+//             isGuest: false,
+//             userId: user?.id,
+//           };
+
+//           setQrCodeValue(JSON.stringify(qrData));
+//         }
+//       } catch (err) {
+//         console.error("Error loading confirmation data:", err);
+//         setError("Failed to load ticket information");
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     loadReservationData();
+//   }, [reservationId, isGuest, guestSessionId, user?.id, location.state]);
+
+//   const handleShareTicket = async () => {
+//     if (!reservation) return;
+
+//     try {
+//       if (navigator.share) {
+//         await navigator.share({
+//           title: "My Lion's Den Cinema Ticket",
+//           text: `Movie: ${reservation.movieTitle}\nTheater: ${
+//             reservation.theaterName
+//           }\nShowtime: ${new Date(
+//             reservation.showtimeStartTime
+//           ).toLocaleString()}\nSeats: ${reservation.tickets
+//             .map((t) => `${t.row}${t.number}`)
+//             .join(", ")}`,
+//         });
+//       } else {
+//         // Fallback for browsers that don't support Web Share API
+//         alert("Sharing is not supported in your browser");
+//       }
+//     } catch (error) {
+//       console.error("Error sharing ticket:", error);
+//     }
+//   };
+
+//   const formatDate = (dateString: string): string => {
+//     return new Date(dateString).toLocaleString(undefined, {
+//       weekday: "short",
+//       month: "short",
+//       day: "numeric",
+//       hour: "2-digit",
+//       minute: "2-digit",
+//     });
+//   };
+
+//   if (isLoading) {
+//     return (
+//       <div className="loading-container">
+//         <div className="loader"></div>
+//         <p className="loading-text">Loading your ticket...</p>
+//       </div>
+//     );
+//   }
+
+//   if (error || !reservation) {
+//     return (
+//       <div className="error-container">
+//         <div className="error-icon">⚠️</div>
+//         <h2>Something went wrong</h2>
+//         <p>{error || "Ticket not found"}</p>
+//         <button className="home-button" onClick={() => navigate("/")}>
+//           Go to Home
+//         </button>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="confirmation-page">
+//       <div className="confirmation-container">
+//         <div className="success-message">
+//           <div className="success-icon">✓</div>
+//           <h1>Purchase Complete!</h1>
+//           <p>
+//             Your tickets have been purchased successfully. Show the QR code at
+//             the entrance.
+//           </p>
+//         </div>
+
+//         <div className="ticket-card">
+//           <div className="ticket-header">
+//             <div>
+//               <h2 className="theater-name">{reservation.theaterName}</h2>
+//               <p className="screen-name">
+//                 {reservation.screenName || "Screen 1"}
+//               </p>
+//             </div>
+//             <div className="logo-container">🎬</div>
+//           </div>
+
+//           <div className="ticket-body">
+//             <h2 className="movie-title">{reservation.movieTitle}</h2>
+
+//             <p className="showtime-date">
+//               {formatDate(reservation.showtimeStartTime)}
+//             </p>
+
+//             <div className="seats-section">
+//               <h3>Seats</h3>
+//               <p className="seats-list">
+//                 {reservation.tickets
+//                   .map((ticket) => `${ticket.row}${ticket.number}`)
+//                   .join(", ")}
+//               </p>
+//             </div>
+
+//             {reservation.foodItems && reservation.foodItems.length > 0 && (
+//               <div className="food-section">
+//                 <h3>Food Order</h3>
+//                 <ul className="food-list">
+//                   {reservation.foodItems.map((item, index) => (
+//                     <li key={index} className="food-item">
+//                       {item.quantity}x {item.foodItemName}
+//                     </li>
+//                   ))}
+//                 </ul>
+//                 <p className="delivery-type">
+//                   {reservation.foodDeliveryType === "ToSeat"
+//                     ? "Delivery to your seat"
+//                     : "Pickup at concession counter"}
+//                 </p>
+//               </div>
+//             )}
+
+//             <div className="qr-container">
+//               {qrCodeValue ? (
+//                 <QRCode value={qrCodeValue} size={200} />
+//               ) : (
+//                 <div className="qr-placeholder">
+//                   <div className="loader small"></div>
+//                 </div>
+//               )}
+//             </div>
+
+//             <p className="scan-instructions">
+//               Scan this QR code at the entrance
+//             </p>
+
+//             <p className="transaction-id">Transaction ID: {reservation.id}</p>
+//           </div>
+
+//           <div className="ticket-footer">
+//             <button className="share-button" onClick={handleShareTicket}>
+//               <i className="fa fa-share"></i> Share Ticket
+//             </button>
+//           </div>
+//         </div>
+
+//         {isGuest && guestSessionId && (
+//           <div className="guest-options">
+//             <p>
+//               Create an account now to save your tickets and get exclusive
+//               offers!
+//             </p>
+//             <button
+//               className="create-account-button"
+//               onClick={() =>
+//                 navigate("/signup", {
+//                   state: { guestSessionId, fromCheckout: true },
+//                 })
+//               }
+//             >
+//               Create Account
+//             </button>
+//           </div>
+//         )}
+
+//         <div className="action-buttons">
+//           <button
+//             className="tickets-button"
+//             onClick={() => navigate("/tickets")}
+//           >
+//             View All Tickets
+//           </button>
+
+//           <button className="home-button" onClick={() => navigate("/")}>
+//             Back to Home
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ConfirmationPage;
 // src/pages/ConfirmationPage/ConfirmationPage.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,15 +316,40 @@ import * as reservationService from "../../services/reservationService";
 import * as guestSessionService from "../../services/guestSessionsService";
 import "./ConfirmationPage.css";
 
+interface Ticket {
+  id?: number;
+  row: string;
+  number: number;
+  ticketType?: string;
+  price?: number;
+}
+
+interface FoodItem {
+  quantity: number;
+  foodItemName: string;
+}
+
+interface Reservation {
+  id: number;
+  reservationId?: number; // Some responses might use reservationId instead of id
+  movieTitle: string;
+  theaterName: string;
+  showtimeStartTime: string;
+  screenName: string;
+  tickets: Ticket[];
+  totalAmount: number;
+  foodItems?: FoodItem[];
+  foodDeliveryType?: string;
+}
+
 const ConfirmationPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Get reservation details from location state
   const { reservationId, isGuest, guestSessionId } = location.state || {};
 
-  const [reservation, setReservation] = useState<any>(null);
+  const [reservation, setReservation] = useState<Reservation | null>(null);
   const [qrCodeValue, setQrCodeValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,65 +366,100 @@ const ConfirmationPage: React.FC = () => {
         setIsLoading(true);
 
         if (isGuest && guestSessionId) {
-          // Try to get reservation through guest session data
-          try {
-            const sessionData = await guestSessionService.getGuestSessionData(
-              guestSessionId
-            );
+          // For guest users, we'll use the data from the payment result
+          // since guest access to reservations might be restricted
+          const paymentResult = location.state?.paymentResult;
 
-            // Check if this reservation is part of the guest session
-            if (sessionData.reservationIds?.includes(reservationId)) {
-              // Fetch the reservation data through the API
-              // Guest can access it because it's been linked to their session
-              const reservationData = await reservationService.getReservation(
-                reservationId
-              );
-              setReservation(reservationData);
+          if (paymentResult?.reservation) {
+            // Use the reservation data from the payment result
+            const reservationData = paymentResult.reservation;
+            setReservation(reservationData);
 
-              // Create QR code data
-              const qrData = {
+            // Create QR code data for guest
+            const qrData = {
+              type: "ticket",
+              reservationId: reservationData.id,
+              movieTitle: reservationData.movieTitle || "Movie",
+              theaterName: reservationData.theaterName || "Lion's Den Cinema",
+              showtime:
+                reservationData.showtimeStartTime || new Date().toISOString(),
+              seats: reservationData.tickets
+                ? reservationData.tickets
+                    .map((t: Ticket) => `${t.row}${t.number}`)
+                    .join(",")
+                : "N/A",
+              isGuest: true,
+              guestSessionId: guestSessionId,
+            };
+
+            setQrCodeValue(JSON.stringify(qrData));
+          } else {
+            // If no payment result data, create a fallback reservation object
+            const fallbackReservation: Reservation = {
+              id: reservationId,
+              movieTitle: location.state?.movieTitle || "Movie",
+              theaterName: location.state?.theaterName || "Lion's Den Cinema",
+              showtimeStartTime:
+                location.state?.showtimeStartTime || new Date().toISOString(),
+              screenName: location.state?.screenName || "Screen 1",
+              tickets: location.state?.tickets || [{ row: "A", number: 1 }],
+              totalAmount: location.state?.totalAmount || 0,
+              foodItems: location.state?.foodItems,
+            };
+
+            setReservation(fallbackReservation);
+            setQrCodeValue(
+              JSON.stringify({
                 type: "ticket",
-                reservationId: reservationData.id,
-                movieTitle: reservationData.movieTitle,
-                theaterName: reservationData.theaterName,
-                showtime: reservationData.showtimeStartTime,
-                seats: reservationData.tickets
-                  .map((t: any) => `${t.row}${t.number}`)
-                  .join(","),
+                reservationId: reservationId,
                 isGuest: true,
                 guestSessionId: guestSessionId,
-              };
-
-              setQrCodeValue(JSON.stringify(qrData));
-            } else {
-              setError("Reservation not found in guest session");
-            }
-          } catch (error) {
-            console.error("Error loading guest reservation:", error);
-            setError("Failed to load guest reservation");
+              })
+            );
           }
         } else {
           // For authenticated users, fetch from API
-          const reservationData = await reservationService.getReservation(
-            reservationId
-          );
-          setReservation(reservationData);
+          try {
+            const reservationData = await reservationService.getReservation(
+              reservationId
+            );
+            setReservation(reservationData);
 
-          // Create QR code data
-          const qrData = {
-            type: "ticket",
-            reservationId: reservationData.id,
-            movieTitle: reservationData.movieTitle,
-            theaterName: reservationData.theaterName,
-            showtime: reservationData.showtimeStartTime,
-            seats: reservationData.tickets
-              .map((t: any) => `${t.row}${t.number}`)
-              .join(","),
-            isGuest: false,
-            userId: user?.id,
-          };
+            // Create QR code data
+            const qrData = {
+              type: "ticket",
+              reservationId: reservationData.id,
+              movieTitle: reservationData.movieTitle,
+              theaterName: reservationData.theaterName,
+              showtime: reservationData.showtimeStartTime,
+              seats: reservationData.tickets
+                .map((t: Ticket) => `${t.row}${t.number}`)
+                .join(","),
+              isGuest: false,
+              userId: user?.id,
+            };
 
-          setQrCodeValue(JSON.stringify(qrData));
+            setQrCodeValue(JSON.stringify(qrData));
+          } catch (err) {
+            console.error(
+              "Failed to fetch reservation for authenticated user:",
+              err
+            );
+            // Use location state as fallback
+            if (location.state?.paymentResult?.reservation) {
+              setReservation(location.state.paymentResult.reservation);
+              setQrCodeValue(
+                JSON.stringify({
+                  type: "ticket",
+                  reservationId: reservationId,
+                  isGuest: false,
+                  userId: user?.id,
+                })
+              );
+            } else {
+              throw err;
+            }
+          }
         }
       } catch (err) {
         console.error("Error loading confirmation data:", err);
@@ -101,9 +470,11 @@ const ConfirmationPage: React.FC = () => {
     };
 
     loadReservationData();
-  }, [reservationId, isGuest, guestSessionId, user?.id]);
+  }, [reservationId, isGuest, guestSessionId, user?.id, location.state]);
 
   const handleShareTicket = async () => {
+    if (!reservation) return;
+
     try {
       if (navigator.share) {
         await navigator.share({
@@ -113,11 +484,10 @@ const ConfirmationPage: React.FC = () => {
           }\nShowtime: ${new Date(
             reservation.showtimeStartTime
           ).toLocaleString()}\nSeats: ${reservation.tickets
-            .map((t: any) => `${t.row}${t.number}`)
+            .map((t) => `${t.row}${t.number}`)
             .join(", ")}`,
         });
       } else {
-        // Fallback for browsers that don't support Web Share API
         alert("Sharing is not supported in your browser");
       }
     } catch (error) {
@@ -125,14 +495,18 @@ const ConfirmationPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatDate = (dateString: string): string => {
+    try {
+      return new Date(dateString).toLocaleString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateString; // Return original if parsing fails
+    }
   };
 
   if (isLoading) {
@@ -188,19 +562,19 @@ const ConfirmationPage: React.FC = () => {
             </p>
 
             <div className="seats-section">
-              <h3>Seats:</h3>
+              <h3>Seats</h3>
               <p className="seats-list">
                 {reservation.tickets
-                  .map((ticket: any) => `${ticket.row}${ticket.number}`)
+                  .map((ticket) => `${ticket.row}${ticket.number}`)
                   .join(", ")}
               </p>
             </div>
 
             {reservation.foodItems && reservation.foodItems.length > 0 && (
               <div className="food-section">
-                <h3>Food Order:</h3>
+                <h3>Food Order</h3>
                 <ul className="food-list">
-                  {reservation.foodItems.map((item: any, index: number) => (
+                  {reservation.foodItems.map((item, index) => (
                     <li key={index} className="food-item">
                       {item.quantity}x {item.foodItemName}
                     </li>

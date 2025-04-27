@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // Seat related types
 export interface Seat {
   id: number;
@@ -10,7 +12,7 @@ export interface Seat {
 export enum SeatStatus {
   Available = "Available",
   Selected = "Selected",
-  Taken = "Taken"
+  Taken = "Taken",
 }
 
 export interface SeatingLayout {
@@ -34,6 +36,9 @@ export interface TicketType {
 
 // Cart related types
 export interface CartItem {
+  name: ReactNode;
+  id: any;
+  type: string;
   seatId: number;
   seatLabel: string;
   ticketType: string;
