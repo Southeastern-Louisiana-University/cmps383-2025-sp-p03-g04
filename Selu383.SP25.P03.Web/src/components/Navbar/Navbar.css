@@ -104,6 +104,33 @@
   width: 25%;
 }
 
+/* Theme toggle button */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: #f8f9fa;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle-btn:hover {
+  background-color: rgba(101, 163, 13, 0.2);
+  transform: scale(1.05);
+}
+
+.theme-icon {
+  font-size: 1.25rem;
+}
+
 .theater-dropdown {
   display: flex;
   align-items: center;
@@ -237,6 +264,35 @@
   color: #f8f9fa;
 }
 
+/* Mobile Theme Toggle */
+.mobile-theme-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-theme-toggle span {
+  margin-right: 1rem;
+  color: #f8f9fa;
+}
+
+.mobile-theme-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8f9fa;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.mobile-theme-btn:hover {
+  background-color: rgba(101, 163, 13, 0.2);
+}
+
 /* Responsive navbar */
 @media (max-width: 992px) {
   .navbar-left {
@@ -285,6 +341,7 @@
     display: flex;
   }
 
+  .theme-toggle-btn,
   .theater-mode,
   .sign-in {
     display: none;
