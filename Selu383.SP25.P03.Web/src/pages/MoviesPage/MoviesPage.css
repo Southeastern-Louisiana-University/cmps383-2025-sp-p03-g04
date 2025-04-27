@@ -79,7 +79,7 @@
 
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 👈 changed 300px to 220px */
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
