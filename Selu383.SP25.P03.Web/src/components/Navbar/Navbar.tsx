@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import TypewriterBanner from '../TypewriterBanner/TypewriterBanner';
 import Cart from '../Cart/Cart';
+import { useTheme } from '../../contexts/Themecontext';
 import './Navbar.css';
 
 // Services
@@ -16,6 +17,9 @@ const Navbar: React.FC = () => {
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
   const location = useLocation();
+  
+  // Use theme context
+  const { isDark, toggleTheme } = useTheme();
 
   // Fetch theaters on component mount
   useEffect(() => {
@@ -76,8 +80,11 @@ const Navbar: React.FC = () => {
 
   // Handle theater selection
   const handleTheaterSelect = (theater: Theater) => {
-    setSelectedTheater(theater);
-    localStorage.setItem('selectedTheaterId', theater.id.toString());
+    // Check if it's a different theater to avoid unnecessary re-renders
+    if (!selectedTheater || selectedTheater.id !== theater.id) {
+      setSelectedTheater(theater);
+      localStorage.setItem('selectedTheaterId', theater.id.toString());
+    }
   };
 
   return (
@@ -92,26 +99,20 @@ const Navbar: React.FC = () => {
         <NavLink to="/movies">Movies</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
       </div>
+      
       <div className="navbar-right">
-        {/* Theater Dropdown */}
-        <div className="theater-dropdown">
-          <select 
-            className="theater-mode"
-            value={selectedTheater?.id || ''}
-            onChange={(e) => {
-              const theater = theaters.find(t => t.id === parseInt(e.target.value));
-              if (theater) {
-                handleTheaterSelect(theater);
-              }
-            }}
-          >
-            {theaters.map(theater => (
-              <option key={theater.id} value={theater.id}>
-                {theater.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Theme toggle button */}
+        <button 
+          className="theme-toggle-btn" 
+          onClick={toggleTheme}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? (
+            <span className="theme-icon">☀️</span>
+          ) : (
+            <span className="theme-icon">🌙</span>
+          )}
+        </button>
 
         {/* Cart component */}
         <Cart />
@@ -125,6 +126,7 @@ const Navbar: React.FC = () => {
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
+      
       {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? 'active' : ''}`}>
         <NavLink to="/" end>Home</NavLink>
@@ -148,6 +150,16 @@ const Navbar: React.FC = () => {
               </option>
             ))}
           </select>
+        </div>
+        {/* Theme toggle in mobile menu */}
+        <div className="mobile-theme-toggle">
+          <span>Theme:</span>
+          <button 
+            className="mobile-theme-btn" 
+            onClick={toggleTheme}
+          >
+            {isDark ? 'Switch to Light Mode ☀️' : 'Switch to Dark Mode 🌙'}
+          </button>
         </div>
       </div>
     </nav>
