@@ -15,7 +15,9 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
     if (savedTheme === "dark") {
       setIsDark(true);
@@ -36,13 +38,13 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         --text-color: #1E2429;
         --card-background: #f8f9fa;
         --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        --button-primary-bg: #4CAF50;
+        --button-primary-bg: #65a30d;
         --button-primary-text: white;
         --button-secondary-bg: #f0f0f0;
         --button-secondary-text: #333333;
         --input-bg: #ffffff;
         --input-border: #000000;
-        --input-focus-border: #4CAF50;
+        --input-focus-border: #65a30d;
         --action-btn-bg: #f0f0f0;
         --movie-info-text: #000000;
       }
@@ -52,13 +54,13 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         --text-color: #f0f0f0;
         --card-background: #2d2d2d;
         --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        --button-primary-bg: #4CAF50;
+        --button-primary-bg: #65a30d;
         --button-primary-text: white;
         --button-secondary-bg: #3a3a3a;
         --button-secondary-text: #e0e0e0;
         --input-bg: #333333;
         --input-border: #555;
-        --input-focus-border: #4CAF50;
+        --input-focus-border: #65a30d;
         --action-btn-bg: #2a2a2a;
         --movie-info-text: #f0f0f0;
       }
@@ -296,10 +298,9 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       <button
         style={buttonStyles}
         onClick={toggleTheme}
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      >
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
         {isDark ? (
-          <SunIcon size={size * 0.5} color="#4CAF50" />
+          <SunIcon size={size * 0.5} color="#65a30d" />
         ) : (
           <MoonIcon size={size * 0.5} color="#1E2429" />
         )}
@@ -317,8 +318,7 @@ const SunIcon = ({ size, color }: { size: number; color: string }) => (
     stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+    strokeLinejoin="round">
     <circle cx="12" cy="12" r="5" />
     <line x1="12" y1="1" x2="12" y2="3" />
     <line x1="12" y1="21" x2="12" y2="23" />
@@ -340,8 +340,7 @@ const MoonIcon = ({ size, color }: { size: number; color: string }) => (
     stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+    strokeLinejoin="round">
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );
