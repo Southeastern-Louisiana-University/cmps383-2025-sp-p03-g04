@@ -99,26 +99,20 @@ const Navbar: React.FC = () => {
         <NavLink to="/movies">Movies</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
       </div>
+      
       <div className="navbar-right">
-        {/* Theater Dropdown */}
-        <div className="theater-dropdown">
-          <select 
-            className="theater-mode"
-            value={selectedTheater?.id || ''}
-            onChange={(e) => {
-              const theater = theaters.find(t => t.id === parseInt(e.target.value));
-              if (theater) {
-                handleTheaterSelect(theater);
-              }
-            }}
-          >
-            {theaters.map(theater => (
-              <option key={theater.id} value={theater.id}>
-                {theater.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Theme toggle button */}
+        <button 
+          className="theme-toggle-btn" 
+          onClick={toggleTheme}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? (
+            <span className="theme-icon">☀️</span>
+          ) : (
+            <span className="theme-icon">🌙</span>
+          )}
+        </button>
 
         {/* Cart component */}
         <Cart />
@@ -132,6 +126,7 @@ const Navbar: React.FC = () => {
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
+      
       {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? 'active' : ''}`}>
         <NavLink to="/" end>Home</NavLink>
