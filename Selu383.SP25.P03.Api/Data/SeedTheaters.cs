@@ -9,25 +9,25 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // reseed the theaters (remove existing ones first)
+                
                 bool reseed = true;
                 
                 if (reseed)
                 {
-                    // First check if there are any theaters to remove
+                    
                     if (context.Theaters.Any())
                     {
                         try
                         {
-                            // First remove all seats
+                            
                             var seats = context.Seats.ToList();
                             context.Seats.RemoveRange(seats);
                             
-                            // Then remove all screens
+                            
                             var screens = context.Screens.ToList();
                             context.Screens.RemoveRange(screens);
                             
-                            // Finally remove all theaters
+                            
                             var theaters = context.Theaters.ToList();
                             context.Theaters.RemoveRange(theaters);
                             
@@ -40,7 +40,7 @@ namespace Selu383.SP25.P03.Api.Data
                     }
                 }
                 
-                // Create theaters
+                
                 var LionDen1 = new Theater
                 {
                     Name = "Lion's Den Cinema 1",
@@ -67,7 +67,7 @@ namespace Selu383.SP25.P03.Api.Data
                 context.Theaters.Add(LionDen3);
                 context.SaveChanges();
                 
-                // Create screens for each theater
+                
                 var screen1 = new Screen
                 {
                     Name = "Screen 1",
@@ -118,13 +118,13 @@ namespace Selu383.SP25.P03.Api.Data
                 context.Screens.Add(screen6);
                 context.SaveChanges();
                 
-                // Create seats for each screen
-                CreateSeats(context, screen1.Id, 10, 10); // 10 rows, 10 seats per row
-                CreateSeats(context, screen2.Id, 8, 10);  // 8 rows, 10 seats per row
-                CreateSeats(context, screen3.Id, 10, 12); // 10 rows, 12 seats per row
-                CreateSeats(context, screen4.Id, 8, 10);  // 8 rows, 10 seats per row
-                CreateSeats(context, screen5.Id, 10, 10); // 10 rows, 10 seats per row
-                CreateSeats(context, screen6.Id, 10, 12); // 10 rows, 12 seats per row
+                
+                CreateSeats(context, screen1.Id, 10, 10); 
+                CreateSeats(context, screen2.Id, 8, 10);  
+                CreateSeats(context, screen3.Id, 10, 12); 
+                CreateSeats(context, screen4.Id, 8, 10);  
+                CreateSeats(context, screen5.Id, 10, 10); 
+                CreateSeats(context, screen6.Id, 10, 12); 
                 
                 context.SaveChanges();
             }

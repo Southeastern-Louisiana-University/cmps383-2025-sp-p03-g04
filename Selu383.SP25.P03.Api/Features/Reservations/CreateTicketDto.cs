@@ -8,8 +8,8 @@ namespace Selu383.SP25.P03.Api.Features.Reservations
         public int SeatId { get; set; }
         
         [Required]
-        public string TicketType { get; set; } = "Adult"; // Default to adult ticket
+        public string TicketType { get; set; } = "Adult"; 
         
-        public decimal Price { get; set; } // Will be filled in by the controller
+        public decimal Price { get; set; } 
     }
 }

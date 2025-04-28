@@ -10,19 +10,19 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // Look for any users.
+                
                 if (context.Users.Any())
                 {
-                    return;   // DB has been seeded
+                    return;   
                 }
                 var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
-                // Admin/Manager users
+                
                 var manager = new User { UserName = "manager", Email = "manager@lionsden.com" };
                 await userManager.CreateAsync(manager, "Password123!");
                 await userManager.AddToRoleAsync(manager, UserRoleNames.Admin);
 
-                // Staff users
+                
                 var staff1 = new User { UserName = "staff1", Email = "staff1@lionsden.com" };
                 await userManager.CreateAsync(staff1, "Password123!");
                 await userManager.AddToRoleAsync(staff1, UserRoleNames.User);
@@ -31,7 +31,7 @@ namespace Selu383.SP25.P03.Api.Data
                 await userManager.CreateAsync(staff2, "Password123!");
                 await userManager.AddToRoleAsync(staff2, UserRoleNames.User);
 
-                // Customer users
+                
                 var customer1 = new User { UserName = "customer1", Email = "customer1@example.com" };
                 await userManager.CreateAsync(customer1, "Password123!");
                 await userManager.AddToRoleAsync(customer1, UserRoleNames.User);
@@ -40,7 +40,7 @@ namespace Selu383.SP25.P03.Api.Data
                 await userManager.CreateAsync(customer2, "Password123!");
                 await userManager.AddToRoleAsync(customer2, UserRoleNames.User);
 
-                // Keep existing users with updated roles
+                
                 var galkadi = new User { UserName = "galkadi", Email = "galkadi@example.com" };
                 await userManager.CreateAsync(galkadi, "Password123!");
                 await userManager.AddToRoleAsync(galkadi, UserRoleNames.Admin);

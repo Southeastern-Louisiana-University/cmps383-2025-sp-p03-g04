@@ -22,12 +22,12 @@ namespace Selu383.SP25.P03.Api.Features.Concessions
         
         public decimal TotalAmount { get; set; }
         
-        // Foreign keys
+        
         public int? UserId { get; set; }
         
         public int? ReservationId { get; set; }
         
-        // Navigation properties
+        
         public virtual User? User { get; set; }
         
         public virtual Reservation? Reservation { get; set; }

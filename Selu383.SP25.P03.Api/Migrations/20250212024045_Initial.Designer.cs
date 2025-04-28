@@ -14,7 +14,7 @@ namespace Selu383.SP25.P03.Api.Migrations
     [Migration("20250212024045_Initial")]
     partial class Initial
     {
-        /// <inheritdoc />
+        
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

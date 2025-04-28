@@ -11,17 +11,17 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // Always reseed to ensure latest data
+                
                 if (context.FoodCategories.Any())
                 {
-                    // Remove existing categories and items
+                    
                     context.FoodOrderItems.RemoveRange(context.FoodOrderItems);
                     context.FoodItems.RemoveRange(context.FoodItems);
                     context.FoodCategories.RemoveRange(context.FoodCategories);
                     context.SaveChanges();
                 }
 
-                // Create categories
+                
                 var startersCategory = new FoodCategory { Name = "Chef's Starters" };
                 var saladsCategory = new FoodCategory { Name = "Salads" };
                 var sandwichesCategory = new FoodCategory { Name = "Sandwiches" };
@@ -44,7 +44,7 @@ namespace Selu383.SP25.P03.Api.Data
 
                 context.SaveChanges();
 
-                // Seed food items with verified image URLs
+                
                 context.FoodItems.AddRange(
                     new FoodItem { 
                         Name = "Chicken Tenders", 

@@ -14,12 +14,12 @@ namespace Selu383.SP25.P03.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            
             builder.Services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DataContext") ?? throw new InvalidOperationException("Connection string 'DataContext' not found.")));
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            
             builder.Services.AddOpenApi();
             builder.Services.AddRazorPages();
 
@@ -29,7 +29,7 @@ namespace Selu383.SP25.P03.Api
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
-                // Password settings.
+                
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireNonAlphanumeric = true;
@@ -37,12 +37,12 @@ namespace Selu383.SP25.P03.Api
                 options.Password.RequiredLength = 6;
                 options.Password.RequiredUniqueChars = 1;
 
-                // Lockout settings.
+                
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
 
-                // User settings.
+                
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = false;
@@ -50,7 +50,7 @@ namespace Selu383.SP25.P03.Api
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                // Cookie settings
+                
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
                 options.Events.OnRedirectToLogin = context =>
@@ -85,18 +85,18 @@ namespace Selu383.SP25.P03.Api
             
             builder.Services.AddScoped<ShowtimeManagementService>();
             
-            // Add new services
-            // Add QR Code ticket generation
+            
+            
             builder.Services.AddScoped<TicketService>();
 
-            // payment processing
+            
             builder.Services.AddSingleton<IPaymentService, MockPaymentService>();
 
-            // reservation timeout service
+            
             builder.Services.AddHostedService<ReservationTimeoutService>();
 
-            // guest session management
-            builder.Services.AddDistributedMemoryCache(); // Use in-memory cache for development
+            
+            builder.Services.AddDistributedMemoryCache(); 
             builder.Services.AddScoped<GuestSessionService>();
 
             var app = builder.Build();
@@ -112,12 +112,12 @@ namespace Selu383.SP25.P03.Api
                 SeedMovies.Initialize(scope.ServiceProvider);
                 SeedConcessions.Initialize(scope.ServiceProvider);
                 
-                // Generate showtimes on startup if none exist
+                
                 var showtimeService = scope.ServiceProvider.GetRequiredService<ShowtimeManagementService>();
                 await showtimeService.GenerateShowtimesIfNoneExist();
             }
 
-            // Configure the HTTP request pipeline.
+            
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();

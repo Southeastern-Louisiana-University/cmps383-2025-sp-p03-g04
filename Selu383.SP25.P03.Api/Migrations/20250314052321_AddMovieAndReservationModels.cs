@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Selu383.SP25.P03.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AddMovieAndReservationModels : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
