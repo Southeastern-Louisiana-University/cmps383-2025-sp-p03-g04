@@ -26,7 +26,6 @@ body {
   flex-direction: column;
 }
 
-/* Navbar styles */
 .navbar {
   position: fixed;
   top: 0;
@@ -139,7 +138,6 @@ main {
   flex: 1;
 }
 
-/* Not found page */
 .not-found {
   display: flex;
   justify-content: center;
@@ -151,7 +149,6 @@ main {
   margin-top: 60px;
 }
 
-/* Dark mode */
 body.dark-mode {
   --bg-color: #000;
   --text-color: #fff;
@@ -159,7 +156,6 @@ body.dark-mode {
   --nav-bg: rgba(0, 0, 0, 0.85);
 }
 
-/* Media queries */
 @media (max-width: 992px) {
   .navbar-container {
     padding: 0.8rem 3%;

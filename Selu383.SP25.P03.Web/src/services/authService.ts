@@ -1,4 +1,3 @@
-// src/services/authService.ts
 const BASE_URL = "/api/authentication";
 
 export interface LoginData {
@@ -31,7 +30,7 @@ export const login = async (
       },
       credentials: "include",
       body: JSON.stringify({
-        userName: username, // Make sure the casing matches your backend
+        userName: username, // Make sure the casing matches the backend
         password: password,
       }),
     });

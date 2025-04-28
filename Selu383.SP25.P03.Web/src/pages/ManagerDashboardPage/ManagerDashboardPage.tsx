@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import './ManagerDashboardPage.css';
+import React, { useState, useEffect } from "react";
+import "./ManagerDashboardPage.css";
 
 interface Movie {
   id: number;
@@ -29,46 +29,47 @@ const MovieManager: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([
     {
       id: 1,
-      title: 'Dune: Part Two',
-      description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',
+      title: "Dune: Part Two",
+      description:
+        "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
       duration: 166,
-      genre: 'Action',
-      rating: 'PG-13',
-      posterPath: '/images/dune-part-two.jpg',
-      status: 'Active'
-    }
+      genre: "Action",
+      rating: "PG-13",
+      posterPath: "/images/dune-part-two.jpg",
+      status: "Active",
+    },
   ]);
 
   const [showtimes, setShowtimes] = useState<Showtime[]>([
     {
       id: 1,
       movieId: 1,
-      date: 'Mar 15, 2025',
-      time: '14:30',
-      theater: 'Theater 1',
+      date: "Mar 15, 2025",
+      time: "14:30",
+      theater: "Theater 1",
       capacity: {
         booked: 120,
-        total: 150
+        total: 150,
       },
-      status: 'Active'
-    }
+      status: "Active",
+    },
   ]);
 
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(movies[0]);
 
-  const [movieTitle, setMovieTitle] = useState('');
+  const [movieTitle, setMovieTitle] = useState("");
   const [movieDuration, setMovieDuration] = useState(0);
-  const [movieDescription, setMovieDescription] = useState('');
-  const [movieGenre, setMovieGenre] = useState('Action');
-  const [movieRating, setMovieRating] = useState('G');
+  const [movieDescription, setMovieDescription] = useState("");
+  const [movieGenre, setMovieGenre] = useState("Action");
+  const [movieRating, setMovieRating] = useState("G");
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Showtime modal state
   const [isShowtimeModalOpen, setIsShowtimeModalOpen] = useState(false);
-  const [newShowtimeDate, setNewShowtimeDate] = useState('');
-  const [newShowtimeTime, setNewShowtimeTime] = useState('');
-  const [newShowtimeTheater, setNewShowtimeTheater] = useState('');
+  const [newShowtimeDate, setNewShowtimeDate] = useState("");
+  const [newShowtimeTime, setNewShowtimeTime] = useState("");
+  const [newShowtimeTheater, setNewShowtimeTheater] = useState("");
   const [newShowtimeCapacity, setNewShowtimeCapacity] = useState(150);
 
   useEffect(() => {
@@ -101,13 +102,13 @@ const MovieManager: React.FC = () => {
   const handleAddMovie = () => {
     const newMovie: Movie = {
       id: movies.length + 1,
-      title: 'New Movie',
-      description: '',
+      title: "New Movie",
+      description: "",
       duration: 120,
-      genre: 'Action',
-      rating: 'PG-13',
-      posterPath: '',
-      status: 'Active'
+      genre: "Action",
+      rating: "PG-13",
+      posterPath: "",
+      status: "Active",
     };
 
     setMovies([...movies, newMovie]);
@@ -115,7 +116,7 @@ const MovieManager: React.FC = () => {
   };
 
   const handleDeleteShowtime = (id: number) => {
-    setShowtimes(showtimes.filter(showtime => showtime.id !== id));
+    setShowtimes(showtimes.filter((showtime) => showtime.id !== id));
   };
 
   const handleSaveMovie = () => {
@@ -128,30 +129,29 @@ const MovieManager: React.FC = () => {
       description: movieDescription,
       genre: movieGenre,
       rating: movieRating,
-      posterPath: posterPreview || selectedMovie.posterPath
+      posterPath: posterPreview || selectedMovie.posterPath,
     };
 
     setMovies(
-      movies.map(movie =>
+      movies.map((movie) =>
         movie.id === selectedMovie.id ? updatedMovie : movie
       )
     );
 
     setSelectedMovie(updatedMovie);
-    alert('Movie details saved successfully!');
+    alert("Movie details saved successfully!");
   };
 
-  const filteredMovies = movies.filter(movie =>
+  const filteredMovies = movies.filter((movie) =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredShowtimes = selectedMovie
-    ? showtimes.filter(showtime => showtime.movieId === selectedMovie.id)
+    ? showtimes.filter((showtime) => showtime.movieId === selectedMovie.id)
     : [];
 
   return (
     <div className="container">
-      {/* Header */}
       <div className="header">
         <div className="logo">
           <i className="fas fa-film"></i>
@@ -163,7 +163,6 @@ const MovieManager: React.FC = () => {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="main-content">
         <div className="sidebar">
           <div className="search-bar">
@@ -177,17 +176,23 @@ const MovieManager: React.FC = () => {
           </div>
 
           <ul className="movie-list">
-            {filteredMovies.map(movie => (
+            {filteredMovies.map((movie) => (
               <li
                 key={movie.id}
-                className={`movie-item ${selectedMovie && movie.id === selectedMovie.id ? 'active' : ''}`}
-                onClick={() => handleSelectMovie(movie)}
-              >
+                className={`movie-item ${
+                  selectedMovie && movie.id === selectedMovie.id ? "active" : ""
+                }`}
+                onClick={() => handleSelectMovie(movie)}>
                 <div className="movie-thumbnail">
                   {movie.posterPath ? (
                     <img src={movie.posterPath} alt={movie.title} />
                   ) : (
-                    <div style={{ background: '#3d3f4a', width: '100%', height: '100%' }}></div>
+                    <div
+                      style={{
+                        background: "#3d3f4a",
+                        width: "100%",
+                        height: "100%",
+                      }}></div>
                   )}
                 </div>
                 <div className="movie-info">
@@ -202,23 +207,36 @@ const MovieManager: React.FC = () => {
         <div className="content-area">
           {selectedMovie ? (
             <>
-              {/* Movie Editor */}
               <div className="movie-editor">
                 <div className="editor-grid">
                   <div className="poster-upload">
                     <input
                       type="file"
                       id="poster-upload"
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       onChange={handlePosterUpload}
                       accept="image/*"
                     />
-                    <label htmlFor="poster-upload" style={{ width: '100%', height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <label
+                      htmlFor="poster-upload"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}>
                       {posterPreview || selectedMovie.posterPath ? (
                         <img
                           src={posterPreview || selectedMovie.posterPath}
                           alt={selectedMovie.title}
-                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
                         />
                       ) : (
                         <>
@@ -244,7 +262,9 @@ const MovieManager: React.FC = () => {
                       <input
                         type="number"
                         value={movieDuration}
-                        onChange={(e) => setMovieDuration(parseInt(e.target.value))}
+                        onChange={(e) =>
+                          setMovieDuration(parseInt(e.target.value))
+                        }
                       />
                     </div>
 
@@ -252,16 +272,16 @@ const MovieManager: React.FC = () => {
                       <label>Description</label>
                       <textarea
                         value={movieDescription}
-                        onChange={(e) => setMovieDescription(e.target.value)}
-                      ></textarea>
+                        onChange={(e) =>
+                          setMovieDescription(e.target.value)
+                        }></textarea>
                     </div>
 
                     <div className="form-group">
                       <label>Genre</label>
                       <select
                         value={movieGenre}
-                        onChange={(e) => setMovieGenre(e.target.value)}
-                      >
+                        onChange={(e) => setMovieGenre(e.target.value)}>
                         <option value="Action">Action</option>
                         <option value="Comedy">Comedy</option>
                         <option value="Drama">Drama</option>
@@ -274,8 +294,7 @@ const MovieManager: React.FC = () => {
                       <label>Rating</label>
                       <select
                         value={movieRating}
-                        onChange={(e) => setMovieRating(e.target.value)}
-                      >
+                        onChange={(e) => setMovieRating(e.target.value)}>
                         <option value="G">G</option>
                         <option value="PG">PG</option>
                         <option value="PG-13">PG-13</option>
@@ -283,8 +302,12 @@ const MovieManager: React.FC = () => {
                       </select>
                     </div>
 
-                    <div className="form-group full-width" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <button className="btn btn-primary" onClick={handleSaveMovie}>
+                    <div
+                      className="form-group full-width"
+                      style={{ display: "flex", justifyContent: "flex-end" }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSaveMovie}>
                         <i className="fas fa-save"></i> Save Changes
                       </button>
                     </div>
@@ -292,7 +315,6 @@ const MovieManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* Showtime Section */}
               <div className="showtime-section">
                 <div className="section-header">
                   <h2 className="section-title">Showtime Management</h2>
@@ -301,7 +323,9 @@ const MovieManager: React.FC = () => {
                       <i className="fas fa-copy"></i>
                       Bulk Copy
                     </button>
-                    <button className="btn btn-primary" onClick={() => setIsShowtimeModalOpen(true)}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setIsShowtimeModalOpen(true)}>
                       <i className="fas fa-plus"></i>
                       Add Showtime
                     </button>
@@ -321,20 +345,27 @@ const MovieManager: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredShowtimes.map(showtime => (
+                      {filteredShowtimes.map((showtime) => (
                         <tr key={showtime.id}>
                           <td>{showtime.date}</td>
                           <td>{showtime.time}</td>
                           <td>{showtime.theater}</td>
-                          <td>{showtime.capacity.booked}/{showtime.capacity.total}</td>
-                          <td><span className="status-badge status-active">{showtime.status}</span></td>
+                          <td>
+                            {showtime.capacity.booked}/{showtime.capacity.total}
+                          </td>
+                          <td>
+                            <span className="status-badge status-active">
+                              {showtime.status}
+                            </span>
+                          </td>
                           <td>
                             <div className="action-icons">
                               <i className="fas fa-edit action-icon"></i>
                               <i
                                 className="fas fa-trash-alt action-icon"
-                                onClick={() => handleDeleteShowtime(showtime.id)}
-                              ></i>
+                                onClick={() =>
+                                  handleDeleteShowtime(showtime.id)
+                                }></i>
                             </div>
                           </td>
                         </tr>
@@ -344,54 +375,85 @@ const MovieManager: React.FC = () => {
                 </div>
               </div>
 
-              {/* Modal for Showtime Addition */}
               {isShowtimeModalOpen && (
                 <div className="modal-backdrop">
                   <div className="modal">
                     <h3>Add New Showtime</h3>
                     <div className="form-group">
                       <label>Date</label>
-                      <input type="date" value={newShowtimeDate} onChange={(e) => setNewShowtimeDate(e.target.value)} />
+                      <input
+                        type="date"
+                        value={newShowtimeDate}
+                        onChange={(e) => setNewShowtimeDate(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
                       <label>Time</label>
-                      <input type="time" value={newShowtimeTime} onChange={(e) => setNewShowtimeTime(e.target.value)} />
+                      <input
+                        type="time"
+                        value={newShowtimeTime}
+                        onChange={(e) => setNewShowtimeTime(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
                       <label>Theater</label>
-                      <input type="text" value={newShowtimeTheater} onChange={(e) => setNewShowtimeTheater(e.target.value)} />
+                      <input
+                        type="text"
+                        value={newShowtimeTheater}
+                        onChange={(e) => setNewShowtimeTheater(e.target.value)}
+                      />
                     </div>
                     <div className="form-group">
                       <label>Capacity</label>
-                      <input type="number" value={newShowtimeCapacity} onChange={(e) => setNewShowtimeCapacity(parseInt(e.target.value))} />
+                      <input
+                        type="number"
+                        value={newShowtimeCapacity}
+                        onChange={(e) =>
+                          setNewShowtimeCapacity(parseInt(e.target.value))
+                        }
+                      />
                     </div>
                     <div className="modal-actions">
-                      <button className="btn btn-outline" onClick={() => setIsShowtimeModalOpen(false)}>Cancel</button>
-                      <button className="btn btn-primary" onClick={() => {
-                        if (!selectedMovie) return;
+                      <button
+                        className="btn btn-outline"
+                        onClick={() => setIsShowtimeModalOpen(false)}>
+                        Cancel
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                          if (!selectedMovie) return;
 
-                        const newShowtime: Showtime = {
-                          id: showtimes.length + 1,
-                          movieId: selectedMovie.id,
-                          date: new Date(newShowtimeDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-                          time: newShowtimeTime,
-                          theater: newShowtimeTheater,
-                          capacity: {
-                            booked: 0,
-                            total: newShowtimeCapacity
-                          },
-                          status: 'Active'
-                        };
+                          const newShowtime: Showtime = {
+                            id: showtimes.length + 1,
+                            movieId: selectedMovie.id,
+                            date: new Date(newShowtimeDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            ),
+                            time: newShowtimeTime,
+                            theater: newShowtimeTheater,
+                            capacity: {
+                              booked: 0,
+                              total: newShowtimeCapacity,
+                            },
+                            status: "Active",
+                          };
 
-                        setShowtimes([...showtimes, newShowtime]);
-                        setIsShowtimeModalOpen(false);
+                          setShowtimes([...showtimes, newShowtime]);
+                          setIsShowtimeModalOpen(false);
 
-                        // Reset modal form
-                        setNewShowtimeDate('');
-                        setNewShowtimeTime('');
-                        setNewShowtimeTheater('');
-                        setNewShowtimeCapacity(150);
-                      }}>Add Showtime</button>
+                          setNewShowtimeDate("");
+                          setNewShowtimeTime("");
+                          setNewShowtimeTheater("");
+                          setNewShowtimeCapacity(150);
+                        }}>
+                        Add Showtime
+                      </button>
                     </div>
                   </div>
                 </div>

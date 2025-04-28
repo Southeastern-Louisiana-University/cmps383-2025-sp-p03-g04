@@ -1,40 +1,43 @@
-// src/contexts/ThemeContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
-// Define the context type
 interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
 }
-
-// Create context with default values
 const ThemeContext = createContext<ThemeContextType>({
   isDark: false,
   toggleTheme: () => {},
 });
 
-// Provider component
-export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isDark, setIsDark] = useState<boolean>(false);
-  
-  // Initialize theme from localStorage on component mount
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark') {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    if (savedTheme === "dark") {
       setIsDark(true);
-    } else if (savedTheme === 'light') {
+    } else if (savedTheme === "light") {
       setIsDark(false);
     } else {
       setIsDark(prefersDark);
     }
   }, []);
-  
-  // Update document classes and localStorage whenever isDark changes
+
   useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.id = 'theme-styles';
+    const styleElement = document.createElement("style");
+    styleElement.id = "theme-styles";
 
     styleElement.textContent = `
       :root {
@@ -206,21 +209,20 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     document.head.appendChild(styleElement);
 
-    document.documentElement.classList.toggle('dark-theme', isDark);
-    document.documentElement.classList.toggle('light-theme', !isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark-theme", isDark);
+    document.documentElement.classList.toggle("light-theme", !isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
 
     return () => {
-      const existingStyle = document.getElementById('theme-styles');
+      const existingStyle = document.getElementById("theme-styles");
       if (existingStyle) {
         document.head.removeChild(existingStyle);
       }
     };
   }, [isDark]);
 
-  // Toggle theme function
   const toggleTheme = () => {
-    setIsDark(prevState => !prevState);
+    setIsDark((prevState) => !prevState);
   };
 
   return (
@@ -230,11 +232,10 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
-// Custom hook to use the theme context
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 };

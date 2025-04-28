@@ -25,7 +25,6 @@ const PaymentPage: React.FC = () => {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
 
-  // Demo card data
   const demoCards = [
     { type: "Visa", last4: "4242", brand: "visa" },
     { type: "Mastercard", last4: "5555", brand: "mastercard" },
@@ -33,7 +32,6 @@ const PaymentPage: React.FC = () => {
   ];
   const [selectedCard, setSelectedCard] = useState(demoCards[0]);
 
-  // Initialize guest session if needed
   useEffect(() => {
     const initializeGuestSession = async () => {
       if (!isAuthenticated) {
@@ -52,7 +50,6 @@ const PaymentPage: React.FC = () => {
     initializeGuestSession();
   }, [isAuthenticated]);
 
-  // Fetch showtime and movie data
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
@@ -74,7 +71,6 @@ const PaymentPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  // Check if cart is empty and redirect if necessary
   useEffect(() => {
     if (
       !loading &&
@@ -86,7 +82,6 @@ const PaymentPage: React.FC = () => {
     }
   }, [loading, cartItems, id, navigate, processingPayment, paymentSuccess]);
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Starting payment submission...");
@@ -100,11 +95,9 @@ const PaymentPage: React.FC = () => {
       console.log("Guest session ID:", guestSessionId);
 
       try {
-        // Separate food items and seat items
         const seatItems = cartItems.filter((item) => item.type !== "food");
         const foodItems = cartItems.filter((item) => item.type === "food");
 
-        // Group food items by ID
         const foodItemGroups: {
           [key: number]: { quantity: number; name: string };
         } = {};
@@ -118,10 +111,9 @@ const PaymentPage: React.FC = () => {
           foodItemGroups[item.id].quantity++;
         });
 
-        // Create food order request if there are food items
         let foodOrders: {
           deliveryType: string;
-          status: string; // Add this line to the type definition
+          status: string;
           orderItems: {
             foodItemId: number;
             foodItemName: string;
@@ -134,12 +126,12 @@ const PaymentPage: React.FC = () => {
           foodOrders = [
             {
               deliveryType: "Pickup",
-              status: "Pending", // Now TypeScript will recognize this field
+              status: "Pending",
               orderItems: Object.entries(foodItemGroups).map(
                 ([id, details]) => {
                   return {
                     foodItemId: parseInt(id),
-                    foodItemName: details.name, // Include the foodItemName
+                    foodItemName: details.name,
                     quantity: details.quantity,
                     specialInstructions: "",
                   };
@@ -149,8 +141,6 @@ const PaymentPage: React.FC = () => {
           ];
         }
 
-        // Create the full request object that matches the API expectation
-        // FIXED: Removed the 'request' wrapper to match API expectations
         const paymentRequest = {
           reservationRequest:
             seatItems.length > 0
@@ -167,7 +157,7 @@ const PaymentPage: React.FC = () => {
           foodOrders: foodOrders,
           paymentInfo: {
             amount: total,
-            cardNumber: "4242424242424242", // Demo card number
+            cardNumber: "4242424242424242",
             expiryDate: "12/25",
             cvv: "123",
             cardholderName: selectedCard.type + " User",
@@ -177,7 +167,6 @@ const PaymentPage: React.FC = () => {
 
         console.log("Payment request:", paymentRequest);
 
-        // Send the payment request to the API
         const response = await fetch("/api/checkout", {
           method: "POST",
           headers: {
@@ -197,7 +186,6 @@ const PaymentPage: React.FC = () => {
         const result = await response.json();
         console.log("Payment result:", result);
 
-        // If guest, add the reservation to the guest session
         if (!isAuthenticated && guestSessionId && result.reservation?.id) {
           try {
             await guestSessionService.addReservationToGuestSession(
@@ -207,19 +195,16 @@ const PaymentPage: React.FC = () => {
             console.log("Added reservation to guest session successfully");
           } catch (error) {
             console.error("Failed to add reservation to guest session:", error);
-            // Continue anyway as the reservation was created successfully
           }
         }
 
-        // Navigate to confirmation page with all necessary data
         navigate("/confirmation", {
           state: {
             reservationId: result.reservation?.id,
             isGuest: !isAuthenticated,
             guestSessionId: guestSessionId,
             totalAmount: result.totalAmount || total,
-            paymentResult: result, // Pass the entire result for fallback
-            // Also pass individual fields in case needed
+            paymentResult: result,
             movieTitle: movie?.title,
             theaterName: showtime?.theaterName,
             showtimeStartTime: showtime?.startTime,
@@ -248,7 +233,6 @@ const PaymentPage: React.FC = () => {
     }
   };
 
-  // Format date and time
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
       weekday: "long",
@@ -265,7 +249,6 @@ const PaymentPage: React.FC = () => {
     });
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="booking-page">
@@ -277,7 +260,6 @@ const PaymentPage: React.FC = () => {
     );
   }
 
-  // Error state
   if (
     error ||
     !showtime ||
@@ -300,15 +282,17 @@ const PaymentPage: React.FC = () => {
     );
   }
 
-  // Success state
   if (paymentSuccess) {
     return (
       <div className="booking-page">
         <div className="loading-container">
           <div
             className="success-icon"
-            style={{ color: "#65a30d", fontSize: "3rem", marginBottom: "1rem" }}
-          >
+            style={{
+              color: "#65a30d",
+              fontSize: "3rem",
+              marginBottom: "1rem",
+            }}>
             ✓
           </div>
           <h2 style={{ color: "#ffffff", marginBottom: "1rem" }}>
@@ -327,7 +311,6 @@ const PaymentPage: React.FC = () => {
 
   return (
     <div className="booking-page">
-      {/* Header */}
       <div className="booking-header">
         <h1>Complete Your Payment</h1>
         <div className="booking-details">
@@ -359,17 +342,14 @@ const PaymentPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="booking-content">
-        {/* Left column - Order Summary */}
         <div className="seating-container">
           <h3
             style={{
               fontSize: "1.25rem",
               marginBottom: "1.5rem",
               color: "#ffffff",
-            }}
-          >
+            }}>
             Order Summary
           </h3>
 
@@ -405,7 +385,6 @@ const PaymentPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right column - Payment Form */}
         <div className="booking-sidebar">
           <div className="selected-seats">
             <h3>Payment Details</h3>
@@ -417,8 +396,7 @@ const PaymentPage: React.FC = () => {
                 background: "rgba(101, 163, 13, 0.1)",
                 borderRadius: "8px",
                 textAlign: "center",
-              }}
-            >
+              }}>
               <span
                 style={{
                   display: "inline-block",
@@ -429,8 +407,7 @@ const PaymentPage: React.FC = () => {
                   fontSize: "0.875rem",
                   fontWeight: "600",
                   marginBottom: "0.5rem",
-                }}
-              >
+                }}>
                 DEMO MODE
               </span>
               <p style={{ color: "#65a30d", fontSize: "0.875rem", margin: 0 }}>
@@ -439,8 +416,7 @@ const PaymentPage: React.FC = () => {
             </div>
 
             <div
-              style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}
-            >
+              style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
               {demoCards.map((card, index) => (
                 <div
                   key={index}
@@ -459,15 +435,13 @@ const PaymentPage: React.FC = () => {
                     borderRadius: "8px",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                  }}
-                >
+                  }}>
                   <div
                     style={{
                       fontWeight: "600",
                       marginBottom: "0.5rem",
                       color: "#ffffff",
-                    }}
-                  >
+                    }}>
                     {card.type}
                   </div>
                   <div
@@ -475,8 +449,7 @@ const PaymentPage: React.FC = () => {
                       fontFamily: "monospace",
                       color: "#cbd5e1",
                       fontSize: "0.875rem",
-                    }}
-                  >
+                    }}>
                     •••• {card.last4}
                   </div>
                 </div>
@@ -492,8 +465,7 @@ const PaymentPage: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "0.5rem",
-              }}
-            >
+              }}>
               {processingPayment ? (
                 <>
                   <div
@@ -502,8 +474,7 @@ const PaymentPage: React.FC = () => {
                       width: "20px",
                       height: "20px",
                       borderWidth: "2px",
-                    }}
-                  ></div>
+                    }}></div>
                   Processing...
                 </>
               ) : (
@@ -517,8 +488,7 @@ const PaymentPage: React.FC = () => {
                 fontSize: "0.875rem",
                 color: "#cbd5e1",
                 marginTop: "1rem",
-              }}
-            >
+              }}>
               This is a demo. No actual payment will be processed.
             </p>
           </div>

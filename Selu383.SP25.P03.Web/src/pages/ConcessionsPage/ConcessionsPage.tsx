@@ -20,14 +20,11 @@ const ConcessionsPage: React.FC = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [addedToCart, setAddedToCart] = useState<{ [key: number]: number }>({});
 
-  // Fetch food items and categories
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch categories
         const categoriesResponse = await fetch("/api/food-items/categories");
         if (!categoriesResponse.ok) {
           throw new Error(
@@ -41,7 +38,6 @@ const ConcessionsPage: React.FC = () => {
           setSelectedCategory(categoriesData[0].id);
         }
 
-        // Fetch all food items
         const itemsResponse = await fetch("/api/food-items");
         if (!itemsResponse.ok) {
           throw new Error(
@@ -54,7 +50,6 @@ const ConcessionsPage: React.FC = () => {
         console.error("Error fetching data:", err);
         setError("Failed to load concessions data. Please try again later.");
 
-        // Retry logic if server error (500)
         if (
           retryCount < 3 &&
           err instanceof Error &&
@@ -72,14 +67,12 @@ const ConcessionsPage: React.FC = () => {
     fetchData();
   }, [retryCount]);
 
-  // Filter items by selected category
   const filteredItems = selectedCategory
     ? foodItems.filter(
         (item) => item.categoryId === selectedCategory && item.isAvailable
       )
     : foodItems.filter((item) => item.isAvailable);
 
-  // Get food items in cart with count
   const getFoodItemsInCart = () => {
     const foodItemCounts: { [key: number]: number } = {};
 
@@ -97,13 +90,11 @@ const ConcessionsPage: React.FC = () => {
 
   const foodItemsInCart = getFoodItemsInCart();
 
-  // Count total food items in cart
   const foodItemsCount = Object.values(foodItemsInCart).reduce(
     (sum, count) => sum + count,
     0
   );
 
-  // Add item to cart
   const handleAddToCart = (item: FoodItem) => {
     const cartItem = {
       id: item.id,
@@ -112,14 +103,13 @@ const ConcessionsPage: React.FC = () => {
       quantity: 1,
       type: "food",
       showtimeId: showtimeId ? parseInt(showtimeId) : 0,
-      seatId: item.id, // Using food ID as the seat ID for uniqueness
-      seatLabel: item.name, // Using item name as the seat label
-      ticketType: "food", // Marking as food item
+      seatId: item.id,
+      seatLabel: item.name,
+      ticketType: "food",
     };
 
     addToCart(cartItem);
 
-    // Visual feedback for adding to cart
     setAddedToCart((prev) => ({
       ...prev,
       [item.id]: (prev[item.id] || 0) + 1,
@@ -134,9 +124,7 @@ const ConcessionsPage: React.FC = () => {
     }, 2000);
   };
 
-  // Remove food item from cart
   const handleRemoveFromCart = (foodId: number) => {
-    // Find index of a food item with this ID
     const index = cartItems.findIndex(
       (item) => item.type === "food" && item.id === foodId
     );
@@ -146,7 +134,6 @@ const ConcessionsPage: React.FC = () => {
     }
   };
 
-  // Navigate to payment
   const handleCheckout = () => {
     if (showtimeId) {
       navigate(`/payment/${showtimeId}`);
@@ -207,8 +194,7 @@ const ConcessionsPage: React.FC = () => {
                 className={`category-tab ${
                   selectedCategory === category.id ? "active" : ""
                 }`}
-                onClick={() => setSelectedCategory(category.id)}
-              >
+                onClick={() => setSelectedCategory(category.id)}>
                 {category.name}
               </button>
             ))}
@@ -230,7 +216,6 @@ const ConcessionsPage: React.FC = () => {
                       target.src = "/images/placeholder-food.jpg";
                     }}
                   />
-                  {/* Show quantity badge if this item is in cart */}
                   {foodItemsInCart[item.id] > 0 && (
                     <div className="quantity-badge">
                       {foodItemsInCart[item.id]}
@@ -248,8 +233,7 @@ const ConcessionsPage: React.FC = () => {
                       {foodItemsInCart[item.id] > 0 && (
                         <button
                           className="remove-btn"
-                          onClick={() => handleRemoveFromCart(item.id)}
-                        >
+                          onClick={() => handleRemoveFromCart(item.id)}>
                           -
                         </button>
                       )}
@@ -257,8 +241,7 @@ const ConcessionsPage: React.FC = () => {
                         className={`add-to-cart ${
                           addedToCart[item.id] ? "added" : ""
                         }`}
-                        onClick={() => handleAddToCart(item)}
-                      >
+                        onClick={() => handleAddToCart(item)}>
                         {foodItemsInCart[item.id] > 0 ? "+" : "Add"}
                       </button>
                     </div>
@@ -269,7 +252,6 @@ const ConcessionsPage: React.FC = () => {
           )}
         </div>
 
-        {/* Sticky checkout button */}
         {foodItemsCount > 0 && (
           <div className="checkout-bar">
             <div className="checkout-summary">
