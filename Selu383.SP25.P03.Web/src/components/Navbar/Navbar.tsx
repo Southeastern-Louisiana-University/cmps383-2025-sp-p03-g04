@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
-  
+
   // Use theme context
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -97,9 +97,8 @@ const Navbar: React.FC = () => {
     // Check if it's a different theater to avoid unnecessary re-renders
     if (!selectedTheater || selectedTheater.id !== theater.id) {
       setSelectedTheater(theater);
-      localStorage.setItem('selectedTheaterId', theater.id.toString());
-    setSelectedTheater(theater);
-    localStorage.setItem("selectedTheaterId", theater.id.toString());
+      localStorage.setItem("selectedTheaterId", theater.id.toString());
+    }
   };
 
   const handleSignOut = async () => {
@@ -126,11 +125,11 @@ const Navbar: React.FC = () => {
         <NavLink to="/movies">Movies</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
       </div>
-      
+
       <div className="navbar-right">
         {/* Theme toggle button */}
-        <button 
-          className="theme-toggle-btn" 
+        <button
+          className="theme-toggle-btn"
           onClick={toggleTheme}
           aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
@@ -182,7 +181,7 @@ const Navbar: React.FC = () => {
           {menuOpen ? "✕" : "☰"}
         </button>
       </div>
-      
+
       {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? "active" : ""}`}>
         <NavLink to="/" end>

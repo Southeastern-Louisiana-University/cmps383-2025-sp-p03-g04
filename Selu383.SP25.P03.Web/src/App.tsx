@@ -21,27 +21,32 @@ function App() {
     <AuthProvider>
       <TheaterProvider>
         <CartProvider>
-          <Router>
-            <div className="app">
-              <Navbar />
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/movies" element={<MoviesPage />} />
-                <Route path="/movies/:id" element={<MovieDetailsPage />} />
-                <Route path="/booking/:id" element={<BookingPage />} />
-                <Route path="/payment/:id" element={<PaymentPage />} />
-                <Route path="/confirmation" element={<ConfirmationPage />} />
-                <Route path="/concessions" element={<ConcessionsPage />} />
-                <Route path="/concessions/:id" element={<ConcessionsPage />} />
-                <Route path="/signin" element={<SignInPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route
-                  path="*"
-                  element={<div className="not-found">Page not found</div>}
-                />
-              </Routes>
-            </div>
-          </Router>
+          <ThemeProvider>
+            <Router>
+              <div className="app">
+                <Navbar />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/movies" element={<MoviesPage />} />
+                  <Route path="/movies/:id" element={<MovieDetailsPage />} />
+                  <Route path="/booking/:id" element={<BookingPage />} />
+                  <Route path="/payment/:id" element={<PaymentPage />} />
+                  <Route path="/confirmation" element={<ConfirmationPage />} />
+                  <Route path="/concessions" element={<ConcessionsPage />} />
+                  <Route
+                    path="/concessions/:id"
+                    element={<ConcessionsPage />}
+                  />
+                  <Route path="/signin" element={<SignInPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route
+                    path="*"
+                    element={<div className="not-found">Page not found</div>}
+                  />
+                </Routes>
+              </div>
+            </Router>
+          </ThemeProvider>
         </CartProvider>
       </TheaterProvider>
     </AuthProvider>
