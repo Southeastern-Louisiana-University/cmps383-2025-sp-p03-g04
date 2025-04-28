@@ -18,6 +18,7 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import { useBooking } from "../../components/BookingProvider";
 import * as reservationService from "../../services/reservations/reservationService";
 import { ReservationResponse } from "../../types/api/reservations";
+import { cleanupExpiredGuestTickets } from "@/utils/secureStorage";
 
 export default function TicketsScreen() {
   const { user, isAuthenticated } = useAuth();
@@ -42,21 +43,35 @@ export default function TicketsScreen() {
     setError(null);
 
     try {
+      // First clean up expired tickets
+      await cleanupExpiredGuestTickets();
+
       if (isAuthenticated && user) {
         // Load authenticated user's tickets
         const userReservations = await reservationService.getUserReservations(
           user.id
         );
         setReservations(userReservations);
-      }
 
-      // Load guest tickets from local storage
-      const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
-      if (guestTicketsStr) {
-        const tickets = JSON.parse(guestTicketsStr);
-        setGuestTickets(tickets);
-      } else {
+        // Clear any guest tickets since the user is authenticated now
+        await AsyncStorage.removeItem("guestTickets");
         setGuestTickets([]);
+      } else {
+        // For guest users, only show message prompting login
+        setReservations([]);
+        setGuestTickets([]);
+        // We're intentionally not loading guest tickets if user is not authenticated
+        // If you want to allow guests to see their tickets temporarily, you can
+        // uncomment the code below:
+        /*
+        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
+        if (guestTicketsStr) {
+          const tickets = JSON.parse(guestTicketsStr);
+          setGuestTickets(tickets);
+        } else {
+          setGuestTickets([]);
+        }
+        */
       }
     } catch (err) {
       console.error("Failed to fetch tickets:", err);
@@ -80,7 +95,7 @@ export default function TicketsScreen() {
   const handleViewTicket = (ticketId: number, isGuest: boolean = false) => {
     // View ticket details
     router.push({
-      pathname: `./booking/${isGuest ? "guest" : ticketId}/confirmation`,
+      pathname: `../booking/${isGuest ? "guest" : ticketId}/confirmation`,
       params: {
         reservationId: ticketId.toString(),
         guest: isGuest ? "true" : "false",

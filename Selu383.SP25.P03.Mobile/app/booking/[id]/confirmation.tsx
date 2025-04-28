@@ -1,3 +1,6 @@
+// This is the updated confirmation screen
+// app/booking/[id]/confirmation.tsx
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -22,8 +25,6 @@ import { QRCode } from "../../../components/QRCode";
 import * as reservationService from "../../../services/reservations/reservationService";
 
 export default function ConfirmationScreen() {
-  // Note that we're now getting the id from useLocalSearchParams
-  // along with reservationId and guest
   const { id, reservationId, guest } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -53,6 +54,9 @@ export default function ConfirmationScreen() {
           const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
           if (guestTicketsStr) {
             const guestTickets = JSON.parse(guestTicketsStr);
+            console.log("Found guest tickets:", guestTickets.length);
+            
+            // Look for the specific reservation
             const foundTicket = guestTickets.find(
               (ticket: any) => ticket.reservationId === Number(reservationId)
             );
@@ -71,6 +75,7 @@ export default function ConfirmationScreen() {
                 seats: foundTicket.tickets
                   .map((t: any) => `${t.row}${t.number}`)
                   .join(","),
+                confirmationCode: foundTicket.confirmationCode || `LD${foundTicket.reservationId.toString().slice(-6)}`,
                 isGuest: true,
               };
 
@@ -82,6 +87,12 @@ export default function ConfirmationScreen() {
                 "The requested ticket information could not be found."
               );
             }
+          } else {
+            console.error("No guest tickets found in storage");
+            Alert.alert(
+              "No Tickets Found",
+              "No ticket information found in your device."
+            );
           }
         } else if (reservationId) {
           console.log("Loading authenticated user reservation:", reservationId);
@@ -122,15 +133,16 @@ export default function ConfirmationScreen() {
         );
       } finally {
         setIsLoading(false);
+        
+        // Reset booking state after confirmation screen has loaded
+        // This ensures we don't lose the data before it's displayed
+        setTimeout(() => {
+          booking.resetBooking();
+        }, 1000);
       }
     };
 
     loadConfirmationData();
-
-    // Clear booking state when showing confirmation
-    return () => {
-      booking.resetBooking();
-    };
   }, [reservationId, guest, user?.id]);
 
   const handleShareTicket = async () => {
@@ -407,6 +419,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     marginVertical: 20,
+    color: "#9BA1A6",
   },
   scrollContent: {
     padding: 16,
@@ -427,6 +440,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: "#9BA1A6",
+    marginHorizontal: 10,
   },
   ticketContainer: {
     width: "100%",
@@ -435,6 +449,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 24,
+    shadowColor: "#B4D335",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   ticketHeader: {
     flexDirection: "row",
@@ -488,6 +507,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
   seatsLabel: {
     fontSize: 16,
@@ -496,6 +517,8 @@ const styles = StyleSheet.create({
   },
   seatsValue: {
     fontSize: 16,
+    flexShrink: 1,
+    textAlign: "center",
   },
   divider: {
     width: "100%",
@@ -506,12 +529,19 @@ const styles = StyleSheet.create({
   qrContainer: {
     padding: 10,
     backgroundColor: "white",
-    borderRadius: 8,
+    borderRadius: 12,
     marginVertical: 16,
     height: 220,
     width: 220,
     alignItems: "center",
     justifyContent: "center",
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    // Shadow for Android
+    elevation: 4,
   },
   scanText: {
     fontSize: 14,
@@ -562,6 +592,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
+    marginBottom: 16,
   },
   homeButtonText: {
     color: "#1E2429",
