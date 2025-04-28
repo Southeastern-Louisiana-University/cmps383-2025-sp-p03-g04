@@ -16,7 +16,7 @@ namespace Selu383.SP25.P03.Api.Controllers
 {
     [Route("api/checkout")]
     [ApiController]
-    // Remove the [Authorize] attribute from the class level
+    
     public class CheckoutController : ControllerBase
     {
         private readonly DataContext _dataContext;
@@ -49,15 +49,15 @@ namespace Selu383.SP25.P03.Api.Controllers
         }
 
         [HttpPost]
-        // Remove the authorization requirement for this endpoint to allow guest checkout
+        
         public async Task<ActionResult<CombinedCheckoutResult>> CombinedCheckout(CombinedCheckoutRequest request)
         {
             Console.WriteLine($"Checkout request received at {DateTime.Now}");
             
-            // Try to get the current user
+            
             var user = await _userManager.GetUserAsync(User);
             
-            // Log whether this is a logged-in user or guest checkout
+            
             bool isGuestCheckout = user == null;
             Console.WriteLine($"Is Guest Checkout: {isGuestCheckout}");
             
@@ -66,11 +66,11 @@ namespace Selu383.SP25.P03.Api.Controllers
                 Console.WriteLine($"Processing checkout for showtime ID: {request.ReservationRequest.ShowtimeId}");
                 Console.WriteLine($"Ticket count: {request.ReservationRequest.Tickets?.Count ?? 0}");
                 
-                // Create the reservation
+                
                 var reservation = await CreateReservationInternal(request.ReservationRequest, user);
                 Console.WriteLine($"Reservation created successfully. ID: {reservation.Id}");
                 
-                // Create food orders and link them to the reservation
+                
                 var foodOrders = new List<FoodOrderDto>();
                 if (request.FoodOrders != null && request.FoodOrders.Any())
                 {
@@ -83,11 +83,11 @@ namespace Selu383.SP25.P03.Api.Controllers
                     }
                 }
 
-                // Calculate the total amount
+                
                 decimal totalAmount = reservation.TotalAmount + foodOrders.Sum(o => o.TotalAmount);
                 Console.WriteLine($"Total amount: {totalAmount}");
 
-                // Process payment
+                
                 request.PaymentInfo.Amount = totalAmount;
                 request.PaymentInfo.ReservationId = reservation.Id;
                 Console.WriteLine($"Processing payment for ${totalAmount}");
@@ -97,7 +97,7 @@ namespace Selu383.SP25.P03.Api.Controllers
 
                 if (paymentResult.Success)
                 {
-                    // Mark reservation as paid
+                    
                     reservation.IsPaid = true;
                     await _dataContext.SaveChangesAsync();
                     Console.WriteLine($"Reservation {reservation.Id} marked as paid");
@@ -112,7 +112,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                 }
                 else
                 {
-                    // Payment failed - clean up
+                    
                     Console.WriteLine($"Payment failed, cleaning up reservation {reservation.Id}");
                     _dataContext.Reservations.Remove(await _dataContext.Reservations.FindAsync(reservation.Id));
                     await _dataContext.SaveChangesAsync();
@@ -129,7 +129,7 @@ namespace Selu383.SP25.P03.Api.Controllers
 
         private async Task<ReservationDto> CreateReservationInternal(CreateReservationRequest request, User? user)
         {
-            // Verify showtime exists
+            
             var showtime = await _dataContext.Showtimes
                 .Include(s => s.Movie)
                 .Include("Screen.Theater")
@@ -140,20 +140,20 @@ namespace Selu383.SP25.P03.Api.Controllers
                 throw new Exception("Showtime not found");
             }
 
-            // Create reservation
+            
             var reservation = new Reservation
             {
                 ShowtimeId = request.ShowtimeId,
-                UserId = user?.Id,  // Null for guest users
+                UserId = user?.Id,  
                 ReservationTime = DateTime.UtcNow,
-                TotalAmount = 0,  // Will be calculated
+                TotalAmount = 0,  
                 IsPaid = false
             };
 
             _dataContext.Reservations.Add(reservation);
             await _dataContext.SaveChangesAsync();
 
-            // Add seats and calculate total
+            
             decimal totalAmount = 0;
             foreach (var ticket in request.Tickets)
             {
@@ -163,7 +163,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                     throw new Exception($"Seat {ticket.SeatId} not found");
                 }
 
-                // Calculate ticket price based on type
+                
                 decimal ticketPrice = showtime.TicketPrice;
                 switch (ticket.TicketType.ToLower())
                 {
@@ -189,7 +189,7 @@ namespace Selu383.SP25.P03.Api.Controllers
             reservation.TotalAmount = totalAmount;
             await _dataContext.SaveChangesAsync();
 
-            // Map to DTO
+            
             var ticketDtos = await _dataContext.ReservationSeats
                 .Where(rs => rs.ReservationId == reservation.Id)
                 .Include(rs => rs.Seat)
@@ -258,7 +258,7 @@ namespace Selu383.SP25.P03.Api.Controllers
             _dataContext.FoodOrders.Add(order);
             await _dataContext.SaveChangesAsync();
 
-            // Map to DTO
+            
             return new FoodOrderDto
             {
                 Id = order.Id,

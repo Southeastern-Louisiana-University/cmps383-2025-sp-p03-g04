@@ -38,7 +38,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         return BadRequest("Reservation data is required and must include at least one ticket");
     }
     
-    // Check for expired reservations before continuing
+    
     var cutoffTime = DateTime.UtcNow.AddMinutes(-15);
     var expiredReservations = await dataContext.ReservationSeats
         .Where(rs => rs.Reservation != null && 
@@ -49,7 +49,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         .Distinct()
         .ToListAsync();
     
-    // If there are expired reservations, release their seats
+    
     if (expiredReservations.Any())
     {
         foreach (var expiredId in expiredReservations)
@@ -68,7 +68,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         await dataContext.SaveChangesAsync();
     }
     
-    // Verify showtime exists
+    
     var showtime = await dataContext.Showtimes
         .Include(s => s.Movie)
         .Include("Screen.Theater")
@@ -79,10 +79,10 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         return NotFound("Showtime not found");
     }
 
-    // Get all seat IDs from the tickets
+    
     var seatIds = request.Tickets.Select(t => t.SeatId).ToList();
 
-    // Verify seats exist and belong to the right screen
+    
     var seats = await dataContext.Seats
         .Where(s => seatIds.Contains(s.Id) && s.ScreenId == showtime.ScreenId)
         .ToListAsync();
@@ -92,7 +92,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         return BadRequest("One or more seats are invalid");
     }
 
-    // Verify seats are available
+    
     var reservedSeatIds = await dataContext.ReservationSeats
         .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == request.ShowtimeId && rs.Reservation.IsPaid)
         .Select(rs => rs.SeatId)
@@ -104,7 +104,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         return BadRequest("One or more seats are already reserved");
     }
 
-    // Get current user
+    
     var userName = User.Identity?.Name;
     var user = userName != null 
         ? await dataContext.Users.FirstOrDefaultAsync(u => u.UserName == userName)
@@ -115,41 +115,40 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
         return BadRequest("User not found");
     }
 
-    // For each ticket, set the price based on ticket type
-    // In a real application, you'd have a more sophisticated pricing strategy
+    
     foreach (var ticket in request.Tickets)
     {
         switch (ticket.TicketType.ToLower())
         {
             case "child":
-                ticket.Price = showtime.TicketPrice * 0.75m; // 25% discount for children
+                ticket.Price = showtime.TicketPrice * 0.75m; 
                 break;
             case "senior":
-                ticket.Price = showtime.TicketPrice * 0.8m; // 20% discount for seniors
+                ticket.Price = showtime.TicketPrice * 0.8m; 
                 break;
-            default: // "adult" or any other type
+            default: 
                 ticket.Price = showtime.TicketPrice;
                 break;
         }
     }
 
-    // Calculate total amount
+    
     decimal totalAmount = request.Tickets.Sum(t => t.Price);
 
-    // Create reservation
+    
     var reservation = new Reservation
     {
         ShowtimeId = request.ShowtimeId,
         UserId = user.Id,
         ReservationTime = DateTime.UtcNow,
         TotalAmount = totalAmount,
-        IsPaid = request.ProcessPayment // Set to true if payment is being processed immediately
+        IsPaid = request.ProcessPayment 
     };
 
     reservations.Add(reservation);
     await dataContext.SaveChangesAsync();
 
-    // Add seat reservations
+    
     foreach (var ticket in request.Tickets)
     {
         var seat = seats.First(s => s.Id == ticket.SeatId);
@@ -165,7 +164,7 @@ public async Task<ActionResult<ReservationDto>> CreateReservation(CreateReservat
 
     await dataContext.SaveChangesAsync();
 
-    // Map to DTO for response
+    
     var ticketDtos = new List<TicketDto>();
     foreach (var reservationSeat in dataContext.ReservationSeats
         .Where(rs => rs.ReservationId == reservation.Id)
@@ -218,13 +217,13 @@ public async Task<ActionResult> GetTicket(int id)
             return NotFound();
         }
 
-        // Only allow users to see their own tickets unless admin
+        
         if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
         {
             return Forbid();
         }
 
-        // Generate ticket QR code
+        
         var ticketService = HttpContext.RequestServices.GetRequiredService<TicketService>();
         var qrCodeImage = await ticketService.GenerateTicketQRCode(id);
 
@@ -262,7 +261,7 @@ public async Task<ActionResult> GetTicket(int id)
                 return NotFound();
             }
 
-            // Only allow users to see their own reservations unless admin
+            
             if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
             {
                 return Forbid();
@@ -305,7 +304,7 @@ public async Task<ActionResult> GetTicket(int id)
                 return BadRequest("User not found");
             }
 
-            // Only allow users to see their own reservations unless admin
+            
             if (userId != user.Id && !User.IsInRole(UserRoleNames.Admin))
             {
                 return Forbid();
@@ -424,16 +423,16 @@ var userReservations = await reservations
                 return NotFound();
             }
 
-            // Only allow users to cancel their own reservations unless admin
+            
             if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
             {
                 return Forbid();
             }
 
-            // Delete associated ReservationSeats
+            
             dataContext.ReservationSeats.RemoveRange(reservation.ReservationSeats);
             
-            // Delete reservation
+            
             reservations.Remove(reservation);
             await dataContext.SaveChangesAsync();
 

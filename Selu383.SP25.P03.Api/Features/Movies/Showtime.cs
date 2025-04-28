@@ -17,7 +17,7 @@ namespace Selu383.SP25.P03.Api.Features.Movies
     
     public int ScreenId { get; set; }
     
-    // Make navigation properties nullable
+    
     public virtual Movie? Movie { get; set; }
     
     public virtual Screen? Screen { get; set; }

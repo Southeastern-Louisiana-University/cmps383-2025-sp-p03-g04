@@ -60,14 +60,14 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetOrdersByReservatio
         return Unauthorized();
     }
 
-    // Check if reservation exists
+    
     var reservation = await dataContext.Reservations.FindAsync(reservationId);
     if (reservation == null)
     {
         return NotFound("Reservation not found");
     }
 
-    // Verify the user owns the reservation or is admin
+    
     if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
     {
         return Forbid();
@@ -152,7 +152,7 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
                 return Unauthorized();
             }
 
-            // Only admins or the owner of the order can view it
+            
             if (order.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
             {
                 return Forbid();
@@ -181,7 +181,7 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
                 return Unauthorized();
             }
 
-            // Verify all food items exist and are available
+            
             var foodItemIds = dto.OrderItems.Select(oi => oi.FoodItemId).ToList();
             var foodItems = await dataContext.FoodItems
                 .Where(fi => foodItemIds.Contains(fi.Id) && fi.IsAvailable)
@@ -192,7 +192,7 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
                 return BadRequest("One or more food items are unavailable or invalid");
             }
 
-            // Create the order
+            
             var order = new FoodOrder
             {
                 OrderTime = DateTime.UtcNow,
@@ -203,20 +203,20 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
                 OrderItems = new List<FoodOrderItem>()
             };
 
-            // Add order items
+            
             decimal totalAmount = 0;
             foreach (var itemDto in dto.OrderItems)
             {
                 if (itemDto.Quantity <= 0 || !foodItems.TryGetValue(itemDto.FoodItemId, out var foodItem))
                 {
-                    continue; // Skip invalid items
+                    continue; 
                 }
 
                 var orderItem = new FoodOrderItem
                 {
                     FoodItemId = itemDto.FoodItemId,
                     Quantity = itemDto.Quantity,
-                    Price = foodItem.Price, // Use current price
+                    Price = foodItem.Price, 
                     SpecialInstructions = itemDto.SpecialInstructions
                 };
 
@@ -226,11 +226,11 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
 
             order.TotalAmount = totalAmount;
 
-            // Save to database
+            
             foodOrders.Add(order);
             await dataContext.SaveChangesAsync();
 
-            // Reload the complete order with navigation properties
+            
             order = await foodOrders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.FoodItem)
@@ -260,7 +260,7 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
                 return NotFound();
             }
 
-            // Validate the status
+            
             string[] validStatuses = { "Pending", "Preparing", "Ready", "Delivered", "Cancelled" };
             if (!validStatuses.Contains(status))
             {
@@ -270,7 +270,7 @@ public async Task<ActionResult<IEnumerable<FoodOrderDto>>> GetPendingOrders()
             order.Status = status;
             await dataContext.SaveChangesAsync();
 
-            // Reload the complete order with navigation properties
+            
             order = await foodOrders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.FoodItem)
@@ -310,26 +310,26 @@ public async Task<ActionResult<FoodOrderDto>> LinkOrderToReservation(int orderId
         return NotFound("Order not found");
     }
 
-    // Verify the user owns the order or is admin
+    
     if (order.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
     {
         return Forbid();
     }
 
-    // Check if reservation exists
+    
     var reservation = await dataContext.Reservations.FindAsync(reservationId);
     if (reservation == null)
     {
         return NotFound("Reservation not found");
     }
 
-    // Verify the user owns the reservation or is admin
+    
     if (reservation.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
     {
         return Forbid();
     }
 
-    // Link the order to the reservation
+    
     order.ReservationId = reservationId;
     await dataContext.SaveChangesAsync();
 
@@ -351,13 +351,13 @@ public async Task<ActionResult<FoodOrderDto>> LinkOrderToReservation(int orderId
                 return Unauthorized();
             }
 
-            // Only admins or the owner of the order can cancel it
+            
             if (order.UserId != user.Id && !User.IsInRole(UserRoleNames.Admin))
             {
                 return Forbid();
             }
 
-            // Only pending orders can be cancelled
+            
             if (order.Status != "Pending")
             {
                 return BadRequest("Only pending orders can be cancelled");
@@ -369,12 +369,12 @@ public async Task<ActionResult<FoodOrderDto>> LinkOrderToReservation(int orderId
             return NoContent();
         }
 
-        // Helper method to map a FoodOrder entity to a FoodOrderDto
+        
         private FoodOrderDto? MapOrderToDto(FoodOrder? order)
 {
     if (order == null)
     {
-        return null;  // This is fine, just make the return type nullable
+        return null;  
     }
 
     return new FoodOrderDto

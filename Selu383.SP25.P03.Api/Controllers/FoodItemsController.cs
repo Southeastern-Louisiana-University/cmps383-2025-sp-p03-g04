@@ -84,7 +84,7 @@ namespace Selu383.SP25.P03.Api.Controllers
             };
         }
 
-        // Add these methods to FoodItemsController.cs
+        
 [HttpGet("categories")]
 public IQueryable<FoodCategoryDto> GetAllCategories()
 {
@@ -120,7 +120,7 @@ public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
                 return BadRequest("Food item name is required");
             }
 
-            // Check if category exists
+            
             var categoryExists = await dataContext.FoodCategories.AnyAsync(c => c.Id == dto.CategoryId);
             if (!categoryExists)
             {
@@ -140,7 +140,7 @@ public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
             foodItems.Add(foodItem);
             await dataContext.SaveChangesAsync();
 
-            // Reload the food item with its category
+            
             foodItem = await foodItems
                 .Include(f => f.Category)
                 .FirstOrDefaultAsync(f => f.Id == foodItem.Id);
@@ -179,7 +179,7 @@ public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
                 return NotFound();
             }
 
-            // Check if category exists
+            
             var categoryExists = await dataContext.FoodCategories.AnyAsync(c => c.Id == dto.CategoryId);
             if (!categoryExists)
             {
@@ -195,7 +195,7 @@ public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
 
             await dataContext.SaveChangesAsync();
 
-            // Reload the food item with its category
+            
             foodItem = await foodItems
                 .Include(f => f.Category)
                 .FirstOrDefaultAsync(f => f.Id == foodItem.Id);
@@ -229,11 +229,11 @@ public async Task<ActionResult<FoodCategoryDto>> GetCategoryById(int id)
                 return NotFound();
             }
 
-            // Check if the food item is part of any orders
+            
             var isInOrders = await dataContext.FoodOrderItems.AnyAsync(oi => oi.FoodItemId == id);
             if (isInOrders)
             {
-                // Instead of deleting, just mark it as unavailable
+                
                 foodItem.IsAvailable = false;
                 await dataContext.SaveChangesAsync();
                 return Ok();

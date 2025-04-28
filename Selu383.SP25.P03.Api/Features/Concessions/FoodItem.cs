@@ -20,13 +20,13 @@ namespace Selu383.SP25.P03.Api.Features.Concessions
         
         public bool IsAvailable { get; set; } = true;
         
-        // Foreign key
+        
         public int CategoryId { get; set; }
         
-        // Navigation property
+        
         public virtual FoodCategory? Category { get; set; }
         
-        // Navigation property for order items
+        
         public virtual ICollection<FoodOrderItem> OrderItems { get; set; } = new List<FoodOrderItem>();
     }
 }
