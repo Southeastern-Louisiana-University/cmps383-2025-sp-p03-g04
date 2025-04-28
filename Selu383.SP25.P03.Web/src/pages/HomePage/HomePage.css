@@ -1,66 +1,86 @@
-
-/*
-/* Main container */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #65a30d transparent;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #65a30d;
-  border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #4d7c0a;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Poppins", sans-serif;
-  color: #f8f9fa;
-  background-color: #000000;
-  overflow-x: hidden;
-  width: 100vw;
-  max-width: unset;
-}
-
 .home-page {
-  width: 100vw;
-  max-width: unset;
+  width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
+  min-height: 100vh;
+  background-color: #000000;
+  color: #f8f9fa;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Loading and error states */
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  margin-top: 6rem;
+  font-weight: 700;
+}
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 .loading-container,
 .error-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 80vh;
   width: 100%;
-  background-color: #0f172a;
-  color: #f8f9fa;
-  font-size: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(101, 163, 13, 0.2);
+  border-radius: 50%;
+  border-top-color: #65a30d;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+  margin-left: 35%;
 }
 
 .error-container {
   color: #ef4444;
 }
 
-/* Section styling */
+.retry-btn {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #65a30d;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background-color: #4d7c0a;
+  transform: translateY(-2px);
+}
+
 .section {
-  padding: 3rem 1.5rem;
-  max-width: 100%;
+  padding: 4rem 0;
+  position: relative;
 }
 
 .section-title {
@@ -69,468 +89,331 @@ body {
   margin-bottom: 2rem;
   text-align: center;
   color: #f8f9fa;
-}
-
-/* Hero slider */
-.hero-slider {
   position: relative;
-  height: 80vh;
-  width: 100%;
-  overflow: hidden;
 }
 
-.slide {
+.section-title::after {
+  content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  z-index: 1;
-}
-
-.slide.active {
-  opacity: 1;
-  z-index: 2;
-}
-
-.slide-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.2) 100%
-  );
-}
-
-.slide-content {
-  position: relative;
-  z-index: 3;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 5%;
-}
-
-.content-box {
-  background-color: rgba(15, 23, 42, 0.7);
-  border: 2px solid #65a30d;
-  border-radius: 10px;
-  padding: 2rem;
-  max-width: 600px;
-}
-
-.universe {
-  display: inline-block;
-  background-color: #65a30d;
-  color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-}
-
-.movie-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  line-height: 1.2;
-}
-
-.movie-overview {
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  max-width: 600px;
-}
-
-.actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.875rem 1.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-size: 0.875rem;
-  border: none;
-}
-
-.book-now {
-  background-color: #65a30d;
-  color: #ffffff;
-}
-
-.book-now:hover {
-  background-color: #4d7c0a;
-}
-
-.btn-play {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.875rem 1.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.play-icon {
-  font-style: normal;
-  margin-right: 0.5rem;
-}
-
-/* Slider controls */
-.slider-control {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  font-size: 1.5rem;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.slider-control:hover {
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.slider-control:focus {
-  outline: none;
-  border: none;
-}
-
-.slider-control:active {
-  outline: none;
-  border: none;
-}
-
-.prev {
-  left: 20px;
-  transition: transform 0.3s ease;
-  padding: 0; /* Reset padding */
-  line-height: 0; /* Fix alignment */
-}
-
-.prev:hover {
-  transform: translateY(-50%) translateX(-5px);
-}
-
-.next {
-  right: 20px;
-  transition: transform 0.3s ease;
-  padding: 0; /* Reset padding */
-  line-height: 0; /* Fix alignment */
-}
-
-.next:hover {
-  transform: translateY(-50%) translateX(5px);
-}
-
-/* Slider pagination */
-.slider-pagination {
-  position: absolute;
-  bottom: 20px;
+  bottom: -0.75rem;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 4;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dot.active {
+  width: 60px;
+  height: 3px;
   background-color: #65a30d;
+  border-radius: 3px;
 }
 
-/* Theaters section */
-.theaters-section {
-  background-color: #000000;
+.theater-section {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
-.theater-selector {
-  max-width: 1200px;
-  margin: 0 auto;
+.movies-section {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.theater-selector-inner {
-  padding: 2rem;
-  background-color: var(--theater-selector-bg);
-  border-radius: 8px;
-  border: 1px solid #65a30d;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease;
+.showtimes-section {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
-.theater-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.theater-option {
-  padding: 1.5rem;
-  background-color: #1e293b;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.no-content {
   text-align: center;
+  padding: 2rem;
+  background-color: rgba(30, 41, 59, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(101, 163, 13, 0.2);
+  margin: 1rem 0;
 }
 
-.theater-option.active {
-  background-color: #65a30d;
-}
-
-.theater-name {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.theater-location,
-.theater-screens {
-  font-size: 0.875rem;
+.no-content p {
+  font-size: 1.125rem;
   color: #cbd5e1;
 }
 
-.theater-option.active .theater-location,
-.theater-option.active .theater-screens {
+.date-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.date-tab {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(101, 163, 13, 0.3);
   color: #f8f9fa;
-}
-
-/* Movies grid */
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.movie-card {
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: hidden;
+  min-width: 120px;
 }
 
-.movie-card:hover {
-  transform: translateY(-10px);
+.date-tab.active {
+  background-color: #65a30d;
+  color: #ffffff;
 }
 
-.movie-image {
-  position: relative;
+.date-tab:hover:not(.active) {
+  background-color: rgba(101, 163, 13, 0.2);
+}
+
+.showtimes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.movie-showtimes {
+  background-color: rgba(30, 41, 59, 0.5);
   border-radius: 8px;
-  overflow: hidden;
-  aspect-ratio: 2/3;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(101, 163, 13, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.movie-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.movie-showtimes:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.movie-showtime-info {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.movie-poster-small {
+  width: 80px;
+  height: 120px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
-.movie-card:hover .movie-image img {
+.movie-poster-small:hover {
   transform: scale(1.05);
 }
 
-.movie-rating {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #65a30d;
-  color: #ffffff;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.875rem;
+.movie-poster-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.movie-name {
-  font-size: 1.125rem;
+.movie-info-container {
+  flex: 1;
+}
+
+.movie-info-container .movie-title {
+  font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #ffffff;
 }
 
-.movie-info {
-  font-size: 0.875rem;
-  color: #cbd5e1;
-}
-
-/* Footer */
-.footer {
-  background-color: #000000;
-  padding: 4rem 1.5rem 2rem;
-  border-top: 1px solid #65a30d;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-}
-
-.footer-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
+.movie-meta {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  justify-content: center;
-}
-
-.footer-links a {
   color: #cbd5e1;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
 }
 
-.footer-links a:hover {
+.separator {
   color: #65a30d;
 }
 
-.copyright {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #94a3b8;
+.showtime-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .movie-title {
+.showtime-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8f9fa;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 90px;
+}
+
+.showtime-btn:hover {
+  background-color: #65a30d;
+  border-color: #65a30d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(101, 163, 13, 0.3);
+}
+
+.showtime-btn .price {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  color: #cbd5e1;
+}
+
+.showtime-btn:hover .price {
+  color: #ffffff;
+}
+
+.no-showtimes {
+  text-align: center;
+  padding: 3rem 2rem;
+  background-color: rgba(30, 41, 59, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(101, 163, 13, 0.3);
+}
+
+.no-showtimes p {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+}
+
+.cta-section {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7)),
+    url("/images/popcorn-background.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 6rem 0;
+}
+
+.cta-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.cta-content p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  color: #cbd5e1;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: #65a30d;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #4d7c0a;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(101, 163, 13, 0.4);
+}
+
+@media (max-width: 992px) {
+  .section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
     font-size: 2rem;
   }
 
-  .movie-overview {
-    font-size: 1rem;
+  .cta-content h2 {
+    font-size: 2.25rem;
   }
+}
 
-  .hero-slider {
-    height: 70vh;
-  }
-
+@media (max-width: 768px) {
   .section {
-    padding: 2rem 1rem;
+    padding: 2.5rem 0;
   }
 
   .section-title {
     font-size: 1.75rem;
   }
 
-  .movie-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .movie-name {
-    font-size: 1rem;
-  }
-
-  .content-box {
-    width: 90%;
-    max-height: 250px;
-    left: 5%;
-    bottom: 10%;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-slider {
-    height: 60vh;
-  }
-
-  .slide-content {
-    padding: 0 1rem;
-  }
-
-  .movie-title {
-    font-size: 1.5rem;
-  }
-
-  .actions {
+  .movie-showtime-info {
     flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .btn,
-  .btn-play {
-    width: 100%;
-    padding: 0.75rem 1rem;
-  }
-
-  .theater-option {
-    width: 100%;
-  }
-
-  .movie-grid {
-    grid-template-columns: repeat(2, 1fr);
+    align-items: flex-start;
     gap: 1rem;
   }
 
-  .content-box {
-    width: 85%;
-    max-height: 220px;
-    padding: 1rem;
+  .movie-poster-small {
+    width: 100px;
+    height: 150px;
+  }
+
+  .date-tab {
+    min-width: unset;
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .cta-content h2 {
+    font-size: 2rem;
+  }
+
+  .cta-content p {
+    font-size: 1.125rem;
   }
 }
- 
+
+@media (max-width: 576px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .section {
+    padding: 2rem 0;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .movie-info-container .movie-title {
+    font-size: 1.25rem;
+  }
+
+  .showtime-buttons {
+    justify-content: center;
+  }
+
+  .showtime-btn {
+    min-width: 80px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .no-showtimes p {
+    font-size: 1rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .cta-content p {
+    font-size: 1rem;
+  }
+
+  .cta-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+}

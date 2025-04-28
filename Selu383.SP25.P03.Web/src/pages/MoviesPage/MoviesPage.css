@@ -79,7 +79,7 @@
 
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 👈 changed 300px to 220px */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -185,16 +185,16 @@
   .movies-header {
     flex-direction: column;
   }
-  
+
   .filter-container {
     flex-direction: column;
   }
-  
+
   .genre-filter,
   .sort-filter {
     width: 100%;
   }
-  
+
   .movies-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
@@ -205,11 +205,11 @@
   .movies-page {
     padding: 100px 1rem 1rem;
   }
-  
+
   .movies-header h1 {
     font-size: 2rem;
   }
-  
+
   .movies-grid {
     grid-template-columns: 1fr;
     gap: 1rem;

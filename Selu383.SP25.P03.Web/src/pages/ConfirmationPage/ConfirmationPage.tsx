@@ -20,7 +20,7 @@ interface FoodItem {
 
 interface Reservation {
   id: number;
-  reservationId?: number; // Some responses might use reservationId instead of id
+  reservationId?: number;
   movieTitle: string;
   theaterName: string;
   showtimeStartTime: string;
@@ -55,16 +55,12 @@ const ConfirmationPage: React.FC = () => {
         setIsLoading(true);
 
         if (isGuest && guestSessionId) {
-          // For guest users, we'll use the data from the payment result
-          // since guest access to reservations might be restricted
           const paymentResult = location.state?.paymentResult;
 
           if (paymentResult?.reservation) {
-            // Use the reservation data from the payment result
             const reservationData = paymentResult.reservation;
             setReservation(reservationData);
 
-            // Create QR code data for guest
             const qrData = {
               type: "ticket",
               reservationId: reservationData.id,
@@ -83,7 +79,6 @@ const ConfirmationPage: React.FC = () => {
 
             setQrCodeValue(JSON.stringify(qrData));
           } else {
-            // If no payment result data, create a fallback reservation object
             const fallbackReservation: Reservation = {
               id: reservationId,
               movieTitle: location.state?.movieTitle || "Movie",
@@ -107,14 +102,12 @@ const ConfirmationPage: React.FC = () => {
             );
           }
         } else {
-          // For authenticated users, fetch from API
           try {
             const reservationData = await reservationService.getReservation(
               reservationId
             );
             setReservation(reservationData);
 
-            // Create QR code data
             const qrData = {
               type: "ticket",
               reservationId: reservationData.id,
@@ -134,7 +127,6 @@ const ConfirmationPage: React.FC = () => {
               "Failed to fetch reservation for authenticated user:",
               err
             );
-            // Use location state as fallback
             if (location.state?.paymentResult?.reservation) {
               setReservation(location.state.paymentResult.reservation);
               setQrCodeValue(
@@ -306,8 +298,7 @@ const ConfirmationPage: React.FC = () => {
         <div className="action-buttons">
           <button
             className="tickets-button"
-            onClick={() => navigate("/tickets")}
-          >
+            onClick={() => navigate("/tickets")}>
             View All Tickets
           </button>
 

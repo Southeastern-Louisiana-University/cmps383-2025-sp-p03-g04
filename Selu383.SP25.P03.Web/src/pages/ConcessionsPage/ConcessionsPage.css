@@ -5,7 +5,6 @@
   max-width: unset;
 }
 
-/* Hero Banner */
 .hero-banner {
   position: relative;
   height: 40vh;
@@ -55,7 +54,6 @@
   position: relative;
 }
 
-/* Categories Menu */
 .categories-menu {
   margin-bottom: 1rem;
 }
@@ -98,12 +96,11 @@
   color: #ffffff;
 }
 
-/* Food Items Grid */
 .food-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 100px; /* Space for checkout bar */
+  margin-bottom: 100px;
 }
 
 .no-items {
@@ -148,7 +145,6 @@
   transform: scale(1.05);
 }
 
-/* Added for quantity badge */
 .item-quantity-badge {
   position: absolute;
   top: 10px;
@@ -200,7 +196,6 @@
   color: #65a30d;
 }
 
-/* Added item actions container */
 .item-actions {
   display: flex;
   align-items: center;
@@ -228,7 +223,6 @@
   cursor: default;
 }
 
-/* Added remove button */
 .remove-item {
   width: 28px;
   height: 28px;
@@ -248,7 +242,6 @@
   background-color: rgba(239, 68, 68, 0.4);
 }
 
-/* Checkout Bar */
 .checkout-bar {
   position: fixed;
   bottom: 0;
@@ -298,7 +291,6 @@
   transform: translateY(-2px);
 }
 
-/* Loading and error states */
 .loading-container,
 .error-container {
   display: flex;
@@ -340,7 +332,6 @@
   background-color: #dc2626;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
   .hero-banner {
     height: 30vh;

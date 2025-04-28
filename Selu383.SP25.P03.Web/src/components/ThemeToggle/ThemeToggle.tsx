@@ -1,4 +1,3 @@
-// src/components/ThemeToggle/ThemeToggle.tsx
 import React from "react";
 import { useTheme } from "../../contexts/Themecontext";
 
@@ -13,7 +12,6 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   position = "bottomRight",
   showText = false,
 }) => {
-  // Use our theme context instead of local state
   const { isDark, toggleTheme } = useTheme();
 
   const positionStyles: React.CSSProperties = {
@@ -52,8 +50,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       <button
         style={buttonStyles}
         onClick={toggleTheme}
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      >
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
         {isDark ? (
           <SunIcon size={size * 0.5} color="#65a30d" />
         ) : (
@@ -65,7 +62,6 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   );
 };
 
-// Keep the icon components the same
 const SunIcon = ({ size, color }: { size: number; color: string }) => (
   <svg
     width={size}
@@ -75,8 +71,7 @@ const SunIcon = ({ size, color }: { size: number; color: string }) => (
     stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+    strokeLinejoin="round">
     <circle cx="12" cy="12" r="5" />
     <line x1="12" y1="1" x2="12" y2="3" />
     <line x1="12" y1="21" x2="12" y2="23" />
@@ -98,8 +93,7 @@ const MoonIcon = ({ size, color }: { size: number; color: string }) => (
     stroke={color}
     strokeWidth="2"
     strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+    strokeLinejoin="round">
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
   </svg>
 );

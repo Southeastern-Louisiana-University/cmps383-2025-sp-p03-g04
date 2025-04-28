@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 
-// Seat related types
 export interface Seat {
   id: number;
   row: string;
@@ -26,7 +25,6 @@ export interface SeatingLayout {
   rows: Record<string, Seat[]>;
 }
 
-// Ticket related types
 export interface TicketType {
   type: "Adult" | "Child" | "Senior";
   price: number;
@@ -34,7 +32,6 @@ export interface TicketType {
   multiplier: number;
 }
 
-// Cart related types
 export interface CartItem {
   name: ReactNode;
   id: any;

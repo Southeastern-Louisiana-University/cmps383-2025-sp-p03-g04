@@ -27,7 +27,6 @@ const MovieDetailsPage: React.FC = () => {
   const [showTrailerModal, setShowTrailerModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("today");
 
-  // Helper function to open YouTube trailer in a new tab
   const openYouTubeTrailer = () => {
     if (movie && movie.title) {
       const searchQuery = movie.releaseDate
@@ -36,7 +35,6 @@ const MovieDetailsPage: React.FC = () => {
           ).getFullYear()} official trailer`
         : `${movie.title} official trailer`;
 
-      // Open YouTube search results in a new tab
       window.open(
         `https://www.youtube.com/results?search_query=${encodeURIComponent(
           searchQuery
@@ -53,15 +51,12 @@ const MovieDetailsPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // Fetch movie details
         const movieId = parseInt(id);
         const movieData = await getMovie(movieId);
         setMovie(movieData);
 
-        // Determine which theater to use
         let theaterToUse = selectedTheater;
 
-        // If theaterId is specified in the URL, use that instead
         if (theaterId) {
           try {
             const theaterData = await getTheater(parseInt(theaterId));
@@ -69,7 +64,6 @@ const MovieDetailsPage: React.FC = () => {
             theaterToUse = theaterData;
           } catch (theaterError) {
             console.error("Error fetching theater:", theaterError);
-            // If we can't get the specified theater, fall back to the selected theater
             setDisplayTheater(selectedTheater);
           }
         } else if (selectedTheater) {
@@ -80,10 +74,8 @@ const MovieDetailsPage: React.FC = () => {
           return;
         }
 
-        // Fetch showtimes for this movie
         if (theaterToUse) {
           const showtimesData = await getShowtimesByMovie(movieId);
-          // Filter by the theater we're using
           const filteredShowtimes = showtimesData.filter(
             (st) => st.theaterId === theaterToUse?.id
           );
@@ -100,13 +92,10 @@ const MovieDetailsPage: React.FC = () => {
     fetchMovieData();
   }, [id, theaterId, selectedTheater]);
 
-  // Handle body scrolling when modal is open
   useEffect(() => {
     if (showTrailerModal) {
-      // Disable body scrolling
       document.body.style.overflow = "hidden";
 
-      // Add event listener for escape key
       const handleEscKey = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           closeTrailerModal();
@@ -115,18 +104,15 @@ const MovieDetailsPage: React.FC = () => {
 
       window.addEventListener("keydown", handleEscKey);
 
-      // Cleanup
       return () => {
         document.body.style.overflow = "";
         window.removeEventListener("keydown", handleEscKey);
       };
     } else {
-      // Re-enable body scrolling
       document.body.style.overflow = "";
     }
   }, [showTrailerModal]);
 
-  // Format date
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -136,7 +122,6 @@ const MovieDetailsPage: React.FC = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Format runtime to hours and minutes
   const formatRuntime = (minutes: number) => {
     if (!minutes) return "TBD";
     const hours = Math.floor(minutes / 60);
@@ -144,7 +129,6 @@ const MovieDetailsPage: React.FC = () => {
     return `${hours}h ${mins}m`;
   };
 
-  // Group showtimes by date
   const groupedShowtimesByDate = showtimes.reduce<Record<string, Showtime[]>>(
     (acc, showtime) => {
       const date = new Date(showtime.startTime).toLocaleDateString();
@@ -159,7 +143,6 @@ const MovieDetailsPage: React.FC = () => {
     {}
   );
 
-  // Get dates array for date selector
   const dateOptions = Object.keys(groupedShowtimesByDate)
     .map((dateString) => {
       const date = new Date(dateString);
@@ -189,7 +172,6 @@ const MovieDetailsPage: React.FC = () => {
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Format showtime
   const formatShowtime = (datetime: string) => {
     const options: Intl.DateTimeFormatOptions = {
       hour: "numeric",
@@ -198,27 +180,22 @@ const MovieDetailsPage: React.FC = () => {
     return new Date(datetime).toLocaleTimeString(undefined, options);
   };
 
-  // Handle booking
   const handleBookShowtime = (showtimeId: number) => {
     navigate(`/booking/${showtimeId}`);
   };
 
-  // Close trailer modal
   const closeTrailerModal = () => {
     setShowTrailerModal(false);
   };
 
-  // Handle returning to home page
   const handleReturnHome = () => {
     navigate("/");
   };
 
-  // Loading state
   if (loading) {
     return <div className="loading-container">Loading movie details...</div>;
   }
 
-  // Error state
   if (error || !movie) {
     return (
       <div className="error-container">
@@ -232,11 +209,9 @@ const MovieDetailsPage: React.FC = () => {
 
   return (
     <div className="movie-details-page">
-      {/* Movie hero section */}
       <div
         className="movie-hero"
-        style={{ backgroundImage: `url(${movie.posterUrl})` }}
-      >
+        style={{ backgroundImage: `url(${movie.posterUrl})` }}>
         <div className="movie-hero-overlay"></div>
         <div className="movie-hero-content">
           <div className="movie-info-container">
@@ -273,8 +248,7 @@ const MovieDetailsPage: React.FC = () => {
                     if (showtimeSection) {
                       showtimeSection.scrollIntoView({ behavior: "smooth" });
                     }
-                  }}
-                >
+                  }}>
                   BOOK TICKETS
                 </button>
 
@@ -293,11 +267,9 @@ const MovieDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Showtimes section */}
       <section id="showtimes" className="showtimes-section">
         <h2 className="section-title">Showtimes</h2>
 
-        {/* Show selected theater heading */}
         {displayTheater && (
           <div className="selected-theater-info">
             <h3>{displayTheater.name}</h3>
@@ -305,7 +277,6 @@ const MovieDetailsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Date selector tabs */}
         {dateOptions.length > 0 && (
           <div className="date-tabs">
             {dateOptions.map((dateOption) => (
@@ -314,15 +285,13 @@ const MovieDetailsPage: React.FC = () => {
                 className={`date-tab ${
                   selectedDate === dateOption.date ? "active" : ""
                 }`}
-                onClick={() => setSelectedDate(dateOption.date)}
-              >
+                onClick={() => setSelectedDate(dateOption.date)}>
                 {dateOption.display}
               </button>
             ))}
           </div>
         )}
 
-        {/* Showtimes display */}
         {dateOptions.length === 0 ? (
           <div className="no-showtimes">
             <p>
@@ -348,8 +317,7 @@ const MovieDetailsPage: React.FC = () => {
                       <button
                         key={showtime.id}
                         className="time-slot"
-                        onClick={() => handleBookShowtime(showtime.id)}
-                      >
+                        onClick={() => handleBookShowtime(showtime.id)}>
                         {formatShowtime(showtime.startTime)}
                         <span className="time-price">
                           ${showtime.ticketPrice.toFixed(2)}
@@ -375,9 +343,7 @@ const MovieDetailsPage: React.FC = () => {
         )}
       </section>
 
-      {/* ThemeToggle */}
       <ThemeToggle position="bottomRight" />
-      {/* Footer */}
       <Footer />
     </div>
   );

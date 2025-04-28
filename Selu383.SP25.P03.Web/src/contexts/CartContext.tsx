@@ -4,7 +4,7 @@ import { CartItem } from "../types/booking";
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (index: number) => void; // Changed from seatId to index
+  removeFromCart: (index: number) => void;
   clearCart: () => void;
   total: number;
 }
@@ -18,30 +18,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
 
   const addToCart = (item: CartItem) => {
     setCartItems((prevItems) => {
-      // Check if it's a food item by type
       if (item.type === "food") {
-        // For food items, just add to cart
         return [...prevItems, item];
       } else {
-        // For seat items, check if seat already exists in cart
         const existingItemIndex = prevItems.findIndex(
           (i) => i.type !== "food" && i.seatId === item.seatId
         );
 
         if (existingItemIndex > -1) {
-          // Replace existing item
           const newItems = [...prevItems];
           newItems[existingItemIndex] = item;
           return newItems;
         }
 
-        // Add new seat item
         return [...prevItems, item];
       }
     });
   };
 
-  // Change removeFromCart to use index instead of seatId
   const removeFromCart = (index: number) => {
     setCartItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
@@ -54,8 +48,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, clearCart, total }}
-    >
+      value={{ cartItems, addToCart, removeFromCart, clearCart, total }}>
       {children}
     </CartContext.Provider>
   );

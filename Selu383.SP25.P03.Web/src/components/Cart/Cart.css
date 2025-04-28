@@ -186,7 +186,6 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Custom scrollbar for cart items */
 .cart-items::-webkit-scrollbar {
   width: 6px;
 }
@@ -200,7 +199,6 @@
   border-radius: 3px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 576px) {
   .cart-dropdown {
     width: 280px;

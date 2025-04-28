@@ -7,14 +7,13 @@
   width: 100vw;
   max-width: unset;
 }
-/* Movie hero section */
 .movie-hero {
   position: relative;
   height: 90vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin-top: 60px; /* Space for the navbar */
+  margin-top: 60px;
 }
 
 .movie-hero-overlay {
@@ -48,7 +47,6 @@
   width: 100%;
 }
 
-/* Movie poster with hover effect */
 .movie-poster {
   flex-shrink: 0;
   width: 320px;
@@ -114,7 +112,6 @@
   margin-top: 1rem;
 }
 
-/* Improved button styles */
 .btn-play,
 .btn-book,
 .btn {
@@ -162,7 +159,6 @@
   box-shadow: 0 4px 12px rgba(101, 163, 13, 0.3);
 }
 
-/* Synopsis styles */
 .movie-synopsis {
   max-width: 800px;
   margin-top: 1rem;
@@ -181,7 +177,6 @@
   color: #f8f9fa;
 }
 
-/* Showtimes section */
 .showtimes-section {
   padding: 4rem 2rem;
   max-width: 1200px;
@@ -196,7 +191,6 @@
   color: #f8f9fa;
 }
 
-/* Selected theater info */
 .selected-theater-info {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -217,7 +211,6 @@
   margin: 0;
 }
 
-/* Date tabs */
 .date-tabs {
   display: flex;
   justify-content: center;
@@ -306,7 +299,6 @@
   color: #ffffff;
 }
 
-/* Trailer modal */
 .trailer-modal {
   position: fixed;
   top: 0;
@@ -368,7 +360,6 @@ iframe {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Error page */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -397,7 +388,6 @@ iframe {
   font-size: 1.5rem;
 }
 
-/* Responsive styles */
 @media (max-width: 992px) {
   .movie-info-container {
     flex-direction: column;
@@ -517,14 +507,13 @@ iframe {
   }
 }
 
-/* Movie hero section */
 .movie-hero {
   position: relative;
   height: 90vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin-top: 60px; /* Space for the navbar */
+  margin-top: 60px;
 }
 
 .movie-hero-overlay {
@@ -558,7 +547,6 @@ iframe {
   width: 100%;
 }
 
-/* Movie poster with hover effect */
 .movie-poster {
   flex-shrink: 0;
   width: 320px;
@@ -624,7 +612,6 @@ iframe {
   margin-top: 1rem;
 }
 
-/* Improved button styles */
 .btn-play,
 .btn-book,
 .btn {
@@ -672,7 +659,6 @@ iframe {
   box-shadow: 0 4px 12px rgba(101, 163, 13, 0.3);
 }
 
-/* Synopsis styles */
 .movie-synopsis {
   max-width: 800px;
   margin-top: 1rem;
@@ -691,7 +677,6 @@ iframe {
   color: #f8f9fa;
 }
 
-/* Showtimes section */
 .showtimes-section {
   padding: 4rem 2rem;
   max-width: 1200px;
@@ -706,7 +691,6 @@ iframe {
   color: #f8f9fa;
 }
 
-/* Selected theater info */
 .selected-theater-info {
   text-align: center;
   margin-bottom: 2.5rem;
@@ -727,7 +711,6 @@ iframe {
   margin: 0;
 }
 
-/* Date tabs */
 .date-tabs {
   display: flex;
   justify-content: center;
@@ -816,7 +799,6 @@ iframe {
   color: #ffffff;
 }
 
-/* Trailer modal */
 .trailer-modal {
   position: fixed;
   top: 0;
@@ -878,7 +860,6 @@ iframe {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Error page */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -907,7 +888,6 @@ iframe {
   font-size: 1.5rem;
 }
 
-/* Responsive styles */
 @media (max-width: 992px) {
   .movie-info-container {
     flex-direction: column;
@@ -1026,7 +1006,6 @@ iframe {
     font-size: 1.25rem;
   }
 }
-/* Add these styles to your MovieDetailsPage1.css */
 
 .trailer-content {
   background: #222;
@@ -1062,7 +1041,6 @@ iframe {
   background: #cc0000;
 }
 
-/* Update the trailer-container to be appropriate for text content */
 .trailer-container {
   background: transparent;
   width: 90%;
@@ -1072,7 +1050,6 @@ iframe {
   border-radius: 8px;
 }
 
-/* Adjust the close button */
 .close-trailer {
   position: absolute;
   top: -10px;

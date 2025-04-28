@@ -13,7 +13,7 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import { CartProvider } from "./contexts/CartContext";
 import { TheaterProvider } from "./contexts/TheaterContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ThemeProvider } from "./contexts/Themecontext"; // Add the ThemeProvider import
+import { ThemeProvider } from "./contexts/Themecontext";
 import "./App.css";
 
 function App() {
