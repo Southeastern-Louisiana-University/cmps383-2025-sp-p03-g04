@@ -1,4 +1,4 @@
-// App.tsx
+// src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/HomePage/HomePage";
@@ -8,6 +8,8 @@ import MoviesPage from "./pages/MoviesPage/MoviesPage";
 import BookingPage from "./pages/BookingPage/BookingPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import ConfirmationPage from "./pages/ConfirmationPage/ConfirmationPage";
+import SignInPage from "./pages/SignInPage/SignInPage";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import { CartProvider } from "./contexts/CartContext";
 import { TheaterProvider } from "./contexts/TheaterContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -19,7 +21,7 @@ function App() {
     <AuthProvider>
       <TheaterProvider>
         <CartProvider>
-          <ThemeProvider> {/* Add ThemeProvider here */}
+          <ThemeProvider>
             <Router>
               <div className="app">
                 <Navbar />
@@ -34,8 +36,9 @@ function App() {
                   <Route
                     path="/concessions/:id"
                     element={<ConcessionsPage />}
-                  />{" "}
-                  {/* Add route for concessions with ID */}
+                  />
+                  <Route path="/signin" element={<SignInPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route
                     path="*"
                     element={<div className="not-found">Page not found</div>}

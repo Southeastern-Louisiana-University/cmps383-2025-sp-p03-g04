@@ -1,4 +1,5 @@
-const BASE_URL = '/api/authentication';
+// src/services/authService.ts
+const BASE_URL = "/api/authentication";
 
 export interface LoginData {
   userName: string;
@@ -8,6 +9,7 @@ export interface LoginData {
 export interface RegisterData {
   username: string;
   password: string;
+  email?: string;
   roles: string[];
 }
 
@@ -17,63 +19,94 @@ export interface UserDto {
   roles: string[];
 }
 
-export const login = async (data: LoginData): Promise<UserDto> => {
-  const response = await fetch(`${BASE_URL}/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(data)
-  });
-  
-  if (!response.ok) {
-    throw new Error('Login failed');
+export const login = async (
+  username: string,
+  password: string
+): Promise<UserDto> => {
+  try {
+    const response = await fetch(`${BASE_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        userName: username, // Make sure the casing matches your backend
+        password: password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Login failed");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error;
   }
-  
-  return response.json();
 };
 
 export const logout = async (): Promise<void> => {
-  const response = await fetch(`${BASE_URL}/logout`, {
-    method: 'POST',
-    credentials: 'include'
-  });
-  
-  if (!response.ok) {
-    throw new Error('Logout failed');
+  try {
+    const response = await fetch(`${BASE_URL}/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Logout failed");
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw error;
   }
 };
 
 export const getCurrentUser = async (): Promise<UserDto | null> => {
   try {
     const response = await fetch(`${BASE_URL}/me`, {
-      credentials: 'include'
+      credentials: "include",
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     return response.json();
   } catch {
     return null;
   }
 };
 
-export const register = async (data: RegisterData): Promise<UserDto> => {
-  const response = await fetch(`${BASE_URL}/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(data)
-  });
-  
-  if (!response.ok) {
-    throw new Error('Registration failed');
+export const register = async (
+  username: string,
+  password: string,
+  roles: string[] = ["User"]
+): Promise<UserDto> => {
+  try {
+    const response = await fetch(`${BASE_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        roles: roles,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Registration failed");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Registration error:", error);
+    throw error;
   }
-  
-  return response.json();
 };

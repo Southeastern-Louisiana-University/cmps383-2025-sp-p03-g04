@@ -1,5 +1,6 @@
+// src/contexts/AuthContext.tsx
 import React, { useEffect, useState, createContext, useContext } from "react";
-import * as authService from "../services/auth/authService";
+import * as authService from "../services/authService"; // Use the real backend service
 import { UserRole } from "../types/user";
 import { AuthContextType } from "../types/api/auth";
 
@@ -10,9 +11,6 @@ const AuthContext = createContext<AuthContextType>({
     return "customer";
   },
   signOut: async () => {},
-  signUp: async () => {
-    return "customer";
-  },
   isAuthenticated: false,
 });
 
@@ -26,24 +24,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const id = await localStorage.getItem("userId");
-        const username = await localStorage.getItem("username");
-        const role = await localStorage.getItem("userRole");
+        // Try to get current user from backend if there's an active session
+        try {
+          const currentUser = await authService.getCurrentUser();
+          if (currentUser) {
+            const appRole = mapBackendRoleToAppRole(
+              currentUser.roles?.[0] || "User"
+            );
+            setUser({
+              id: currentUser.id,
+              username: currentUser.userName,
+              role: appRole,
+            });
+            setIsAuthenticated(true);
+          }
+        } catch (error) {
+          // No active session, check localStorage as fallback
+          const id = localStorage.getItem("userId");
+          const username = localStorage.getItem("username");
+          const role = localStorage.getItem("userRole");
 
-        if (id && username && role) {
-          const appRole = mapBackendRoleToAppRole(role);
-
-          setUser({
-            id: parseInt(id),
-            username,
-            role: appRole,
-          });
-          setIsAuthenticated(true);
+          if (id && username && role) {
+            const appRole = mapBackendRoleToAppRole(role);
+            setUser({
+              id: parseInt(id),
+              username,
+              role: appRole,
+            });
+            setIsAuthenticated(true);
+          }
         }
       } catch (error: any) {
         console.error("Error loading user:", error);
-
-        await localStorage.multiRemove(["userId", "username", "userRole"]);
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userRole");
       } finally {
         setIsLoading(false);
       }
@@ -65,14 +80,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (username: string, password: string) => {
     try {
+      console.log("AuthContext: Starting sign in process");
+
+      // Use the real backend login service
       const response = await authService.login(username, password);
 
-      const backendRole = response.roles[0];
+      console.log("AuthContext: Login response received:", response);
+
+      const backendRole = response.roles?.[0] || "User";
       const appRole = mapBackendRoleToAppRole(backendRole);
 
-      await localStorage.setItem("userId", response.id.toString());
-      await localStorage.setItem("username", response.userName);
-      await localStorage.setItem("userRole", backendRole);
+      localStorage.setItem("userId", response.id.toString());
+      localStorage.setItem("username", response.userName);
+      localStorage.setItem("userRole", backendRole);
 
       setUser({
         id: response.id,
@@ -83,40 +103,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return appRole;
     } catch (error: any) {
-      console.error("Sign in error:", error);
-      throw error;
+      console.error("Sign in error in AuthContext:", error);
+
+      // Provide more specific error messages
+      if (error.message.includes("400")) {
+        throw new Error("Invalid username or password");
+      } else if (error.message.includes("401")) {
+        throw new Error("Invalid username or password");
+      } else if (error.message.includes("500")) {
+        throw new Error("Server error. Please try again later.");
+      } else if (error.message.includes("404")) {
+        throw new Error(
+          "Authentication service not found. Please check server configuration."
+        );
+      } else {
+        throw error;
+      }
     }
   };
 
-  const signUp = async (username: string, password: string, email?: string) => {
-    try {
-      await authService.register({
-        username,
-        password,
-        email: email || "",
-        roles: ["User"],
-      });
-
-      return await signIn(username, password);
-    } catch (error: any) {
-      console.error("Sign up error:", error);
-      throw error;
-    }
-  };
   const signOut = async () => {
     try {
-      await localStorage.multiRemove(["userId", "username", "userRole"]);
+      // Call backend logout
+      await authService.logout();
+
+      // Clear local state and storage
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userRole");
       setUser(null);
       setIsAuthenticated(false);
-
-      authService.logout().catch((error: any) => {
-        console.error("API logout error (ignored):", error);
-      });
     } catch (error: any) {
       console.error("Sign out error:", error);
+      // Clear state anyway even if backend logout fails
       setUser(null);
       setIsAuthenticated(false);
-      throw error;
     }
   };
 
@@ -127,7 +148,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signOut,
-        signUp,
         isAuthenticated,
       }}
     >
