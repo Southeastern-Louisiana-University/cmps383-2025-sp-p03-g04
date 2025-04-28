@@ -280,9 +280,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Complete guest booking
-  // In components/BookingProvider.tsx
-  // Update the completeGuestBooking method:
+  // This is the updated completeGuestBooking method for the BookingProvider
+  // You would place this in components/BookingProvider.tsx
 
   const completeGuestBooking = async (
     showtime: Showtime
@@ -313,7 +312,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         totalAmount: calculateTotal(),
         isPaid: true,
         reservationTime: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000
+        ).toISOString(),
         tickets: selectedSeats.map((seatId) => {
           // Find seat information in the seating layout
           let seatRow = "";
@@ -361,7 +362,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         ? JSON.parse(existingTicketsStr)
         : [];
 
-      guestTickets.push({
+      // Create a new guest ticket record with all required fields
+      const newTicket = {
         reservationId: guestReservationId,
         movieTitle: guestReservation.movieTitle,
         theaterName: guestReservation.theaterName,
@@ -372,8 +374,13 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         foodItems: guestReservation.foodItems,
         foodDeliveryType: guestReservation.foodDeliveryType,
         purchaseDate: new Date().toISOString(),
-      });
+        isPaid: true, // Ensure this is marked as paid
+        // Add a confirmation code for display on the ticket
+        confirmationCode: `LD${guestReservationId.toString().slice(-6)}`,
+      };
 
+      // Add the new ticket to the list and save to AsyncStorage
+      guestTickets.push(newTicket);
       await AsyncStorage.setItem("guestTickets", JSON.stringify(guestTickets));
       console.log("Saved guest tickets to storage");
 

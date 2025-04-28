@@ -1,3 +1,4 @@
+// This version fixes the TypeScript error with id type mismatch
 import React, { useEffect } from "react";
 import {
   View,
@@ -66,35 +67,43 @@ export default function PaymentScreen() {
           console.log("Completing guest booking");
           // For guest users
           if (booking.showtime) {
-            const result = await booking.completeGuestBooking(booking.showtime);
-            console.log("Guest booking completed:", result);
+            try {
+              const result = await booking.completeGuestBooking(
+                booking.showtime
+              );
+              console.log("Guest booking completed:", result);
 
-            // Use relative path format with "../" to navigate up one level and then down to confirmation
-            router.push({
-              pathname: "../confirmation",
-              params: {
-                id: id,
-                reservationId: result.reservationId.toString(),
-                guest: "true",
-              },
-            });
+              // FIX: Use absolute path format and convert id to string
+              router.push({
+                pathname: "/booking/[id]/confirmation",
+                params: {
+                  id: String(id),
+                  reservationId: result.reservationId.toString(),
+                  guest: "true",
+                },
+              });
+            } catch (error) {
+              console.error("Error completing guest booking:", error);
+              Alert.alert("Error", "Could not complete your booking.");
+            }
           } else {
             Alert.alert("Error", "Missing showtime information");
           }
         } else {
           console.log("Navigating to confirmation for authenticated user");
-          // For authenticated users - also use relative path
+          // For authenticated users - also use absolute path
           router.push({
-            pathname: "../confirmation",
+            pathname: "/booking/[id]/confirmation",
             params: {
-              id: id,
+              id: String(id),
               reservationId: booking.reservationId!.toString(),
             },
           });
         }
 
         // Reset booking state after navigating to confirmation
-        booking.resetBooking();
+        // Don't reset yet - wait until after confirmation screen has loaded
+        // booking.resetBooking();
       } else {
         Alert.alert(
           "Payment Failed",
