@@ -1,6 +1,3 @@
-// This is the updated confirmation screen
-// app/booking/[id]/confirmation.tsx
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -128,8 +125,6 @@ export default function ConfirmationScreen() {
       } finally {
         setIsLoading(false);
 
-        // Reset booking state after confirmation screen has loaded
-        // This ensures we don't lose the data before it's displayed
         setTimeout(() => {
           booking.resetBooking();
         }, 1000);
@@ -529,12 +524,10 @@ const styles = StyleSheet.create({
     width: 220,
     alignItems: "center",
     justifyContent: "center",
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    // Shadow for Android
     elevation: 4,
   },
   scanText: {

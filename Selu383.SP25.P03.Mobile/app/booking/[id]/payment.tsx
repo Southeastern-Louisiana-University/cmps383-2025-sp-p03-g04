@@ -1,4 +1,3 @@
-// This version fixes the TypeScript error with id type mismatch
 import React, { useEffect } from "react";
 import {
   View,
@@ -26,16 +25,13 @@ export default function PaymentScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // Ensure we have booking data
   useEffect(() => {
     const checkBookingData = async () => {
       console.log("Checking booking data in payment page");
       if (!booking.showtime) {
         console.log("No showtime data, trying to load from progress");
-        // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
-        // If still no data, redirect to seat selection
         if (!loaded) {
           console.log("Failed to load progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
@@ -44,7 +40,6 @@ export default function PaymentScreen() {
         }
       }
 
-      // If we have a reservation ID but don't have the reservation data, load it
       if (booking.reservationId && !booking.reservation && !booking.isGuest) {
         console.log("Loading reservation data for ID:", booking.reservationId);
         await booking.loadReservation(booking.reservationId);
@@ -73,7 +68,6 @@ export default function PaymentScreen() {
               );
               console.log("Guest booking completed:", result);
 
-              // FIX: Use absolute path format and convert id to string
               router.push({
                 pathname: "/booking/[id]/confirmation",
                 params: {
@@ -91,7 +85,6 @@ export default function PaymentScreen() {
           }
         } else {
           console.log("Navigating to confirmation for authenticated user");
-          // For authenticated users - also use absolute path
           router.push({
             pathname: "/booking/[id]/confirmation",
             params: {
@@ -100,10 +93,6 @@ export default function PaymentScreen() {
             },
           });
         }
-
-        // Reset booking state after navigating to confirmation
-        // Don't reset yet - wait until after confirmation screen has loaded
-        // booking.resetBooking();
       } else {
         Alert.alert(
           "Payment Failed",
@@ -212,7 +201,6 @@ export default function PaymentScreen() {
                     ? booking.showtime.ticketPrice
                     : 0;
 
-                  // Apply discount based on ticket type
                   if (ticketType === "Child") price *= 0.75; // 25% off
                   if (ticketType === "Senior") price *= 0.8; // 20% off
 
