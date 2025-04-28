@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 const LoginPage: React.FC = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,7 +55,6 @@ const LoginPage: React.FC = () => {
         }
         navigate(location.state?.from || "/");
       } else {
-        await signUp(username, password);
         navigate("/");
       }
     } catch (err: any) {
