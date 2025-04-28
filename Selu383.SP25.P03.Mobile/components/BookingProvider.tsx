@@ -13,7 +13,6 @@ import { FoodOrderRequest } from "../types/api/concessions";
 import { SeatingLayout } from "../types/models/theater";
 
 interface BookingContextType {
-  // State
   showtimeId: number | null;
   showtime: Showtime | null;
   selectedSeats: number[];
@@ -27,11 +26,9 @@ interface BookingContextType {
   paymentMethod: string;
   isGuest: boolean;
 
-  // Loading and error states
   isLoading: boolean;
   error: string | null;
 
-  // Methods
   loadShowtime: (id: number) => Promise<void>;
   loadSeatingLayout: (showtimeId: number, userId?: number) => Promise<void>;
   loadReservation: (id: number) => Promise<void>;
@@ -64,7 +61,6 @@ export function useBooking() {
 }
 
 export function BookingProvider({ children }: { children: React.ReactNode }) {
-  // State
   const [showtimeId, setShowtimeId] = useState<number | null>(null);
   const [showtime, setShowtime] = useState<Showtime | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
@@ -84,16 +80,13 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   const [paymentMethod, setPaymentMethod] = useState<string>("visa");
   const [isGuest, setIsGuest] = useState<boolean>(false);
 
-  // UI states
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update total amount when selections change
   useEffect(() => {
     setTotalAmount(calculateTotal());
   }, [selectedSeats, ticketTypes, foodItems, showtime]);
 
-  // Load a showtime by ID
   const loadShowtime = async (id: number) => {
     setIsLoading(true);
     setError(null);
@@ -110,7 +103,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Load seating layout
   const loadSeatingLayout = async (showtimeId: number, userId?: number) => {
     setIsLoading(true);
     setError(null);
@@ -129,7 +121,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Load a reservation by ID
   const loadReservation = async (id: number) => {
     setIsLoading(true);
     setError(null);
@@ -146,53 +137,45 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Toggle seat selection
   const toggleSeatSelection = (seatId: number) => {
     setSelectedSeats((prev) => {
       if (prev.includes(seatId)) {
-        // Remove seat and ticket type
         const newTicketTypes = { ...ticketTypes };
         delete newTicketTypes[seatId];
         setTicketTypes(newTicketTypes);
 
         return prev.filter((id) => id !== seatId);
       } else {
-        // Add seat with Adult as default type
         setTicketTypes({ ...ticketTypes, [seatId]: "Adult" });
         return [...prev, seatId];
       }
     });
   };
 
-  // Set ticket type
   const setTicketType = (seatId: number, type: string) => {
     setTicketTypes((prev) => ({ ...prev, [seatId]: type }));
   };
 
-  // Calculate total amount
   const calculateTotal = () => {
     let total = 0;
 
-    // Calculate ticket prices
     if (showtime && selectedSeats.length > 0) {
       const basePrice = showtime.ticketPrice;
 
       total += selectedSeats.reduce((sum, seatId) => {
         const ticketType = ticketTypes[seatId] || "Adult";
 
-        // Apply discount based on ticket type
         switch (ticketType) {
           case "Child":
-            return sum + basePrice * 0.75; // 25% off for children
+            return sum + basePrice * 0.75;
           case "Senior":
-            return sum + basePrice * 0.8; // 20% off for seniors
+            return sum + basePrice * 0.8;
           default:
-            return sum + basePrice; // Full price for adults
+            return sum + basePrice;
         }
       }, 0);
     }
 
-    // Add food items
     total += foodItems.reduce((sum, item) => {
       return sum + item.price * item.quantity;
     }, 0);
@@ -200,7 +183,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     return total;
   };
 
-  // Create a reservation
   const createReservation = async (): Promise<number | null> => {
     if (!showtimeId || selectedSeats.length === 0) {
       setError("Please select seats before creating a reservation");
@@ -238,21 +220,16 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Process payment
   const processPayment = async (): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
 
     try {
       if (isGuest) {
-        // For guest users, we'll simulate payment and store in AsyncStorage
-        // This would be handled by the completeGuestBooking method
         return true;
       } else if (reservationId) {
-        // For authenticated users
         await reservationService.payForReservation(reservationId);
 
-        // Create food order if there are items
         if (foodItems.length > 0) {
           const foodOrderRequest: FoodOrderRequest = {
             deliveryType: foodDeliveryType,
@@ -280,9 +257,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // This is the updated completeGuestBooking method for the BookingProvider
-  // You would place this in components/BookingProvider.tsx
-
   const completeGuestBooking = async (
     showtime: Showtime
   ): Promise<{ reservationId: number }> => {
@@ -297,13 +271,11 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       console.log("Selected seats:", selectedSeats);
       console.log("Food items:", foodItems);
 
-      // Create a unique ID for the guest reservation
       const guestReservationId = new Date().getTime();
 
-      // Create a guest reservation object with all necessary data
       const guestReservation = {
         id: guestReservationId,
-        reservationId: guestReservationId, // Add this for consistency with backend objects
+        reservationId: guestReservationId,
         movieTitle: showtime.movieTitle,
         theaterName: showtime.theaterName,
         screenName: showtime.screenName,
@@ -316,7 +288,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           Date.now() + 30 * 24 * 60 * 60 * 1000
         ).toISOString(),
         tickets: selectedSeats.map((seatId) => {
-          // Find seat information in the seating layout
           let seatRow = "";
           let seatNumber = 0;
 
@@ -333,11 +304,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
             }
           }
 
-          // Calculate price based on ticket type
           const ticketType = ticketTypes[seatId] || "Adult";
           let price = showtime.ticketPrice;
 
-          // Apply discount based on ticket type
           if (ticketType === "Child") price *= 0.75; // 25% off
           if (ticketType === "Senior") price *= 0.8; // 20% off
 
@@ -356,7 +325,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
       console.log("Created guest reservation:", guestReservationId);
 
-      // Store in AsyncStorage for guest users
       const existingTicketsStr = await AsyncStorage.getItem("guestTickets");
       const guestTickets = existingTicketsStr
         ? JSON.parse(existingTicketsStr)
@@ -384,7 +352,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem("guestTickets", JSON.stringify(guestTickets));
       console.log("Saved guest tickets to storage");
 
-      // Clean up temporary storage
       await AsyncStorage.removeItem("bookingProgress");
       console.log("Cleared booking progress");
 
@@ -398,21 +365,17 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Food-related methods
   const addFoodItem = (foodItem: any, quantity: number) => {
     setFoodItems((prev) => {
-      // Check if item already exists
       const existingItemIndex = prev.findIndex(
         (item) => item.foodItemId === foodItem.id
       );
 
       if (existingItemIndex >= 0) {
-        // Update quantity if item exists
         const newItems = [...prev];
         newItems[existingItemIndex].quantity += quantity;
         return newItems;
       } else {
-        // Add new item
         return [
           ...prev,
           {
@@ -436,11 +399,9 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       if (existingItemIndex >= 0) {
         const newItems = [...prev];
         if (newItems[existingItemIndex].quantity > 1) {
-          // Decrease quantity if more than 1
           newItems[existingItemIndex].quantity -= 1;
           return newItems;
         } else {
-          // Remove item if quantity would be 0
           return prev.filter((item) => item.foodItemId !== foodItemId);
         }
       }
@@ -449,7 +410,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Save booking progress to AsyncStorage
   const saveBookingProgress = async (): Promise<void> => {
     try {
       const bookingData = JSON.stringify({
@@ -469,7 +429,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Load booking progress from AsyncStorage
   const loadBookingProgress = async (): Promise<boolean> => {
     try {
       const bookingData = await AsyncStorage.getItem("bookingProgress");
@@ -477,7 +436,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       if (bookingData) {
         const parsed = JSON.parse(bookingData);
 
-        // Check if the data is still valid (e.g., not older than 30 minutes)
         const timestamp = new Date(parsed.timestamp);
         const now = new Date();
         const timeDiffMinutes =
@@ -492,7 +450,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           setFoodDeliveryType(parsed.foodDeliveryType || "Pickup");
           setIsGuest(parsed.isGuest || false);
 
-          // Load showtime data if needed
           if (parsed.showtimeId && !showtime) {
             await loadShowtime(parsed.showtimeId);
           }
@@ -508,7 +465,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Reset booking state
   const resetBooking = () => {
     setShowtimeId(null);
     setShowtime(null);
@@ -523,7 +479,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     setIsGuest(false);
 
-    // Clear saved progress
     AsyncStorage.removeItem("bookingProgress");
   };
 

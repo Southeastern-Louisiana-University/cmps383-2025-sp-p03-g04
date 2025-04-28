@@ -56,11 +56,9 @@ export default function SeatSelectionScreen() {
       return;
     }
 
-    // Save current progress
     await booking.saveBookingProgress();
 
     if (!isAuthenticated) {
-      // Set guest mode flag
       booking.setIsGuest(true);
       console.log("Setting guest mode and presenting options");
 
@@ -79,7 +77,6 @@ export default function SeatSelectionScreen() {
             text: "Continue as Guest",
             onPress: () => {
               console.log("User chose to continue as guest");
-              // Proceed to food options page
               router.push(`/booking/${id}/food-option`);
             },
           },
@@ -89,12 +86,10 @@ export default function SeatSelectionScreen() {
     } else {
       try {
         console.log("Creating reservation for authenticated user");
-        // For authenticated users, create a reservation first
         const reservationId = await booking.createReservation();
 
         if (reservationId) {
           console.log("Reservation created:", reservationId);
-          // Proceed to food options
           router.push({
             pathname: `./booking/${id}/food-option`,
             params: { reservationId: reservationId.toString() },

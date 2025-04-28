@@ -16,7 +16,6 @@ export default function DeliveryOptionScreen() {
   const { isAuthenticated } = useAuth();
   const isDark = colorScheme === "dark";
 
-  // Parse cart items from params
   const [cartItems, setCartItems] = useState<any[]>([]);
 
   useEffect(() => {
@@ -36,12 +35,10 @@ export default function DeliveryOptionScreen() {
   }, [params.cartItems]);
 
   const handleDeliveryOption = async (deliveryType: "Pickup" | "ToSeat") => {
-    // Save cart and delivery option to AsyncStorage
     try {
       await AsyncStorage.setItem("foodCart", JSON.stringify(cartItems));
       await AsyncStorage.setItem("foodDeliveryType", deliveryType);
 
-      // If user wants delivery to seat but isn't authenticated, prompt login
       if (deliveryType === "ToSeat" && !isAuthenticated) {
         Alert.alert(
           "Authentication Required",
@@ -56,14 +53,12 @@ export default function DeliveryOptionScreen() {
             {
               text: "Continue as Guest",
               onPress: () => {
-                // For guest, default to pickup
                 router.push("../food-checkout/payment");
               },
             },
           ]
         );
       } else {
-        // Otherwise proceed to payment
         router.push("../food-checkout/payment");
       }
     } catch (error) {

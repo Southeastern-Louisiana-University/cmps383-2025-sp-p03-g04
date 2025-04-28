@@ -18,7 +18,6 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import { useBooking } from "../../components/BookingProvider";
 import * as reservationService from "../../services/reservations/reservationService";
 import { ReservationResponse } from "../../types/api/reservations";
-import { cleanupExpiredGuestTickets } from "@/utils/secureStorage";
 
 export default function TicketsScreen() {
   const { user, isAuthenticated } = useAuth();
@@ -43,9 +42,6 @@ export default function TicketsScreen() {
     setError(null);
 
     try {
-      // First clean up expired tickets
-      await cleanupExpiredGuestTickets();
-
       if (isAuthenticated && user) {
         // Load authenticated user's tickets
         const userReservations = await reservationService.getUserReservations(
@@ -95,7 +91,7 @@ export default function TicketsScreen() {
   const handleViewTicket = (ticketId: number, isGuest: boolean = false) => {
     // View ticket details
     router.push({
-      pathname: `../booking/${isGuest ? "guest" : ticketId}/confirmation`,
+      pathname: `./booking/${isGuest ? "guest" : ticketId}/confirmation`,
       params: {
         reservationId: ticketId.toString(),
         guest: isGuest ? "true" : "false",

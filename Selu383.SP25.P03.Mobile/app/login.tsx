@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, View, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemedView } from '../components/ThemedView';
-import { ThemedText } from '../components/ThemedText';
-import { useAuth } from '../components/AuthProvider';
-import { loginStyles as styles } from '../styles/screens/loginScreen';
+import React, { useState, useEffect } from "react";
+import {
+  TouchableOpacity,
+  View,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "../components/ThemedText";
+import { useAuth } from "../components/AuthProvider";
+import { loginStyles as styles } from "../styles/screens/loginScreen";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -20,14 +27,12 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-  // Get selected role from storage
   useEffect(() => {
     const getRole = async () => {
       try {
         const role = await AsyncStorage.getItem("selectedRole");
         setSelectedRole(role);
 
-        // If no role is selected, go back to role selection
         if (!role) {
           router.replace("../role-selection");
         }
@@ -39,7 +44,6 @@ export default function LoginScreen() {
     getRole();
   }, []);
 
-  // Set background and accent colors based on role
   const getRoleColors = () => {
     switch (selectedRole) {
       case "staff":
@@ -81,7 +85,6 @@ export default function LoginScreen() {
     try {
       await signIn(username, password);
 
-      // Navigate to home
       router.replace("/");
     } catch (error) {
       console.error("Login error:", error);

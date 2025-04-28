@@ -15,7 +15,6 @@ export default function FoodOptionScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // Check if booking data is loaded
   useEffect(() => {
     const checkBookingData = async () => {
       console.log("Checking for booking data on food-option page");
@@ -24,10 +23,8 @@ export default function FoodOptionScreen() {
         console.log(
           "No showtime in booking context, attempting to load from progress"
         );
-        // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
-        // If still no data, redirect to seat selection
         if (!loaded) {
           console.log("Could not load booking progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
@@ -44,16 +41,13 @@ export default function FoodOptionScreen() {
 
   const handleSkipFood = () => {
     console.log("User chose to skip food");
-    // Skip food and go directly to payment
     router.push(`/booking/${id}/payment`);
   };
 
   const handleOrderFood = (deliveryType: "Pickup" | "ToSeat") => {
     console.log("User chose to order food with delivery type:", deliveryType);
-    // Set the delivery type in our booking context
     booking.setFoodDeliveryType(deliveryType);
 
-    // Go to concessions screen
     router.push(`/booking/${id}/concessions`);
   };
 

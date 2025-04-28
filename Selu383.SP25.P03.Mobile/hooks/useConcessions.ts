@@ -14,7 +14,6 @@ export function useConcessions() {
     "Pickup"
   );
 
-  // Calculate total
   const cartTotal = Object.entries(cart).reduce((sum, [id, quantity]) => {
     const item = foodItems.find((food) => food.id === parseInt(id));
     return sum + (item ? item.price * quantity : 0);
@@ -25,7 +24,6 @@ export function useConcessions() {
     setError(null);
 
     try {
-      // Load categories first
       const categoriesData = await concessionService.getFoodCategories();
       setCategories(categoriesData);
 
@@ -33,11 +31,9 @@ export function useConcessions() {
         setSelectedCategory(categoriesData[0].id);
       }
 
-      // Load all food items
       const itemsData = await concessionService.getConcessions();
       setFoodItems(itemsData);
 
-      // Restore cart from storage if available
       const savedCart = await AsyncStorage.getItem("foodCart");
       if (savedCart) {
         setCart(JSON.parse(savedCart));
@@ -50,7 +46,6 @@ export function useConcessions() {
     }
   };
 
-  // Save cart to storage whenever it changes
   useEffect(() => {
     if (Object.keys(cart).length > 0) {
       AsyncStorage.setItem("foodCart", JSON.stringify(cart));

@@ -9,7 +9,6 @@ export default function TabLayout() {
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Define theme-aware colors
   const tabBarBgColor = isDark ? UIColors.dark.tabBar : UIColors.light.tabBar;
   const activeTabColor = UIColors.brandGreen;
   const inactiveTabColor = isDark
@@ -42,69 +41,64 @@ export default function TabLayout() {
           color: headerTextColor,
         },
         headerTintColor: headerTextColor,
-        // Add this to hide the header title or customize it
-        headerTitle: "", // This removes the default route name title
+
+        headerTitle: "",
       }}
     >
-      {/* Home tab - visible to all users */}
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home", // This is the tab label
+          title: "Home",
           tabBarLabel: "Home",
-          headerTitle: "Lion's Den Cinemas", // This is the header title
+          headerTitle: "Lion's Den Cinemas",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Movies tab - visible to all users */}
       <Tabs.Screen
         name="movies"
         options={{
-          title: "Movies", // Tab label
+          title: "Movies",
           tabBarLabel: "Movies",
-          headerTitle: "Movies", // Header title
+          headerTitle: "Movies",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="film" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Tickets tab - visible to all users */}
       <Tabs.Screen
         name="tickets"
         options={{
-          title: "My Tickets", // Tab label
+          title: "My Tickets",
           tabBarLabel: "Tickets",
-          headerTitle: "My Tickets", // Header title
+          headerTitle: "My Tickets",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="ticket" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Food tab - visible to all users */}
       <Tabs.Screen
         name="concessions"
         options={{
-          title: "Order Food", // Tab label
+          title: "Order Food",
           tabBarLabel: "Food",
-          headerTitle: "Order Food", // Header title
+          headerTitle: "Order Food",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="fast-food" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Profile tab - visible to all users */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile", // Tab label
+          title: "Profile",
           tabBarLabel: "Profile",
-          headerTitle: "Profile", // Header title
+          headerTitle: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),

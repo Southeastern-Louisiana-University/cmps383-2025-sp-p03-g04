@@ -41,7 +41,6 @@ export default function ShowtimeDetailScreen() {
   }, [id]);
 
   const handleBookTickets = () => {
-    // Navigate to booking flow without requiring authentication
     router.push(`/booking/${id}/seats`);
   };
 
@@ -72,7 +71,6 @@ export default function ShowtimeDetailScreen() {
 
       <ThemedView style={{ flex: 1 }}>
         <ScrollView style={{ padding: 16 }}>
-          {/* Movie and Showtime Info */}
           <View style={{ marginBottom: 24 }}>
             <ThemedText
               style={{
@@ -140,7 +138,6 @@ export default function ShowtimeDetailScreen() {
             </View>
           </View>
 
-          {/* Book Tickets Button */}
           <TouchableOpacity
             style={{
               backgroundColor: "#B4D335",
@@ -158,7 +155,6 @@ export default function ShowtimeDetailScreen() {
             </ThemedText>
           </TouchableOpacity>
 
-          {/* View Theater Button */}
           <TouchableOpacity
             style={{
               backgroundColor: "#1E3A55",

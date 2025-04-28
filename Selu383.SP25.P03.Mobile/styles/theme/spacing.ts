@@ -1,4 +1,3 @@
-// Consistent spacing throughout the app
 export const Spacing = {
   xs: 4,
   s: 8,
@@ -8,17 +7,15 @@ export const Spacing = {
   xxl: 48,
 };
 
-// Common border radius values
 export const BorderRadius = {
   xs: 4,
   s: 8,
   m: 12,
   l: 16,
   xl: 24,
-  round: 9999, // For circular elements
+  round: 9999,
 };
 
-// Typography sizing and spacing
 export const Typography = {
   fontSize: {
     xs: 12,

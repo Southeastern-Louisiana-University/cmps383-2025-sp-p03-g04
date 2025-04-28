@@ -1,8 +1,5 @@
 import { BASE_URL } from "../../constants/BaseUrl";
 
-/**
- * Helper function to handle fetch requests
- */
 export async function fetchWithCredentials<T = any>(
   endpoint: string,
   options: RequestInit = {}
@@ -18,9 +15,7 @@ export async function fetchWithCredentials<T = any>(
       },
     });
 
-    // Handle different types of errors
     if (!response.ok) {
-      // Handle different status codes
       if (response.status === 401) {
         throw new Error("Authentication required. Please log in.");
       } else if (response.status === 403) {
@@ -28,7 +23,6 @@ export async function fetchWithCredentials<T = any>(
       } else if (response.status === 404) {
         throw new Error("The requested resource was not found.");
       } else {
-        // Try to get error details from response
         try {
           const errorData = await response.json();
           throw new Error(
@@ -43,7 +37,6 @@ export async function fetchWithCredentials<T = any>(
       }
     }
 
-    // Handle empty responses
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       return (await response.json()) as T;

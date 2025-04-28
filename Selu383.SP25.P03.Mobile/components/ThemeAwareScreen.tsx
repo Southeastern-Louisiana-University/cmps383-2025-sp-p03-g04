@@ -21,7 +21,6 @@ export function ThemeAwareScreen({
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Get the appropriate background color based on theme
   const backgroundColor = isDark
     ? UIColors.dark.background
     : UIColors.light.background;
