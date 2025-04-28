@@ -1,10 +1,9 @@
-/* Navbar styling */
+/* Navbar styling with auth support */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #000000;
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.11rem 2rem;
   border-bottom: 1px solid #65a30d;
   position: sticky;
@@ -15,7 +14,6 @@
 }
 
 .navbar.scrolled {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.4rem 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -30,9 +28,6 @@
   text-decoration: none;
   color: #f8f9fa;
   transition: transform 0.3s ease;
-  /* Optional: If logo/text is too tall, adjust its font-size or max-height */
-  /* font-size: 1rem; */
-  /* max-height: 30px; */ /* Example if it's an image */
 }
 
 .welcome-logo:hover {
@@ -49,14 +44,13 @@
 .primary-menu a {
   color: #f8f9fa;
   text-decoration: none;
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.25rem 1rem;
   margin: 0 0.5rem;
   border-radius: 4px;
   transition: all 0.3s ease;
   position: relative;
   font-weight: 500;
-  font-size: large; /* You might want to reduce this too, e.g., to 'medium' or '1rem' */
+  font-size: large;
 }
 
 /* Underline animation */
@@ -65,7 +59,7 @@
   position: absolute;
   width: 0;
   height: 2px;
-  bottom: 0; /* Adjust if underline looks off with new padding */
+  bottom: 0;
   left: 50%;
   background-color: #65a30d;
   transition: all 0.3s ease;
@@ -99,7 +93,6 @@
 }
 
 .theater-mode {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.25rem 1rem;
   background-color: transparent;
   border: 1px solid #65a30d;
@@ -113,7 +106,7 @@
   background-repeat: no-repeat;
   background-position: right 0.7rem top 50%;
   background-size: 0.65rem auto;
-  min-width: 180px; /* You might need to adjust min-width if text wraps */
+  min-width: 180px;
 }
 
 .theater-mode:hover {
@@ -128,7 +121,6 @@
 }
 
 .sign-in {
-  /* --- MODIFIED: Reduced top/bottom padding --- */
   padding: 0.25rem 1.5rem;
   background-color: #65a30d;
   color: #ffffff;
@@ -145,13 +137,72 @@
   box-shadow: 0 4px 8px rgba(101, 163, 13, 0.3);
 }
 
+/* User menu styles */
+.user-menu-container {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem;
+  background-color: transparent;
+  border: 1px solid #65a30d;
+  color: #65a30d;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.user-button:hover {
+  background-color: rgba(101, 163, 13, 0.1);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background-color: #1e293b;
+  border: 1px solid rgba(101, 163, 13, 0.3);
+  border-radius: 8px;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.user-dropdown a,
+.user-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: #f8f9fa;
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-dropdown a:hover,
+.user-dropdown button:hover {
+  background-color: rgba(101, 163, 13, 0.1);
+  color: #65a30d;
+}
+
 /* Mobile menu button with animation */
 .menu-toggle {
   display: none;
   background: none;
   border: none;
   color: #f8f9fa;
-  font-size: 1.5rem; /* Adjust if needed for vertical alignment */
+  font-size: 1.5rem;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -165,7 +216,7 @@
 .mobile-menu {
   display: none;
   position: absolute;
-  top: 100%; /* This will attach below the now shorter navbar */
+  top: 100%;
   left: 0;
   width: 100%;
   background-color: #000000;
@@ -177,16 +228,16 @@
 }
 
 .mobile-menu.active {
-  max-height: 300px; /* Adjust if content gets cut off */
-  padding: 0.5rem 0; /* Slightly reduced padding */
+  max-height: 400px;
+  padding: 0.5rem 0;
   border-bottom: 1px solid #65a30d;
 }
 
 .mobile-menu a {
   color: #f8f9fa;
   text-decoration: none;
-  padding: 0.6rem 2rem; /* Slightly reduced padding */
-  margin: 0.1rem 0; /* Slightly reduced margin */
+  padding: 0.6rem 2rem;
+  margin: 0.1rem 0;
   transition: all 0.3s ease;
 }
 
@@ -200,11 +251,30 @@
   background-color: rgba(101, 163, 13, 0.05);
 }
 
+/* Mobile Sign Out Button */
+.mobile-sign-out {
+  color: #f8f9fa;
+  text-decoration: none;
+  padding: 0.6rem 2rem;
+  margin: 0.1rem 0;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-sign-out:hover {
+  background-color: rgba(101, 163, 13, 0.1);
+  color: #65a30d;
+}
+
 /* Mobile Theater Dropdown */
 .mobile-theater-dropdown {
   display: flex;
   align-items: center;
-  padding: 0.6rem 2rem; /* Slightly reduced padding */
+  padding: 0.6rem 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -215,7 +285,7 @@
 
 .mobile-theater-dropdown select {
   flex-grow: 1;
-  padding: 0.4rem; /* Slightly reduced padding */
+  padding: 0.4rem;
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #f8f9fa;
@@ -243,7 +313,6 @@
   }
 
   .primary-menu a {
-    /* --- MODIFIED: Consistent padding reduction --- */
     padding: 0.25rem 0.75rem;
     margin: 0 0.25rem;
   }
@@ -251,7 +320,6 @@
 
 @media (max-width: 768px) {
   .navbar {
-    /* --- MODIFIED: Consistent padding reduction --- */
     padding: 0.5rem 1rem;
   }
 
@@ -277,13 +345,12 @@
   }
 
   .theater-mode,
-  .sign-in {
+  .sign-in,
+  .user-menu-container {
     display: none;
   }
 }
 
-/* Note: The @media (max-width: 480px) rule didn't directly style the navbar height, */
-/* so it remains unchanged unless specific adjustments are needed for very small screens. */
 @media (max-width: 480px) {
   .welcome-banner .text-container {
     width: 120px;
