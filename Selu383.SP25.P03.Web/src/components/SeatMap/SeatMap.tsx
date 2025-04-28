@@ -1,6 +1,6 @@
-import React from 'react';
-import { SeatingLayout } from '../../types/booking';
-import './SeatMap.css';
+import React from "react";
+import { SeatingLayout } from "../../types/booking";
+import "./SeatMap.css";
 
 interface SeatMapProps {
   seatingLayout: SeatingLayout;
@@ -13,7 +13,6 @@ const SeatMap: React.FC<SeatMapProps> = ({
   selectedSeats,
   onSeatSelect,
 }) => {
-  // Sort row keys alphabetically
   const sortedRowKeys = Object.keys(seatingLayout.rows).sort();
 
   return (
@@ -30,10 +29,11 @@ const SeatMap: React.FC<SeatMapProps> = ({
                 return (
                   <button
                     key={seat.id}
-                    className={`seat ${isTaken ? 'taken' : ''} ${isSelected ? 'selected' : ''}`}
+                    className={`seat ${isTaken ? "taken" : ""} ${
+                      isSelected ? "selected" : ""
+                    }`}
                     onClick={() => !isTaken && onSeatSelect(seat.id)}
-                    disabled={isTaken}
-                  >
+                    disabled={isTaken}>
                     {seat.number}
                   </button>
                 );

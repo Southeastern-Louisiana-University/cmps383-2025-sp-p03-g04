@@ -1,9 +1,5 @@
-// src/services/api/config.ts
 import { API_BASE_URL } from "../../constants/BaseUrl";
 
-/**
- * Helper function to handle fetch requests
- */
 export async function fetchWithCredentials<T = any>(
   endpoint: string,
   options: RequestInit = {}
@@ -24,7 +20,7 @@ export async function fetchWithCredentials<T = any>(
 
     const response = await fetch(url, {
       ...options,
-      credentials: "include", // Always include credentials for cookies
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
@@ -38,7 +34,6 @@ export async function fetchWithCredentials<T = any>(
     );
 
     if (!response.ok) {
-      // Try to get more detailed error information
       const contentType = response.headers.get("content-type");
       let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
 
@@ -61,7 +56,6 @@ export async function fetchWithCredentials<T = any>(
       throw new Error(errorMessage);
     }
 
-    // Handle empty responses (like for DELETE operations)
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();

@@ -1,4 +1,3 @@
-// This file contains functions to manage guest sessions, including creating, retrieving, and modifying guest session data.
 const GUEST_SESSION_KEY = "guest_session_id";
 
 export interface GuestSession {
@@ -25,7 +24,6 @@ export const createGuestSession = async (): Promise<string> => {
     const data = await response.json();
     const sessionId = data.sessionId || data.SessionId;
 
-    // Store session ID in localStorage
     localStorage.setItem(GUEST_SESSION_KEY, sessionId);
 
     return sessionId;
@@ -125,7 +123,6 @@ export const migrateGuestSession = async (
       throw new Error("Failed to migrate guest session");
     }
 
-    // Clear guest session from localStorage after successful migration
     localStorage.removeItem(GUEST_SESSION_KEY);
   } catch (error) {
     console.error("Error migrating guest session:", error);

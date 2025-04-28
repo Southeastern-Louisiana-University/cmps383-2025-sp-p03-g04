@@ -15,13 +15,12 @@ import { useCart } from "../../contexts/CartContext";
 import { CartItem } from "../../types/booking";
 import Footer from "../../components/Footer/Footer";
 import BookingModal from "./BookingModal/BookingModal";
-import "./BookingPage1.css";
+import "./BookingPage.css";
 
 const BookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // State for data
   const [showtime, setShowtime] = useState<Showtime | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [seatingLayout, setSeatingLayout] = useState<SeatingLayout | null>(
@@ -30,7 +29,6 @@ const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for selections
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [ticketTypes, setTicketTypes] = useState<Record<number, string>>({});
 
@@ -229,8 +227,7 @@ const BookingPage: React.FC = () => {
                   selectedSeats.some((s) => s.id === seat.id)
                     ? "selected"
                     : seat.status
-                }`}
-              >
+                }`}>
                 {seat.number}
               </button>
             );
@@ -363,8 +360,7 @@ const BookingPage: React.FC = () => {
                           value={ticketTypes[seat.id] || "Adult"}
                           onChange={(e) =>
                             handleTicketTypeChange(seat.id, e.target.value)
-                          }
-                        >
+                          }>
                           {ticketOptions.map((option) => (
                             <option key={option.type} value={option.type}>
                               {option.type} $
@@ -393,8 +389,7 @@ const BookingPage: React.FC = () => {
                 <button
                   className="checkout-button"
                   onClick={handleContinue}
-                  disabled={selectedSeats.length === 0}
-                >
+                  disabled={selectedSeats.length === 0}>
                   Continue
                 </button>
               </>

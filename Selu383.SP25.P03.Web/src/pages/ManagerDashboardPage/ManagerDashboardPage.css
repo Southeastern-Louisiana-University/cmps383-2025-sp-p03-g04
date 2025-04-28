@@ -1,4 +1,3 @@
-/* Base styles */
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +5,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background-color: #000000;
   color: #f8f9fa;
 }
@@ -17,7 +16,6 @@ body {
   flex-direction: column;
 }
 
-/* Header */
 .header {
   background-color: rgba(30, 41, 59, 0.8);
   padding: 1rem 2rem;
@@ -60,14 +58,12 @@ body {
   transform: translateY(-2px);
 }
 
-/* Main Content */
 .main-content {
   display: flex;
   flex: 1;
   height: calc(100vh - 64px);
 }
 
-/* Sidebar */
 .sidebar {
   width: 300px;
   background-color: rgba(30, 41, 59, 0.5);
@@ -176,7 +172,6 @@ body {
   text-align: center;
 }
 
-/* Movie Editor */
 .movie-editor {
   background-color: rgba(30, 41, 59, 0.5);
   border-radius: 8px;
@@ -281,7 +276,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Showtime Section */
 .showtime-section {
   background-color: rgba(30, 41, 59, 0.5);
   border-radius: 8px;
@@ -324,7 +318,8 @@ thead tr {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-th, td {
+th,
+td {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -375,7 +370,6 @@ td {
   color: #ef4444;
 }
 
-/* Modal Styles */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -437,7 +431,6 @@ td {
   padding: 0.5rem 1.25rem;
 }
 
-/* Responsive styles */
 @media (max-width: 1200px) {
   .editor-grid {
     grid-template-columns: 250px 1fr;

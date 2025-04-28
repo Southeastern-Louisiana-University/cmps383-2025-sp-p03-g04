@@ -1,4 +1,3 @@
-// src/components/Navbar/Navbar.tsx
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import TypewriterBanner from "../TypewriterBanner/TypewriterBanner";
@@ -7,10 +6,8 @@ import { useTheme } from "../../contexts/Themecontext";
 import { useAuth } from "../../contexts/AuthContext";
 import "./Navbar.css";
 
-// Services
 import { getTheaters } from "../../services/theaterService";
 
-// Types
 import { Theater } from "../../types/Theater";
 
 const Navbar: React.FC = () => {
@@ -21,19 +18,16 @@ const Navbar: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
 
-  // Use theme context
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { user, isAuthenticated, signOut } = useAuth();
 
-  // Fetch theaters on component mount
   useEffect(() => {
     const fetchTheaters = async () => {
       try {
         const theatersData = await getTheaters();
         setTheaters(theatersData);
 
-        // Check if there's a saved theater in localStorage
         const savedTheaterId = localStorage.getItem("selectedTheaterId");
         if (savedTheaterId) {
           const theater = theatersData.find(
@@ -42,7 +36,7 @@ const Navbar: React.FC = () => {
           if (theater) {
             setSelectedTheater(theater);
           } else if (theatersData.length > 0) {
-            // Fallback to first theater if saved theater not found
+            // Fallback to first theater if no damn theatre
             setSelectedTheater(theatersData[0]);
             localStorage.setItem(
               "selectedTheaterId",
@@ -50,7 +44,6 @@ const Navbar: React.FC = () => {
             );
           }
         } else if (theatersData.length > 0) {
-          // Default to first theater if no saved theater
           setSelectedTheater(theatersData[0]);
           localStorage.setItem(
             "selectedTheaterId",
@@ -65,13 +58,11 @@ const Navbar: React.FC = () => {
     fetchTheaters();
   }, []);
 
-  // Close menu when route changes
   useEffect(() => {
     setMenuOpen(false);
     setShowUserMenu(false);
   }, [location]);
 
-  // Add scroll effect
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -92,9 +83,7 @@ const Navbar: React.FC = () => {
     setMenuOpen(!menuOpen);
   };
 
-  // Handle theater selection
   const handleTheaterSelect = (theater: Theater) => {
-    // Check if it's a different theater to avoid unnecessary re-renders
     if (!selectedTheater || selectedTheater.id !== theater.id) {
       setSelectedTheater(theater);
       localStorage.setItem("selectedTheaterId", theater.id.toString());
@@ -127,12 +116,10 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className="navbar-right">
-        {/* Theme toggle button */}
         <button
           className="theme-toggle-btn"
           onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        >
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
           {isDark ? (
             <span className="theme-icon">☀️</span>
           ) : (
@@ -140,16 +127,13 @@ const Navbar: React.FC = () => {
           )}
         </button>
 
-        {/* Cart component */}
         <Cart />
 
-        {/* User menu or sign in button */}
         {isAuthenticated ? (
           <div className="user-menu-container">
             <button
               className="user-button"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-            >
+              onClick={() => setShowUserMenu(!showUserMenu)}>
               <i className="fas fa-user"></i>
               {user?.username}
             </button>
@@ -176,13 +160,11 @@ const Navbar: React.FC = () => {
           className="menu-toggle"
           onClick={toggleMenu}
           aria-label="Toggle menu"
-          aria-expanded={menuOpen}
-        >
+          aria-expanded={menuOpen}>
           {menuOpen ? "✕" : "☰"}
         </button>
       </div>
 
-      {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? "active" : ""}`}>
         <NavLink to="/" end>
           Home
@@ -190,7 +172,6 @@ const Navbar: React.FC = () => {
         <NavLink to="/movies">Movies</NavLink>
         <NavLink to="/concessions">Concessions</NavLink>
 
-        {/* Theater Dropdown for Mobile */}
         <div className="mobile-theater-dropdown">
           <span>Select Theater:</span>
           <select
@@ -202,8 +183,7 @@ const Navbar: React.FC = () => {
               if (theater) {
                 handleTheaterSelect(theater);
               }
-            }}
-          >
+            }}>
             {theaters.map((theater) => (
               <option key={theater.id} value={theater.id}>
                 {theater.name}
@@ -212,7 +192,6 @@ const Navbar: React.FC = () => {
           </select>
         </div>
 
-        {/* Mobile user menu */}
         {isAuthenticated ? (
           <>
             <NavLink to="/profile">Profile</NavLink>

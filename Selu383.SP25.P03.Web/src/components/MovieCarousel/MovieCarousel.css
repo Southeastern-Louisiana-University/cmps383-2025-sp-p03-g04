@@ -75,7 +75,7 @@
   font-weight: 600;
   margin-bottom: 5px;
   text-align: center;
-  white-space: normal;  /* this allows wrapping */
+  white-space: normal; /* this allows wrapping */
   word-break: break-word; /* this helps with long titles */
 }
 
@@ -131,16 +131,15 @@
   color: #cbd5e1;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .movie-carousel-container {
     padding: 0 40px;
   }
-  
+
   .movie-carousel .movie-card {
     flex: 0 0 160px;
   }
-  
+
   .carousel-arrow {
     width: 35px;
     height: 35px;
@@ -152,11 +151,11 @@
   .movie-carousel-container {
     padding: 0 30px;
   }
-  
+
   .movie-carousel .movie-card {
     flex: 0 0 140px;
   }
-  
+
   .carousel-arrow {
     width: 30px;
     height: 30px;

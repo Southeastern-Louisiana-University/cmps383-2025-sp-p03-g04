@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.tsx
 import React, { useEffect, useState, createContext, useContext } from "react";
 import * as authService from "../services/authService"; // Use the real backend service
 import { UserRole } from "../types/user";
@@ -24,7 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // Try to get current user from backend if there's an active session
         try {
           const currentUser = await authService.getCurrentUser();
           if (currentUser) {
@@ -39,7 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsAuthenticated(true);
           }
         } catch (error) {
-          // No active session, check localStorage as fallback
           const id = localStorage.getItem("userId");
           const username = localStorage.getItem("username");
           const role = localStorage.getItem("userRole");
@@ -82,7 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("AuthContext: Starting sign in process");
 
-      // Use the real backend login service
       const response = await authService.login(username, password);
 
       console.log("AuthContext: Login response received:", response);
@@ -105,7 +101,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       console.error("Sign in error in AuthContext:", error);
 
-      // Provide more specific error messages
       if (error.message.includes("400")) {
         throw new Error("Invalid username or password");
       } else if (error.message.includes("401")) {
@@ -124,10 +119,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Call backend logout
       await authService.logout();
 
-      // Clear local state and storage
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
       localStorage.removeItem("userRole");
@@ -135,7 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(false);
     } catch (error: any) {
       console.error("Sign out error:", error);
-      // Clear state anyway even if backend logout fails
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -149,8 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signOut,
         isAuthenticated,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

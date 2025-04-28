@@ -18,7 +18,6 @@
   gap: 2rem;
 }
 
-/* Success Message */
 .success-message {
   text-align: center;
   margin-bottom: 1rem;
@@ -40,7 +39,6 @@
   position: relative;
 }
 
-/* Pulsing ring animation */
 .success-icon::before {
   content: "";
   position: absolute;
@@ -54,7 +52,6 @@
   z-index: -1;
 }
 
-/* Second pulsing ring for depth */
 .success-icon::after {
   content: "";
   position: absolute;
@@ -97,7 +94,6 @@
   }
 }
 
-/* Alternative smooth pulse animation for the icon itself */
 .success-icon.pulse {
   animation: checkmark 0.5s ease-in-out, gentle-pulse 3s ease-in-out infinite;
 }
@@ -128,7 +124,6 @@
   margin: 0 auto;
 }
 
-/* Ticket Card */
 .ticket-card {
   width: 100%;
   background-color: #ffffff;
@@ -194,7 +189,6 @@
   font-weight: 600;
 }
 
-/* Sections */
 .seats-section,
 .food-section {
   margin-bottom: 1.5rem;
@@ -245,7 +239,6 @@
   font-weight: 500;
 }
 
-/* QR Code */
 .qr-container {
   display: flex;
   justify-content: center;
@@ -303,7 +296,6 @@
   font-family: monospace;
 }
 
-/* Ticket Footer */
 .ticket-footer {
   padding: 1.5rem;
   background-color: #f8fafc;
@@ -330,7 +322,6 @@
   transform: translateY(-2px);
 }
 
-/* Guest Options */
 .guest-options {
   text-align: center;
   padding: 1.5rem;
@@ -361,7 +352,6 @@
   box-shadow: 0 4px 12px rgba(101, 163, 13, 0.3);
 }
 
-/* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 1rem;
@@ -400,7 +390,6 @@
   background-color: #4d7c0a;
 }
 
-/* Loading and Error States */
 .loading-container,
 .error-container {
   display: flex;
@@ -438,7 +427,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .confirmation-container {
     margin-top: 4rem;
@@ -478,7 +466,6 @@
   }
 }
 
-/* Print Styles */
 @media print {
   .confirmation-page {
     background-color: white;

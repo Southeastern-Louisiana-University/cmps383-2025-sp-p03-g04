@@ -23,7 +23,6 @@ const QRCode: React.FC<QRCodeProps> = ({
     const grid = [];
     const cellSize = size / 25;
 
-    // Finder pattern logic (top-left, top-right, bottom-left)
     const addFinder = (xOffset: number, yOffset: number) => {
       for (let i = 0; i < 7; i++) {
         for (let j = 0; j < 7; j++) {
@@ -40,14 +39,14 @@ const QRCode: React.FC<QRCodeProps> = ({
       }
     };
 
-    addFinder(0, 0);        // Top-left
-    addFinder(18, 0);       // Top-right
-    addFinder(0, 18);       // Bottom-left
+    addFinder(0, 0);
+    addFinder(18, 0);
+    addFinder(0, 18);
 
-    // Fill rest of grid pseudo-randomly
     for (let i = 0; i < 25; i++) {
       for (let j = 0; j < 25; j++) {
-        if ((i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7)) continue;
+        if ((i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7))
+          continue;
 
         const position = i * 25 + j;
         const bitPosition = position % 32;
@@ -78,8 +77,7 @@ const QRCode: React.FC<QRCodeProps> = ({
         justifyContent: "center",
         alignItems: "center",
         padding: 8,
-      }}
-    >
+      }}>
       <svg width={size} height={size}>
         {pattern.map((cell, index) => (
           <rect

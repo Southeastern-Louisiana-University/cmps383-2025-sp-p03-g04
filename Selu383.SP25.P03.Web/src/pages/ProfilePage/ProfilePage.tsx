@@ -21,7 +21,6 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Redirect to sign in if not authenticated
     if (!isAuthenticated) {
       navigate("/signin", { state: { from: "/profile" } });
     }
@@ -39,11 +38,9 @@ const ProfilePage: React.FC = () => {
           user.id
         );
 
-        // Get movie data for each reservation to fetch poster URLs
         const bookingsWithDetails = await Promise.all(
           userReservations.map(async (reservation) => {
             try {
-              // Fetch the showtime data to get the movie ID
               const response = await fetch(
                 `/api/showtimes/${reservation.showtimeId}`
               );
@@ -64,7 +61,6 @@ const ProfilePage: React.FC = () => {
               console.error("Error fetching movie data:", err);
             }
 
-            // Fallback if unable to fetch movie data
             return {
               ...reservation,
               status:
@@ -75,7 +71,6 @@ const ProfilePage: React.FC = () => {
           })
         );
 
-        // Sort by date (newest first)
         bookingsWithDetails.sort(
           (a, b) =>
             new Date(b.showtimeStartTime).getTime() -
@@ -132,15 +127,13 @@ const ProfilePage: React.FC = () => {
           <nav className="profile-nav">
             <button
               className={`nav-item ${activeTab === "profile" ? "active" : ""}`}
-              onClick={() => setActiveTab("profile")}
-            >
+              onClick={() => setActiveTab("profile")}>
               <i className="fas fa-user"></i>
               Profile
             </button>
             <button
               className={`nav-item ${activeTab === "bookings" ? "active" : ""}`}
-              onClick={() => setActiveTab("bookings")}
-            >
+              onClick={() => setActiveTab("bookings")}>
               <i className="fas fa-ticket-alt"></i>
               My Bookings
             </button>
@@ -202,8 +195,7 @@ const ProfilePage: React.FC = () => {
               {loading ? (
                 <div
                   className="loading-message"
-                  style={{ textAlign: "center", padding: "2rem" }}
-                >
+                  style={{ textAlign: "center", padding: "2rem" }}>
                   Loading your bookings...
                 </div>
               ) : error ? (
@@ -213,15 +205,13 @@ const ProfilePage: React.FC = () => {
                     textAlign: "center",
                     padding: "2rem",
                     color: "#ef4444",
-                  }}
-                >
+                  }}>
                   {error}
                 </div>
               ) : bookings.length === 0 ? (
                 <div
                   className="no-bookings"
-                  style={{ textAlign: "center", padding: "2rem" }}
-                >
+                  style={{ textAlign: "center", padding: "2rem" }}>
                   You don't have any bookings yet.
                 </div>
               ) : (
@@ -262,8 +252,7 @@ const ProfilePage: React.FC = () => {
                         </p>
                         <div className="booking-footer">
                           <span
-                            className={`status ${booking.status?.toLowerCase()}`}
-                          >
+                            className={`status ${booking.status?.toLowerCase()}`}>
                             {booking.status}
                           </span>
                           <span className="amount">

@@ -7,17 +7,14 @@ const Cart: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
   const { cartItems, removeFromCart, total } = useCart();
-  const navigate = useNavigate(); // Add this line to initialize navigate
-
-  // Scroll detection for banner visibility
-  // Scroll detection for banner visibility
+  const navigate = useNavigate();
   useEffect(() => {
     const handleScroll = () => {};
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  // Handle clicks outside to close dropdown
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
@@ -40,7 +37,6 @@ const Cart: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
-  // Get the first seat item's showtime ID if available
   const getFirstShowtimeId = (): number | undefined => {
     const seatItem = cartItems.find((item) => item.type !== "food");
     return seatItem?.showtimeId;
@@ -55,7 +51,6 @@ const Cart: React.FC = () => {
     setIsOpen(false);
   };
 
-  // Count food items separately to show correct total item types
   const foodItems = cartItems.filter((item) => item.type === "food");
   const seatItems = cartItems.filter((item) => item.type !== "food");
 
@@ -66,8 +61,7 @@ const Cart: React.FC = () => {
           className="cart-button"
           onClick={toggleCart}
           aria-label="Shopping cart"
-          aria-expanded={isOpen}
-        >
+          aria-expanded={isOpen}>
           <i className="cart-icon">🛒</i>
           {cartItems.length > 0 && (
             <span className="cart-badge">{cartItems.length}</span>
@@ -88,7 +82,6 @@ const Cart: React.FC = () => {
                 <p className="empty-cart">Your cart is empty</p>
               ) : (
                 <>
-                  {/* Render seat items */}
                   {seatItems.length > 0 && (
                     <>
                       <div className="cart-section-heading">Tickets</div>
@@ -111,8 +104,7 @@ const Cart: React.FC = () => {
                               onClick={() =>
                                 removeFromCart(cartItems.indexOf(item))
                               }
-                              aria-label={`Remove seat ${item.seatLabel} from cart`}
-                            >
+                              aria-label={`Remove seat ${item.seatLabel} from cart`}>
                               ✕
                             </button>
                           </div>
@@ -121,7 +113,6 @@ const Cart: React.FC = () => {
                     </>
                   )}
 
-                  {/* Render food items */}
                   {foodItems.length > 0 && (
                     <>
                       <div className="cart-section-heading">Concessions</div>
@@ -139,8 +130,7 @@ const Cart: React.FC = () => {
                               onClick={() =>
                                 removeFromCart(cartItems.indexOf(item))
                               }
-                              aria-label={`Remove ${item.name} from cart`}
-                            >
+                              aria-label={`Remove ${item.name} from cart`}>
                               ✕
                             </button>
                           </div>

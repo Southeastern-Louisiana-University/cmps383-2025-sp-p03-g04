@@ -1,4 +1,3 @@
-// src/pages/SignInPage/SignInPage.tsx
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -21,7 +20,6 @@ const SignInPage: React.FC = () => {
 
     try {
       await signIn(username, password);
-      // Redirect to the previous page or home
       const from = location.state?.from || "/";
       navigate(from);
     } catch (err: any) {
