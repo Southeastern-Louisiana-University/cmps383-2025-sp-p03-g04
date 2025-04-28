@@ -33,7 +33,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                     return NotFound("Reservation not found");
                 }
 
-                // Verify the amount matches the reservation total
+                
                 if (request.Amount != reservation.TotalAmount)
                 {
                     return BadRequest("Payment amount does not match reservation total");
@@ -44,7 +44,7 @@ namespace Selu383.SP25.P03.Api.Controllers
             
             if (result.Success && request.ReservationId.HasValue)
             {
-                // Update reservation status to paid
+                
                 var reservation = await _dataContext.Reservations.FindAsync(request.ReservationId.Value);
                 if (reservation != null)
                 {

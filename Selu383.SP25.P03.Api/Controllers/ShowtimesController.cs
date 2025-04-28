@@ -100,14 +100,14 @@ namespace Selu383.SP25.P03.Api.Controllers
                 return BadRequest("Showtime data is required");
             }
             
-            // Check if movie exists
+            
             var movie = dataContext.Movies.Find(dto.MovieId);
             if (movie == null)
             {
                 return BadRequest("Movie not found");
             }
 
-            // Check if screen exists
+            
             var screen = dataContext.Screens.Find(dto.ScreenId);
             if (screen == null)
             {

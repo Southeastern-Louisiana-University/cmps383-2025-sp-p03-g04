@@ -11,7 +11,7 @@ namespace Selu383.SP25.P03.Api.Features.Concessions
         [MaxLength(50)]
         public required string Name { get; set; }
         
-        // Navigation property
+        
         public virtual ICollection<FoodItem> Items { get; set; } = new List<FoodItem>();
     }
 }

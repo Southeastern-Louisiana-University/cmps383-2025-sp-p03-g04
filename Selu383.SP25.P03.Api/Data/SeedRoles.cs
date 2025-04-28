@@ -10,14 +10,14 @@ namespace Selu383.SP25.P03.Api.Data
         {
             using (var context = new DataContext(serviceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
-                // Look for any roles.
+                
                 if (context.Roles.Any())
                 {
-                    return;   // DB has been seeded
+                    return;   
                 }
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
                 
-                // Add all roles
+                
                 await roleManager.CreateAsync(new Role { Name = UserRoleNames.Admin }); 
                 await roleManager.CreateAsync(new Role { Name = UserRoleNames.User });  
                 

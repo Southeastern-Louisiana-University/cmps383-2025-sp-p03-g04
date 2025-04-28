@@ -11,7 +11,7 @@ namespace Selu383.SP25.P03.Api.Features.Reservations
         [Required]
         public List<CreateTicketDto> Tickets { get; set; } = new List<CreateTicketDto>();
         
-        // Optional - for direct payment
+        
         public bool ProcessPayment { get; set; } = false;
     }
 }

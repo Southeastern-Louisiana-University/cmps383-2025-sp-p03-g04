@@ -36,16 +36,16 @@ namespace Selu383.SP25.P03.Api.Controllers
                 return NotFound("Showtime not found");
             }
 
-            // Get all seats for the screen
+            
             var seats = showtime.Screen?.Seats?.ToList() ?? new List<Seat>();
 
-            // Get all reserved seats for this showtime
+            
             var reservedSeatIds = await dataContext.ReservationSeats
                 .Where(rs => rs.Reservation != null && rs.Reservation.ShowtimeId == showtimeId && rs.Reservation.IsPaid)
                 .Select(rs => rs.SeatId)
                 .ToHashSetAsync();
 
-            // Get currently selected seats for this user (if user is specified)
+            
             var selectedSeatIds = new HashSet<int>();
             if (userId.HasValue)
             {
@@ -58,7 +58,7 @@ namespace Selu383.SP25.P03.Api.Controllers
                     .ToHashSetAsync();
             }
 
-            // Group seats by row for better UI rendering
+            
             var seatsByRow = seats
                 .GroupBy(s => s.Row)
                 .OrderBy(g => g.Key)

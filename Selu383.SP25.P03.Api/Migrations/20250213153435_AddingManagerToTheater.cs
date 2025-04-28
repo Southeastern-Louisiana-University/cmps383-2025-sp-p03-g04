@@ -4,10 +4,10 @@
 
 namespace Selu383.SP25.P03.Api.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class AddingManagerToTheater : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
@@ -29,7 +29,7 @@ namespace Selu383.SP25.P03.Api.Migrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

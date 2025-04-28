@@ -15,10 +15,10 @@ namespace Selu383.SP25.P03.Api.Features.Theaters
     
     public int ScreenId { get; set; }
     
-    // Make navigation properties nullable
+    
     public virtual Screen? Screen { get; set; }
     
-    // Initialize collections
+    
     public virtual ICollection<ReservationSeat> ReservationSeats { get; set; } = new List<ReservationSeat>();
 }
 }
