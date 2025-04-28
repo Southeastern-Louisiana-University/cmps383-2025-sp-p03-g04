@@ -1,3 +1,6 @@
+// Enhanced QRCode component for more reliable rendering
+// components/QRCode.tsx
+
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import Svg, { Rect } from "react-native-svg";
@@ -15,8 +18,17 @@ export const QRCode: React.FC<QRCodeProps> = ({
   color = "#000000",
   backgroundColor = "#FFFFFF",
 }) => {
-  // Note: This is a very simplified QR code implementation
+  // This is a simplified QR code implementation
   // In a real app, you would use a library like 'react-native-qrcode-svg'
+
+  // Make sure we have valid input
+  const safeValue =
+    value ||
+    JSON.stringify({
+      type: "ticket",
+      reservationId: Date.now(),
+      fallback: true,
+    });
 
   // Generate a simple pattern based on the string
   const generatePattern = (str: string) => {
@@ -103,7 +115,8 @@ export const QRCode: React.FC<QRCodeProps> = ({
     return grid;
   };
 
-  const pattern = generatePattern(value);
+  // Get the pattern for rendering
+  const pattern = generatePattern(safeValue);
 
   return (
     <View
@@ -130,5 +143,13 @@ const styles = StyleSheet.create({
     padding: 8,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 8, // Add rounded corners
+    // Add shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // Add elevation for Android
+    elevation: 2,
   },
 });
