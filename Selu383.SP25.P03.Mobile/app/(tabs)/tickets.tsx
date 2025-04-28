@@ -26,13 +26,11 @@ export default function TicketsScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // State
   const [reservations, setReservations] = useState<ReservationResponse[]>([]);
   const [guestTickets, setGuestTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load tickets on mount and when auth state changes
   useEffect(() => {
     loadTickets();
   }, [isAuthenticated]);
@@ -43,31 +41,16 @@ export default function TicketsScreen() {
 
     try {
       if (isAuthenticated && user) {
-        // Load authenticated user's tickets
         const userReservations = await reservationService.getUserReservations(
           user.id
         );
         setReservations(userReservations);
 
-        // Clear any guest tickets since the user is authenticated now
         await AsyncStorage.removeItem("guestTickets");
         setGuestTickets([]);
       } else {
-        // For guest users, only show message prompting login
         setReservations([]);
         setGuestTickets([]);
-        // We're intentionally not loading guest tickets if user is not authenticated
-        // If you want to allow guests to see their tickets temporarily, you can
-        // uncomment the code below:
-        /*
-        const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
-        if (guestTicketsStr) {
-          const tickets = JSON.parse(guestTicketsStr);
-          setGuestTickets(tickets);
-        } else {
-          setGuestTickets([]);
-        }
-        */
       }
     } catch (err) {
       console.error("Failed to fetch tickets:", err);
@@ -89,7 +72,6 @@ export default function TicketsScreen() {
   };
 
   const handleViewTicket = (ticketId: number, isGuest: boolean = false) => {
-    // View ticket details
     router.push({
       pathname: `./booking/${isGuest ? "guest" : ticketId}/confirmation`,
       params: {
@@ -111,7 +93,6 @@ export default function TicketsScreen() {
           onPress: async () => {
             try {
               await reservationService.cancelReservation(reservationId);
-              // Remove from list
               setReservations((prevReservations) =>
                 prevReservations.filter((r) => r.id !== reservationId)
               );
@@ -136,7 +117,6 @@ export default function TicketsScreen() {
     router.push("/login?returnTo=/tickets");
   };
 
-  // If not authenticated and no guest tickets, show login prompt
   if (!isAuthenticated && guestTickets.length === 0 && !isLoading) {
     return (
       <ThemedView style={styles.container}>
@@ -159,7 +139,6 @@ export default function TicketsScreen() {
     );
   }
 
-  // Content to render when there are no tickets
   const renderEmptyState = () => (
     <View style={styles.emptyStateContainer}>
       <Ionicons name="ticket-outline" size={60} color="#9BA1A6" />
@@ -176,7 +155,6 @@ export default function TicketsScreen() {
     </View>
   );
 
-  // Render individual reservation
   const renderReservationItem = ({ item }: { item: ReservationResponse }) => (
     <View style={styles.ticketCard}>
       <View style={styles.ticketHeader}>
@@ -252,7 +230,6 @@ export default function TicketsScreen() {
     </View>
   );
 
-  // Render guest ticket
   const renderGuestTicketItem = ({ item }: { item: any }) => (
     <View style={styles.ticketCard}>
       <View style={styles.ticketHeader}>
@@ -315,7 +292,6 @@ export default function TicketsScreen() {
     </View>
   );
 
-  // Combine authenticated and guest tickets for display
   const allTickets = [
     ...reservations.map((item) => ({ ...item, isGuest: false })),
     ...guestTickets.map((item) => ({ ...item, isGuest: true })),

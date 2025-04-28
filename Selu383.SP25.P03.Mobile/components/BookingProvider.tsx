@@ -307,8 +307,8 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
           const ticketType = ticketTypes[seatId] || "Adult";
           let price = showtime.ticketPrice;
 
-          if (ticketType === "Child") price *= 0.75; // 25% off
-          if (ticketType === "Senior") price *= 0.8; // 20% off
+          if (ticketType === "Child") price *= 0.75;
+          if (ticketType === "Senior") price *= 0.8;
 
           return {
             id: seatId,
@@ -330,7 +330,6 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         ? JSON.parse(existingTicketsStr)
         : [];
 
-      // Create a new guest ticket record with all required fields
       const newTicket = {
         reservationId: guestReservationId,
         movieTitle: guestReservation.movieTitle,
@@ -342,12 +341,10 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
         foodItems: guestReservation.foodItems,
         foodDeliveryType: guestReservation.foodDeliveryType,
         purchaseDate: new Date().toISOString(),
-        isPaid: true, // Ensure this is marked as paid
-        // Add a confirmation code for display on the ticket
+        isPaid: true,
         confirmationCode: `LD${guestReservationId.toString().slice(-6)}`,
       };
 
-      // Add the new ticket to the list and save to AsyncStorage
       guestTickets.push(newTicket);
       await AsyncStorage.setItem("guestTickets", JSON.stringify(guestTickets));
       console.log("Saved guest tickets to storage");
