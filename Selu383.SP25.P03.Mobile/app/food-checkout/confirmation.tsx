@@ -25,15 +25,12 @@ export default function FoodConfirmationScreen() {
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Get order ID and guest flag from params
   const orderId = params.orderId as string;
   const isGuest = params.guest === "true";
 
-  // Order state
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load order data
   useEffect(() => {
     const loadOrderData = async () => {
       setIsLoading(true);
@@ -45,7 +42,6 @@ export default function FoodConfirmationScreen() {
         }
 
         if (isGuest) {
-          // Load guest order from AsyncStorage
           const guestOrdersStr = await AsyncStorage.getItem("guestFoodOrders");
           if (guestOrdersStr) {
             const guestOrders = JSON.parse(guestOrdersStr);
@@ -61,7 +57,6 @@ export default function FoodConfirmationScreen() {
             }
           }
         } else if (isAuthenticated) {
-          // Load authenticated user order from API
           const orderData = await concessionService.getFoodOrder(
             Number(orderId)
           );
@@ -96,7 +91,6 @@ export default function FoodConfirmationScreen() {
     });
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
@@ -108,7 +102,6 @@ export default function FoodConfirmationScreen() {
     );
   }
 
-  // If no order was found
   if (!order) {
     return (
       <ThemedView style={styles.errorContainer}>
@@ -186,7 +179,6 @@ export default function FoodConfirmationScreen() {
 
               <ThemedText style={styles.itemsTitle}>Items:</ThemedText>
 
-              {/* Display order items */}
               {(isGuest ? order.items : order.orderItems)?.map(
                 (item: any, index: number) => (
                   <View key={index} style={styles.itemRow}>
@@ -224,7 +216,6 @@ export default function FoodConfirmationScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

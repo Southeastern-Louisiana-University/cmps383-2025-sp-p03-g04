@@ -2,21 +2,16 @@ import { useColorScheme as useNativeColorScheme } from "react-native";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Type for our color scheme
 export type ColorSchemeName = "light" | "dark";
 
-// Hook to manage theme state
 export function useThemeToggle() {
-  // Get system preference
   const systemColorScheme = useNativeColorScheme();
 
-  // State for user preference
   const [userPreference, setUserPreference] = useState<ColorSchemeName | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load saved preference on mount
   useEffect(() => {
     const loadSavedTheme = async () => {
       try {
@@ -34,11 +29,9 @@ export function useThemeToggle() {
     loadSavedTheme();
   }, []);
 
-  // Determine the active color scheme
   const colorScheme: ColorSchemeName =
     userPreference || (systemColorScheme as ColorSchemeName) || "light";
 
-  // Function to toggle theme
   const toggleTheme = async () => {
     const newTheme = colorScheme === "dark" ? "light" : "dark";
     setUserPreference(newTheme);
@@ -50,7 +43,6 @@ export function useThemeToggle() {
     }
   };
 
-  // Function to set specific theme
   const setTheme = async (theme: ColorSchemeName) => {
     setUserPreference(theme);
 

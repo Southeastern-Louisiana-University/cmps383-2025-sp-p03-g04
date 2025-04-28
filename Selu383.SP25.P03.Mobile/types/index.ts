@@ -1,4 +1,3 @@
-// Export all types through a central index
 export * from "./api/auth";
 export * from "./api/movies";
 export * from "./api/theaters";

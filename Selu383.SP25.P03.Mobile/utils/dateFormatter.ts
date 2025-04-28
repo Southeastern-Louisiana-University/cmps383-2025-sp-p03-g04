@@ -1,24 +1,3 @@
-/**
- * Format a date using the specified format string.
- *
- * Format tokens:
- * - YYYY: 4-digit year (e.g., 2025)
- * - YY: 2-digit year (e.g., 25)
- * - MM: 2-digit month (01-12)
- * - M: 1-digit month (1-12)
- * - DD: 2-digit day (01-31)
- * - D: 1-digit day (1-31)
- * - HH: 2-digit hour in 24-hour format (00-23)
- * - H: 1-digit hour in 24-hour format (0-23)
- * - hh: 2-digit hour in 12-hour format (01-12)
- * - h: 1-digit hour in 12-hour format (1-12)
- * - mm: 2-digit minute (00-59)
- * - m: 1-digit minute (0-59)
- * - ss: 2-digit second (00-59)
- * - s: 1-digit second (0-59)
- * - A: AM/PM
- * - a: am/pm
- */
 export const formatDate = (date: Date, formatString: string): string => {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString();
@@ -49,9 +28,6 @@ export const formatDate = (date: Date, formatString: string): string => {
     .replace("a", ampm);
 };
 
-/**
- * Format a date as a relative time string (e.g., "2 days ago", "in 3 hours").
- */
 export const formatRelativeTime = (
   date: Date,
   baseDate = new Date()
@@ -94,9 +70,6 @@ export const formatRelativeTime = (
   }
 };
 
-/**
- * Format a date range (e.g., "Jan 1 - Jan 5, 2025").
- */
 export const formatDateRange = (startDate: Date, endDate: Date): string => {
   const startYear = startDate.getFullYear();
   const endYear = endDate.getFullYear();
@@ -114,9 +87,6 @@ export const formatDateRange = (startDate: Date, endDate: Date): string => {
   }
 };
 
-/**
- * Get a formatted date string for different time periods
- */
 export const getDateStringForPeriod = (
   period: "today" | "tomorrow" | "thisWeek" | "nextWeek" | "thisMonth"
 ): string => {

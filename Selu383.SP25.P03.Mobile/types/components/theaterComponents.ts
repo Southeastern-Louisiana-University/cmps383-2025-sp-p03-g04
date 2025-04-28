@@ -1,4 +1,4 @@
-import { Theater } from '../models/theater';
+import { Theater } from "../models/theater";
 
 export interface TheaterSelectorProps {
   theaters: Theater[];

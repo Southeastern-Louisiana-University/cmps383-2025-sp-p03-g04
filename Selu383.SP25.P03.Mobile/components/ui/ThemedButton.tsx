@@ -34,13 +34,10 @@ export function ThemedButton({
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Get styles for the current variant
   const variantStyles = getVariantStyles(variant, isDark);
 
-  // Get styles for the current size
   const sizeStyles = getSizeStyles(size);
 
-  // Combine styles
   const buttonStyles = [
     styles.button,
     variantStyles.button,
@@ -50,7 +47,6 @@ export function ThemedButton({
     style,
   ];
 
-  // Combine text styles
   const textStyles = [
     styles.text,
     variantStyles.text,
@@ -83,7 +79,6 @@ export function ThemedButton({
   );
 }
 
-// Helper functions to get styles based on variant and size
 function getVariantStyles(
   variant: ThemedButtonProps["variant"],
   isDark: boolean
@@ -99,7 +94,7 @@ function getVariantStyles(
           backgroundColor: isDark ? "#3A3A3A" : "#E5E5E5",
         },
         text: {
-          color: "#242424", // Dark text on green button
+          color: "#242424",
         },
         textDisabled: {
           color: isDark ? "#707070" : "#A0A0A0",

@@ -23,7 +23,7 @@ export default function LoginScreen() {
   const params = useLocalSearchParams();
   const returnTo = params.returnTo as string | undefined;
 
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and register
+  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +34,6 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Check if we have saved credentials
     const checkSavedCredentials = async () => {
       try {
         const savedUsername = await AsyncStorage.getItem("savedUsername");
@@ -53,7 +52,6 @@ export default function LoginScreen() {
   const handleAuth = async () => {
     setError("");
 
-    // Validate inputs
     if (!username) {
       setError("Username is required");
       return;
@@ -65,7 +63,6 @@ export default function LoginScreen() {
     }
 
     if (!isLogin) {
-      // Additional validation for registration
       if (password.length < 8) {
         setError("Password must be at least 8 characters");
         return;
@@ -81,27 +78,22 @@ export default function LoginScreen() {
 
     try {
       if (isLogin) {
-        // Login - the role is automatically detected by the backend
         const role = await signIn(username, password);
 
-        // Save username if remember me is checked
         if (rememberMe) {
           await AsyncStorage.setItem("savedUsername", username);
         } else {
           await AsyncStorage.removeItem("savedUsername");
         }
 
-        // Navigation after successful login
         if (returnTo) {
           router.replace(returnTo as any);
         } else {
           router.replace("/(tabs)");
         }
       } else {
-        // Register
         const role = await signUp(username, password, email);
 
-        // Navigate home after successful registration
         if (returnTo) {
           router.replace(returnTo as any);
         } else {
@@ -331,7 +323,6 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Skip login button */}
             <TouchableOpacity
               style={styles.skipButton}
               onPress={() => {

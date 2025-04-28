@@ -31,7 +31,6 @@ export default function ProfileScreen() {
       <Stack.Screen options={{ title: "Profile" }} />
 
       {isAuthenticated && user ? (
-        // Authenticated user view
         <View style={styles.content}>
           <View style={styles.profileHeader}>
             <View style={styles.profileCircle}>
@@ -63,7 +62,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        // Guest user view
         <View style={styles.loginContainer}>
           <Ionicons name="person-circle-outline" size={100} color="#B4D335" />
           <ThemedText style={styles.loginTitle}>
@@ -78,7 +76,6 @@ export default function ProfileScreen() {
         </View>
       )}
 
-      {/* Theme toggle */}
       <ThemeToggle position="bottomRight" size={40} />
     </ThemedView>
   );

@@ -61,7 +61,7 @@ export const homeScreenStyles = StyleSheet.create({
     elevation: 6,
   },
   actionButtonText: {
-    color: "#B4D335", // Brand green
+    color: "#B4D335",
     fontWeight: "bold",
     marginLeft: 8,
   },

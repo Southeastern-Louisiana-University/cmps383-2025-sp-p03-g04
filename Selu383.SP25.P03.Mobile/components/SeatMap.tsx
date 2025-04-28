@@ -17,7 +17,6 @@ export function SeatMap({
 }: SeatMapProps) {
   const { isTheaterMode } = useTheme();
 
-  // Sort row keys alphabetically
   const sortedRowKeys = Object.keys(seatingLayout.rows).sort();
 
   return (
@@ -113,7 +112,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#666666",
   },
   theaterModeSeat: {
-    // Dimmer color in theater mode
     opacity: 0.7,
   },
   seatText: {

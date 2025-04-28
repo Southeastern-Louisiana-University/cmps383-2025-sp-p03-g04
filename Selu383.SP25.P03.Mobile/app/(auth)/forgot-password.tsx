@@ -20,7 +20,6 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    // Simple validation
     if (!email) {
       setError("Please enter your email address");
       return;

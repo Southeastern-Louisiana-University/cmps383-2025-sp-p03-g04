@@ -32,14 +32,12 @@ export default function ConfirmationScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // State for reservation data
   const [qrValue, setQrValue] = useState<string>("");
   const [reservationData, setReservationData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   console.log("Confirmation screen params:", { id, reservationId, guest });
 
-  // Load confirmation data
   useEffect(() => {
     const loadConfirmationData = async () => {
       console.log("Loading confirmation data");
@@ -47,15 +45,13 @@ export default function ConfirmationScreen() {
 
       setIsLoading(true);
       try {
-        // Check if we're showing a guest booking
         if (guest === "true") {
           console.log("Loading guest booking confirmation");
-          // Find the guest ticket in AsyncStorage
           const guestTicketsStr = await AsyncStorage.getItem("guestTickets");
           if (guestTicketsStr) {
             const guestTickets = JSON.parse(guestTicketsStr);
             console.log("Found guest tickets:", guestTickets.length);
-            
+
             // Look for the specific reservation
             const foundTicket = guestTickets.find(
               (ticket: any) => ticket.reservationId === Number(reservationId)
@@ -65,7 +61,6 @@ export default function ConfirmationScreen() {
               console.log("Found guest ticket:", foundTicket.reservationId);
               setReservationData(foundTicket);
 
-              // Generate a QR code value with reservation info
               const qrData = {
                 type: "ticket",
                 reservationId: foundTicket.reservationId,
@@ -75,7 +70,9 @@ export default function ConfirmationScreen() {
                 seats: foundTicket.tickets
                   .map((t: any) => `${t.row}${t.number}`)
                   .join(","),
-                confirmationCode: foundTicket.confirmationCode || `LD${foundTicket.reservationId.toString().slice(-6)}`,
+                confirmationCode:
+                  foundTicket.confirmationCode ||
+                  `LD${foundTicket.reservationId.toString().slice(-6)}`,
                 isGuest: true,
               };
 
@@ -96,13 +93,11 @@ export default function ConfirmationScreen() {
           }
         } else if (reservationId) {
           console.log("Loading authenticated user reservation:", reservationId);
-          // For authenticated users, load the reservation
           const reservation = await reservationService.getReservation(
             Number(reservationId)
           );
           setReservationData(reservation);
 
-          // Generate QR code data
           const qrData = {
             type: "ticket",
             reservationId: reservation.id,
@@ -118,7 +113,6 @@ export default function ConfirmationScreen() {
 
           setQrValue(JSON.stringify(qrData));
         } else {
-          // No reservation ID provided
           console.error("No reservation ID found in params");
           Alert.alert(
             "Missing Information",
@@ -133,7 +127,7 @@ export default function ConfirmationScreen() {
         );
       } finally {
         setIsLoading(false);
-        
+
         // Reset booking state after confirmation screen has loaded
         // This ensures we don't lose the data before it's displayed
         setTimeout(() => {
@@ -143,11 +137,14 @@ export default function ConfirmationScreen() {
     };
 
     loadConfirmationData();
+
+    return () => {
+      booking.resetBooking();
+    };
   }, [reservationId, guest, user?.id]);
 
   const handleShareTicket = async () => {
     try {
-      // Format the ticket information for sharing
       const message = `
       🎬 Movie Ticket: ${reservationData.movieTitle}
       🏢 Theater: ${reservationData.theaterName} - ${
@@ -180,7 +177,6 @@ export default function ConfirmationScreen() {
     router.push("/(tabs)/tickets");
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
@@ -287,7 +283,6 @@ export default function ConfirmationScreen() {
                 </ThemedText>
               </View>
 
-              {/* Add food items if present */}
               {reservationData.foodItems &&
                 reservationData.foodItems.length > 0 && (
                   <>
@@ -369,7 +364,6 @@ export default function ConfirmationScreen() {
           </View>
         </ScrollView>
 
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

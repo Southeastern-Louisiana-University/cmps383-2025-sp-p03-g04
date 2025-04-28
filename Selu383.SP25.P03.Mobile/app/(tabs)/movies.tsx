@@ -32,7 +32,6 @@ export default function MoviesScreen() {
     loadMovies();
   }, []);
 
-  // Filter movies when search query changes
   useEffect(() => {
     if (searchQuery) {
       const filtered = movies.filter((movie) =>
@@ -102,7 +101,6 @@ export default function MoviesScreen() {
       />
 
       <ThemedView style={styles.container}>
-        {/* Search bar */}
         <View style={styles.searchContainer}>
           <Ionicons
             name="search-outline"

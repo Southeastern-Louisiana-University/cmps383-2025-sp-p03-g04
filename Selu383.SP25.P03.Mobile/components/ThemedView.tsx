@@ -19,14 +19,11 @@ export function ThemedView({
 }: ThemedViewProps) {
   const { isDark } = useTheme();
 
-  // Determine the background color based on variant or custom colors
   let backgroundColor: string;
 
   if (lightColor && darkColor) {
-    // Use custom colors if provided
     backgroundColor = getThemedColor(isDark, lightColor, darkColor);
   } else {
-    // Otherwise use variant-based colors
     switch (variant) {
       case "surface":
         backgroundColor = getUIColor(isDark, "light");
