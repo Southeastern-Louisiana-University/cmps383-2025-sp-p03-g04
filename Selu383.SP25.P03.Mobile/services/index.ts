@@ -1,4 +1,3 @@
-// Re-export all services for easier imports
 export * from "./api/config";
 export * from "./auth/authService";
 export * from "./movies/movieService";

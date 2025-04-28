@@ -8,7 +8,6 @@ import { AuthProvider } from "../components/AuthProvider";
 import { ThemeProvider, useTheme } from "../components/ThemeProvider";
 import { BookingProvider } from "../components/BookingProvider";
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 function AppLayout() {
@@ -59,7 +58,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Artificial delay for testing
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (e) {
         console.warn(e);

@@ -1,4 +1,4 @@
-import { Movie, Showtime } from '../models/movie';
+import { Movie, Showtime } from "../models/movie";
 
 export interface MovieCarouselProps {
   movies: Movie[];

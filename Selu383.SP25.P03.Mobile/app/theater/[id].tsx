@@ -1,4 +1,3 @@
-// File: app/theater/[id].tsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -34,11 +33,9 @@ export default function TheaterDetailScreen() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Load theater details
         const theaterData = await theaterService.getTheater(Number(id));
         setTheater(theaterData);
 
-        // Load showtimes for this theater
         const theaterShowtimes = await movieService.getShowtimesByTheater(
           Number(id)
         );
@@ -55,11 +52,9 @@ export default function TheaterDetailScreen() {
   }, [id]);
 
   const handleShowtimeSelect = (showtimeId: number) => {
-    // Navigate to booking flow without requiring authentication
     router.push(`/booking/${showtimeId}/seats`);
   };
 
-  // Create groups of showtimes by movie
   const showtimesByMovie = showtimes.reduce(
     (groups: Record<number, Showtime[]>, showtime) => {
       if (!groups[showtime.movieId]) {
@@ -98,7 +93,6 @@ export default function TheaterDetailScreen() {
 
       <ThemedView style={{ flex: 1 }}>
         <ScrollView style={{ padding: 16 }}>
-          {/* Theater Info */}
           <View style={{ marginBottom: 20 }}>
             <ThemedText
               style={{
@@ -117,7 +111,6 @@ export default function TheaterDetailScreen() {
             </ThemedText>
           </View>
 
-          {/* Showtimes by Movie */}
           <ThemedText
             style={{
               fontSize: 20,

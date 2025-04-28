@@ -15,7 +15,6 @@ export function TodaysShowsList({
   showtimes,
   onSelectShowtime,
 }: TodaysShowsListProps) {
-  // Group showtimes by movie
   const groupedByMovie: Record<number, Showtime[]> = {};
 
   showtimes.forEach((showtime) => {
@@ -26,7 +25,6 @@ export function TodaysShowsList({
   });
 
   const renderShowtimeItem = ({ item }: { item: Showtime }) => {
-    // Format the date
     const dateTimeString = new Date(item.startTime).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",

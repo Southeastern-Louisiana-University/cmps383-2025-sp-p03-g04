@@ -56,7 +56,6 @@ export default function MovieDetailsScreen() {
     if (dateStr === today) return "Today";
     if (dateStr === tomorrowStr) return "Tomorrow";
 
-    // Format as "Mon, Apr 5"
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -68,17 +67,14 @@ export default function MovieDetailsScreen() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // Fetch movie details
       const movieData = await movieService.getMovie(Number(id));
       setMovie(movieData);
 
-      // If movie has TMDB ID, get additional details
       if (movieData.tmdbId) {
         try {
           const tmdbDetails = await tmdbService.getMovieDetails(
             movieData.tmdbId
           );
-          // Merge TMDB details with movie data
           setMovie({
             ...movieData,
             trailerUrl: tmdbDetails.trailerUrl,
@@ -89,10 +85,8 @@ export default function MovieDetailsScreen() {
         }
       }
 
-      // Fetch showtimes for this movie
       const showtimesData = await movieService.getShowtimesByMovie(Number(id));
 
-      // Group by date and theater
       const grouped: Record<string, Record<number, ShowtimesByTheater>> = {};
 
       showtimesData.forEach((showtime) => {
@@ -107,7 +101,7 @@ export default function MovieDetailsScreen() {
           grouped[dateStr][showtime.theaterId] = {
             theaterId: showtime.theaterId,
             theaterName: showtime.theaterName,
-            distance: "2.5 miles", // Example
+            distance: "2.5 miles",
             showtimes: [],
           };
         }
@@ -118,7 +112,6 @@ export default function MovieDetailsScreen() {
         });
       });
 
-      // Convert to array structure
       const dates = Object.keys(grouped).sort();
       const showtimesByDateArray = dates.map((date) => ({
         date,
@@ -136,10 +129,8 @@ export default function MovieDetailsScreen() {
 
   const handleWatchTrailer = async () => {
     if (!movie?.trailerUrl) {
-      // If we don't have a trailer URL, attempt to find one using the movie title
       setTrailerLoading(true);
       try {
-        // Fallback: search for a trailer on YouTube
         const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
           movie?.title || ""
         )}+trailer`;
@@ -150,21 +141,16 @@ export default function MovieDetailsScreen() {
         setTrailerLoading(false);
       }
     } else {
-      // Open the trailer URL if available
       await Linking.openURL(movie.trailerUrl);
     }
   };
 
   const handleBookTickets = async (showtimeId: number) => {
-    // Reset any previous booking state
     booking.resetBooking();
 
-    // Load the showtime data
     try {
-      // Get full showtime data
       const showtimeData = await movieService.getShowtime(showtimeId);
 
-      // Navigate to seats screen
       router.push(`/booking/${showtimeId}/seats`);
     } catch (error) {
       console.error("Error loading showtime for booking:", error);
@@ -284,7 +270,6 @@ export default function MovieDetailsScreen() {
           <View style={styles.showtimesContainer}>
             <ThemedText style={styles.sectionTitle}>Showtimes</ThemedText>
 
-            {/* Date selector tabs */}
             {showtimesByDate.length > 0 && (
               <View style={styles.dateTabsContainer}>
                 {showtimesByDate.map((dateGroup, index) => (
@@ -310,7 +295,6 @@ export default function MovieDetailsScreen() {
               </View>
             )}
 
-            {/* Show theaters and showtimes for selected date */}
             {showtimesByDate.length > 0 &&
             selectedDateIndex < showtimesByDate.length ? (
               showtimesByDate[selectedDateIndex].theaters.map(
@@ -365,7 +349,6 @@ export default function MovieDetailsScreen() {
             )}
           </View>
 
-          {/* Book Tickets Button */}
           {showtimesByDate.length > 0 &&
             selectedDateIndex < showtimesByDate.length &&
             showtimesByDate[selectedDateIndex].theaters.length > 0 &&
@@ -374,7 +357,6 @@ export default function MovieDetailsScreen() {
               <TouchableOpacity
                 style={styles.bookButton}
                 onPress={() => {
-                  // Navigate to first showtime of selected date
                   handleBookTickets(
                     showtimesByDate[selectedDateIndex].theaters[0].showtimes[0]
                       .id
@@ -388,7 +370,6 @@ export default function MovieDetailsScreen() {
             )}
         </ScrollView>
 
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

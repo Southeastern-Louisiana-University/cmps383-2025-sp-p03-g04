@@ -152,7 +152,7 @@ export const movieDetailsStyles = StyleSheet.create({
     borderRadius: BorderRadius.s,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40, // Extra padding at bottom for scrolling
+    marginBottom: 40,
   },
   bookButtonText: {
     color: "white",

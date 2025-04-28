@@ -9,9 +9,6 @@ export const clearAllStorage = async (): Promise<void> => {
   }
 };
 
-/**
- * Clears only authentication-related data from AsyncStorage
- */
 export const clearAuthStorage = async (): Promise<void> => {
   try {
     await AsyncStorage.multiRemove(["userId", "username", "userRole"]);
@@ -21,15 +18,11 @@ export const clearAuthStorage = async (): Promise<void> => {
   }
 };
 
-/**
- * Logs all current AsyncStorage keys for debugging
- */
 export const logStorageKeys = async (): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
     console.log("Current AsyncStorage keys:", keys);
 
-    // Log values for each key
     for (const key of keys) {
       const value = await AsyncStorage.getItem(key);
       console.log(`${key}: ${value}`);

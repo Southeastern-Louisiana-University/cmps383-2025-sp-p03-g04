@@ -44,12 +44,10 @@ export const confirmationScreenStyles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 24,
-    // Shadow for iOS
     shadowColor: "#B4D335",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    // Shadow for Android
     elevation: 5,
   },
   ticketHeader: {

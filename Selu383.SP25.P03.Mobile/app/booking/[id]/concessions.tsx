@@ -26,22 +26,18 @@ export default function BookingConcessionsScreen() {
   const isDark = colorScheme === "dark";
   const booking = useBooking();
 
-  // Local state
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodCategories, setFoodCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Ensure we have booking data
   useEffect(() => {
     const checkBookingData = async () => {
       console.log("Checking booking data in concessions page");
       if (!booking.showtime) {
         console.log("No showtime data, trying to load from progress");
-        // If no booking data, try to load from progress
         const loaded = await booking.loadBookingProgress();
 
-        // If still no data, redirect to seat selection
         if (!loaded) {
           console.log("Failed to load progress, redirecting to seats");
           router.replace(`/booking/${id}/seats`);
@@ -57,15 +53,12 @@ export default function BookingConcessionsScreen() {
     loadConcessions();
   }, [id]);
 
-  // Load concessions data
   const loadConcessions = async () => {
     setIsLoading(true);
     try {
       console.log("Loading food categories");
-      // Load categories
       const categories = await concessionService.getFoodCategories();
 
-      // Ensure categories is an array before setting state
       if (Array.isArray(categories)) {
         setFoodCategories(categories);
 
@@ -74,12 +67,10 @@ export default function BookingConcessionsScreen() {
         }
       } else {
         console.error("Categories data is not an array:", categories);
-        // Initialize with empty array to prevent mapping errors
         setFoodCategories([]);
       }
 
       console.log("Loading food items");
-      // Load all food items
       const items = await concessionService.getFoodItems();
       if (Array.isArray(items)) {
         setFoodItems(items);
@@ -90,7 +81,6 @@ export default function BookingConcessionsScreen() {
     } catch (error) {
       console.error("Failed to load concessions:", error);
       Alert.alert("Error", "Failed to load menu items. Please try again.");
-      // Initialize with empty arrays to prevent mapping errors
       setFoodCategories([]);
       setFoodItems([]);
     } finally {
@@ -108,16 +98,13 @@ export default function BookingConcessionsScreen() {
 
   const handleSkip = () => {
     console.log("Skipping food selection");
-    // Skip food and go directly to payment
     router.push(`/booking/${id}/payment`);
   };
 
-  // Filter items by selected category
   const filteredItems = selectedCategory
     ? foodItems.filter((item) => item.categoryId === selectedCategory)
     : foodItems;
 
-  // Render loading state
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
@@ -154,7 +141,6 @@ export default function BookingConcessionsScreen() {
               : "Pickup at concession counter"}
           </ThemedText>
 
-          {/* Category selection - only render if we have categories */}
           {foodCategories && foodCategories.length > 0 ? (
             <ScrollView
               horizontal
@@ -191,7 +177,6 @@ export default function BookingConcessionsScreen() {
             </View>
           )}
 
-          {/* Food items */}
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
               <View key={item.id} style={styles.itemCard}>
@@ -255,7 +240,6 @@ export default function BookingConcessionsScreen() {
             </View>
           )}
 
-          {/* Skip button */}
           <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
             <ThemedText style={styles.skipText}>
               Skip food, continue to payment
@@ -263,7 +247,6 @@ export default function BookingConcessionsScreen() {
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Cart summary at bottom */}
         {booking.foodItems.length > 0 && (
           <View style={styles.cartContainer}>
             <View style={styles.cartSummary}>
@@ -295,7 +278,6 @@ export default function BookingConcessionsScreen() {
           </View>
         )}
 
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

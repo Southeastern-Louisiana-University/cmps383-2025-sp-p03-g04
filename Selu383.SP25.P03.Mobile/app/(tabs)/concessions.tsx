@@ -25,7 +25,6 @@ export default function ConcessionsScreen() {
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // State variables
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -39,7 +38,6 @@ export default function ConcessionsScreen() {
   const loadConcessions = async () => {
     setIsLoading(true);
     try {
-      // Load categories
       const categoriesData = await concessionService.getFoodCategories();
       if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
@@ -51,7 +49,6 @@ export default function ConcessionsScreen() {
         setCategories([]);
       }
 
-      // Load all food items
       const itemsData = await concessionService.getConcessions();
       if (Array.isArray(itemsData)) {
         setFoodItems(itemsData);
@@ -106,7 +103,6 @@ export default function ConcessionsScreen() {
       return;
     }
 
-    // Convert cart to the format expected by the delivery selection screen
     const cartItems = Object.entries(cart).map(([itemId, quantity]) => {
       const item = foodItems.find((c) => c.id === parseInt(itemId));
       return {
@@ -117,12 +113,10 @@ export default function ConcessionsScreen() {
       };
     });
 
-    // Store cart items in AsyncStorage for the next screen
     try {
-      // Navigate to delivery option screen
       router.push({
         pathname: "../food-checkout/delivery-option",
-        params: { cartItems: JSON.stringify(cartItems) }
+        params: { cartItems: JSON.stringify(cartItems) },
       });
     } catch (error) {
       console.error("Error navigating to checkout:", error);
@@ -130,12 +124,10 @@ export default function ConcessionsScreen() {
     }
   };
 
-  // Filter items by selected category
   const filteredItems = selectedCategory
     ? foodItems.filter((item) => item.categoryId === selectedCategory)
     : foodItems;
 
-  // Render loading state
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
@@ -167,7 +159,6 @@ export default function ConcessionsScreen() {
             Order food to enjoy with your movie
           </ThemedText>
 
-          {/* Categories */}
           {categories.length > 0 && (
             <ScrollView
               horizontal
@@ -197,7 +188,6 @@ export default function ConcessionsScreen() {
             </ScrollView>
           )}
 
-          {/* Food Items */}
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
               <View key={item.id} style={styles.foodItemCard}>
@@ -218,13 +208,19 @@ export default function ConcessionsScreen() {
                     <ThemedText style={styles.foodItemPrice}>
                       ${item.price.toFixed(2)}
                     </ThemedText>
-                    
+
                     {cart[item.id.toString()] ? (
                       <View style={styles.quantityControls}>
                         <TouchableOpacity
-                          onPress={() => handleRemoveFromCart(item.id.toString())}
+                          onPress={() =>
+                            handleRemoveFromCart(item.id.toString())
+                          }
                         >
-                          <Ionicons name="remove-circle" size={24} color="#B4D335" />
+                          <Ionicons
+                            name="remove-circle"
+                            size={24}
+                            color="#B4D335"
+                          />
                         </TouchableOpacity>
                         <ThemedText style={styles.quantityText}>
                           {cart[item.id.toString()]}
@@ -232,7 +228,11 @@ export default function ConcessionsScreen() {
                         <TouchableOpacity
                           onPress={() => handleAddToCart(item.id.toString())}
                         >
-                          <Ionicons name="add-circle" size={24} color="#B4D335" />
+                          <Ionicons
+                            name="add-circle"
+                            size={24}
+                            color="#B4D335"
+                          />
                         </TouchableOpacity>
                       </View>
                     ) : (
@@ -240,7 +240,9 @@ export default function ConcessionsScreen() {
                         style={styles.addButton}
                         onPress={() => handleAddToCart(item.id.toString())}
                       >
-                        <ThemedText style={styles.addButtonText}>Add</ThemedText>
+                        <ThemedText style={styles.addButtonText}>
+                          Add
+                        </ThemedText>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -257,7 +259,6 @@ export default function ConcessionsScreen() {
           )}
         </ScrollView>
 
-        {/* Cart summary at bottom */}
         {getCartItemCount() > 0 && (
           <View style={styles.cartContainer}>
             <View style={styles.cartTitle}>
@@ -266,14 +267,14 @@ export default function ConcessionsScreen() {
                 {getCartItemCount()} items
               </ThemedText>
             </View>
-            
+
             <View style={styles.cartTotal}>
               <ThemedText style={styles.cartTotalText}>Total:</ThemedText>
               <ThemedText style={styles.cartTotalPrice}>
                 ${getCartTotal().toFixed(2)}
               </ThemedText>
             </View>
-            
+
             <TouchableOpacity
               style={styles.checkoutButton}
               onPress={handleCheckout}
@@ -285,7 +286,6 @@ export default function ConcessionsScreen() {
           </View>
         )}
 
-        {/* Theme toggle */}
         <ThemeToggle position="bottomRight" size={40} />
       </ThemedView>
     </>

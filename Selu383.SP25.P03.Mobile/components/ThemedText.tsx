@@ -1,17 +1,17 @@
-import React from 'react';
-import { Text, TextProps } from 'react-native';
-import { useTheme } from './ThemeProvider';
-import { getTextColor, getThemedColor } from '../utils/theme';
-import { Colors } from '../styles/theme/colors';
+import React from "react";
+import { Text, TextProps } from "react-native";
+import { useTheme } from "./ThemeProvider";
+import { getTextColor, getThemedColor } from "../utils/theme";
+import { Colors } from "../styles/theme/colors";
 
 export type ThemedTextType =
-  | 'default'
-  | 'title'
-  | 'defaultSemiBold'
-  | 'subtitle'
-  | 'link'
-  | 'caption'
-  | 'button';
+  | "default"
+  | "title"
+  | "defaultSemiBold"
+  | "subtitle"
+  | "link"
+  | "caption"
+  | "button";
 
 export interface ThemedTextProps extends TextProps {
   type?: ThemedTextType;
@@ -22,65 +22,62 @@ export interface ThemedTextProps extends TextProps {
 
 export function ThemedText({
   style,
-  type = 'default',
+  type = "default",
   lightColor,
   darkColor,
   ...rest
 }: ThemedTextProps) {
   const { isDark } = useTheme();
 
-  // Determine the text color
   const defaultColor = getTextColor(isDark);
 
-  // Use provided colors or default
   const color =
     lightColor && darkColor
       ? getThemedColor(isDark, lightColor, darkColor)
       : defaultColor;
 
-  // Apply styles based on text type
   let typeStyle = {};
   switch (type) {
-    case 'title':
+    case "title":
       typeStyle = {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         lineHeight: 32,
       };
       break;
-    case 'defaultSemiBold':
+    case "defaultSemiBold":
       typeStyle = {
         fontSize: 16,
         lineHeight: 24,
-        fontWeight: '600',
+        fontWeight: "600",
       };
       break;
-    case 'subtitle':
+    case "subtitle":
       typeStyle = {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: "600",
         lineHeight: 28,
       };
       break;
-    case 'link':
+    case "link":
       typeStyle = {
         fontSize: 16,
         lineHeight: 24,
-        color: Colors.light.primary, 
-        textDecorationLine: 'underline',
+        color: Colors.light.primary,
+        textDecorationLine: "underline",
       };
       break;
-    case 'caption':
+    case "caption":
       typeStyle = {
         fontSize: 12,
         lineHeight: 16,
         color: isDark ? Colors.dark.gray5 : Colors.light.gray5,
       };
       break;
-    case 'button':
+    case "button":
       typeStyle = {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         lineHeight: 24,
       };
       break;

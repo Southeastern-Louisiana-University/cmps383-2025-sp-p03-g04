@@ -23,7 +23,6 @@ export function ThemedCard({
   const { colorScheme } = useTheme();
   const isDark = colorScheme === "dark";
 
-  // Get the appropriate background and border colors based on theme
   const backgroundColor = isDark
     ? variant === "filled"
       ? UIColors.dark.card
@@ -67,12 +66,10 @@ export function ThemedCard({
   );
 }
 
-// Helper functions to get styles
 function getElevationStyle(
   elevation: ThemedCardProps["elevation"],
   isDark: boolean
 ) {
-  // Darker shadow for light mode, lighter shadow for dark mode
   const shadowColor = isDark ? "rgba(0, 0, 0, 0.9)" : "rgba(0, 0, 0, 0.25)";
 
   switch (elevation) {

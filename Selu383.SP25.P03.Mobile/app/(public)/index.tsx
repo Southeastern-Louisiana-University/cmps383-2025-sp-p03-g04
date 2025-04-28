@@ -30,7 +30,6 @@ export default function HomeScreen() {
   const {} = useTheme();
   const router = useRouter();
 
-  // State variables
   const [movies, setMovies] = useState<Movie[]>([]);
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
@@ -44,41 +43,34 @@ export default function HomeScreen() {
     Record<string, Showtime[]>
   >({});
 
-  // Load data on mount
   useEffect(() => {
     loadData();
   }, []);
 
-  // Load theater showtimes when selected theater changes
   useEffect(() => {
     const fetchShowtimes = async () => {
       try {
         let theaterId = selectedTheater?.id;
         if (!theaterId && theaters.length > 0) {
-          // If no theater is selected but we have theaters, use the first one
           theaterId = theaters[0].id;
           setSelectedTheater(theaters[0]);
         }
 
         if (theaterId) {
-          // Fetch showtimes for this theater
           const allShowtimes = await movieService.getShowtimesByTheater(
             theaterId
           );
 
-          // Organize showtimes by date
-          const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+          const today = new Date().toISOString().split("T")[0];
           const tomorrow = new Date();
           tomorrow.setDate(tomorrow.getDate() + 1);
           const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
-          // Create date buckets
           const byDate: Record<string, Showtime[]> = {
             [today]: [],
             [tomorrowStr]: [],
           };
 
-          // Fill the buckets
           allShowtimes.forEach((showtime) => {
             const showtimeDate = new Date(showtime.startTime)
               .toISOString()
@@ -93,7 +85,6 @@ export default function HomeScreen() {
 
           setShowtimesByDate(byDate);
 
-          // Set showtimes based on selected date
           setShowtimes(
             selectedDate === "today" ? byDate[today] : byDate[tomorrowStr]
           );
@@ -106,11 +97,9 @@ export default function HomeScreen() {
     fetchShowtimes();
   }, [selectedTheater, theaters, selectedDate]);
 
-  // Load all data
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // Fetch all necessary data
       const moviesData = await movieService.getMovies();
       const theatersData = await theaterService.getTheaters();
 
@@ -127,7 +116,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Handler functions
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadData();
@@ -139,7 +127,6 @@ export default function HomeScreen() {
   };
 
   const handleSelectShowtime = (showtimeId: number) => {
-    // Navigate to booking flow - no authentication required
     router.push({
       pathname: "/booking/[id]/seats",
       params: { id: showtimeId.toString() },
@@ -154,7 +141,6 @@ export default function HomeScreen() {
     router.push("/login");
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
@@ -231,7 +217,6 @@ export default function HomeScreen() {
 
           <MovieCarousel movies={movies} onSelectMovie={handleSelectMovie} />
 
-          {/* Quick Actions */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity
               style={styles.actionButton}
@@ -274,7 +259,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Date selector tabs */}
           <View style={styles.dateTabs}>
             <TouchableOpacity
               style={[
@@ -311,7 +295,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Today's/Tomorrow's Showtimes */}
           <TodaysShowsList
             showtimes={showtimes}
             onSelectShowtime={handleSelectShowtime}

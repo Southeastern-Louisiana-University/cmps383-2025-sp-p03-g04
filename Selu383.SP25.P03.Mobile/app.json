@@ -1,10 +1,8 @@
 {
   "expo": {
-
-
     "name": "Selu383-SP25-P03-Mobile-g04",
     "slug": "Selu383-SP25-P03-Mobile-g04",
-    
+
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -21,9 +19,6 @@
       },
 
       "package": "com.selu383.sp25.p03.g04"
-
-
-      
     },
     "web": {
       "bundler": "metro",
@@ -55,6 +50,5 @@
       }
     },
     "owner": "vladfiffie"
-
   }
 }

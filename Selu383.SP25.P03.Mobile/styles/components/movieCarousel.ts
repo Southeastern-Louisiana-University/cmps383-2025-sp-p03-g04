@@ -23,12 +23,11 @@ export const movieCarouselStyles = StyleSheet.create({
     marginRight: Spacing.m,
   },
   posterContainer: {
-    // Add shadow/glow effect
-    shadowColor: "#B4D335", // Lion's Den green
+    shadowColor: "#B4D335",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 5,
-    elevation: 10, // For Android
+    elevation: 10,
     borderRadius: BorderRadius.s,
   },
   poster: {

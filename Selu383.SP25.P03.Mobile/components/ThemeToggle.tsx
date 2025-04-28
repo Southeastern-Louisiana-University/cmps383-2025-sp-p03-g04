@@ -15,7 +15,6 @@ export function ThemeToggle({
 }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
 
-  // Get position styles
   const positionStyle = getPositionStyle(position);
 
   return (
@@ -48,7 +47,6 @@ export function ThemeToggle({
   );
 }
 
-// Helper function to get position styles
 function getPositionStyle(position: ThemeToggleProps["position"]) {
   switch (position) {
     case "bottomLeft":
