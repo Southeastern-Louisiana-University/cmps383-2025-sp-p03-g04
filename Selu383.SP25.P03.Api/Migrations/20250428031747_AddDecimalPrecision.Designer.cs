@@ -12,10 +12,10 @@ using Selu383.SP25.P03.Api.Data;
 namespace Selu383.SP25.P03.Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250322205018_AddTicketTypeAndPricingToReservations")]
-    partial class AddTicketTypeAndPricingToReservations
+    [Migration("20250428031747_AddDecimalPrecision")]
+    partial class AddDecimalPrecision
     {
-        
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
